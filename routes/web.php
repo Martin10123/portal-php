@@ -18,7 +18,15 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('/Sigedin', function () {
+    Route::get('Sigedin', function () {
         return Inertia::render('Sigedin');
     })->name('Sigedin');
+
+    Route::get('Sigedin/Request/AddRequest', function () {
+        return Inertia::render('Request/AddRequest');
+    })->name('AddRequest');
+
+    Route::get('Sigedin/Request/ApproveRequest', function () {
+        return Inertia::render('Request/ApproveRequest');
+    })->name('ApproveRequest');
 });

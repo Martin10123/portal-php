@@ -17,6 +17,17 @@ export default {
             fontFamily: {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
             },
+            fontSize: {
+                "base-more": "1.1rem",
+            },
+            inset: {
+                "-1000": "-200rem",
+                1000: "200rem",
+            },
+            height: {
+                "screen-calc-6": "calc(100vh - 6rem)",
+                "screen-calc-8": "calc(100vh - 8.3rem)",
+            },
         },
     },
 
