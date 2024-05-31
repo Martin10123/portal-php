@@ -17,6 +17,9 @@ export default {
             fontFamily: {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
             },
+            screens: {
+                scmid995: "995px",
+            },
             fontSize: {
                 "base-more": "1.1rem",
             },
@@ -27,6 +30,12 @@ export default {
             height: {
                 "screen-calc-6": "calc(100vh - 6rem)",
                 "screen-calc-8": "calc(100vh - 8.3rem)",
+            },
+            width: {
+                100: "32rem",
+            },
+            gridTemplateColumns: {
+                "auto-img": "30% 1fr",
             },
         },
     },

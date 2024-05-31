@@ -5,5 +5,5 @@
 </template>
 
 <script setup>
-import SideBarMain from '@/Components/SideBarMain.vue';
+import SideBarMain from '@/Components/SideBar/SideBarMain.vue';
 </script>
