@@ -21,8 +21,12 @@ return new class extends Migration
             $table->string('profile_photo_path', 2048)->nullable();
             $table->string('guid')->unique()->nullable();
             $table->string('domain')->nullable();
+            $table->string('gerencia')->nullable();
+            $table->string('oficina')->nullable();
+            $table->string('num_sap')->nullable();
+            $table->string('identificacion')->nullable();
+            $table->string('cargo')->nullable();
             $table->timestamps();
-
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

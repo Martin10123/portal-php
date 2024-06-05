@@ -72,6 +72,11 @@ return [
                 'sync_attributes' => [
                     'name' => 'cn',
                     'username' => 'samaccountname',
+                    'gerencia' => 'department',
+                    'oficina' => 'physicaldeliveryofficename',
+                    'num_sap' => 'employeenumber',
+                    'identificacion' => 'employeeid',
+                    'cargo' => 'title',
                 ],
             ],
         ],

@@ -7,24 +7,24 @@
         }">
             <li class="p-3 border-b cursor-pointer">Ver perfil</li>
             <li class="p-3 border-b cursor-pointer">Configuraciones</li>
-            <li class="p-3 border-b cursor-pointer">Cerrar sesión</li>
+            <li class="p-3 border-b cursor-pointer" @click="logout">Cerrar sesión</li>
         </ul>
 
-        <img src="../../Assets/avatar.png" class="w-14 h-auto rounded-full py-3 cursor-pointer" alt="Avatar del usuario"
+        <img :src="userActive.photo" class="w-14 h-auto rounded-full py-3 cursor-pointer" alt="Avatar del usuario"
             @click="onOpenProfile">
 
         <div>
             <p>
-                <strong>Martin Elias Simarra Salgado</strong>
+                <strong>{{ userActive.name }}</strong>
             </p>
             <div class="grid gap-1">
                 <p class="text-xs text-gray-600 flex items-center gap-2">
                     <i class="fa-solid fa-user-tie"></i>
-                    Aprendiz - GEDIN
+                    {{ userActive.cargo }} - {{ userActive.gerencia }}
                 </p>
                 <p class="text-xs text-gray-600 flex items-center gap-2 cursor-pointer" @click="onCopyEmail">
                     <i class="fa-solid fa-at"></i>
-                    msimarra@cotecmar.com
+                    {{ userActive.username }}@cotecmar.com
                 </p>
             </div>
         </div>
@@ -33,7 +33,14 @@
 
 <script setup>
 
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
+
+const { props } = usePage();
+
+const userActive = computed(() => props.auth.user);
+
+console.log(userActive.value);
 
 const { openMenu } = defineProps({
     openMenu: Boolean
@@ -46,7 +53,11 @@ const onOpenProfile = () => {
 };
 
 const onCopyEmail = () => {
-    navigator.clipboard.writeText("msimarra@cotecmar.com");
+    navigator.clipboard.writeText(userActive.value.usuario);
     alert("Correo copiado al portapapeles");
+}
+
+const logout = () => {
+    router.post(route('logout'));
 }
 </script>
