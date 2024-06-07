@@ -17,9 +17,10 @@ Route::middleware([
         return Inertia::render('Sigedin');
     })->name('Sigedin');
 
-    Route::post("/project-selected", [ProjectsController::class, "getProjectSelect"])->name('get.project.select');
 
     Route::get("/projects", [ProjectsController::class, "index"])->name('get.projects');
+
+    Route::post("/getProject", [ProjectsController::class, "getProjectSelect"])->name('post.project.select');
 
     Route::get('Sigedin/Request/AddRequest', function () {
         return Inertia::render('Request/AddRequest');

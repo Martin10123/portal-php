@@ -7,7 +7,7 @@
 }
 
 .vs--searchable .vs__dropdown-toggle {
-    height: 2.6rem;
+    min-height: 2.6rem;
 }
 
 .vs__search::placeholder {

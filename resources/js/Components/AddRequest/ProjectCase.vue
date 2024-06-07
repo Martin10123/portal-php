@@ -1,12 +1,26 @@
 <script setup>
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
+import { useForm } from '@inertiajs/vue3';
 import axios from 'axios';
 import { onMounted, ref } from 'vue';
 
 const searchProject = ref('')
 
 const projects = ref([])
+
+const form = useForm({
+    buque: '',
+    caso: '',
+    clienteExterno: '',
+    tipoBuque: '',
+    planta: '',
+    interesado: '',
+    solicitante: '',
+    grafo: '',
+    tipoServicio: '',
+    servicioSolicitado: '',
+})
 
 const getProjects = async () => {
     try {
@@ -21,12 +35,17 @@ const getProjects = async () => {
 const onSelectProject = async (project) => {
 
     try {
-        const response = await axios.post(route('get.project.select'), {
-            project
+        const { data } = await axios.post(route('post.project.select'), {
+            Buque: project.buque,
+            Caso: project.caso,
         })
-        console.log(response);
+
+        form.tipoBuque = data.tipoBuque
+        form.planta = data.planta
+        form.clienteExterno = data.clienteExterno
+
     } catch (error) {
-        console.log(error);
+        console.error('Error al enviar el valor onSelect:', error)
     }
 
 }
@@ -41,7 +60,7 @@ onMounted(() => {
     <div class="scmid995:flex scmid995:gap-2 ">
         <div class="grid gap-2">
             <InputLabel class="text-base-more" value="Caso - proceso" />
-            <TextInput class="bg-slate-300" disabled placeholder="8000..." />
+            <TextInput class="bg-slate-300" disabled placeholder="8000..." v-model="form.caso" />
         </div>
 
         <div class="grid gap-2 flex-1 pt-2 md:p-0">
@@ -58,13 +77,13 @@ onMounted(() => {
 
     <div class="grid gap-2">
         <InputLabel class="text-base-more" value="Cliente externo" />
-        <TextInput placeholder="Cliente externo..." />
+        <TextInput placeholder="Cliente externo..." v-model="form.clienteExterno" />
     </div>
 
     <div class="scmid995:grid scmid995:grid-cols-2 scmid995:gap-2 w-full">
         <div class="grid gap-2">
             <InputLabel class="text-base-more" value="Tipo de buque" />
-            <select class="border border-stone-300 rounded-lg">
+            <select class="border border-stone-300 rounded-lg" v-model="form.tipoBuque">
                 <option value="">Seleccionar uno</option>
                 <option value="Militar">Militar</option>
                 <option value="Comercial">Comercial</option>
@@ -74,7 +93,7 @@ onMounted(() => {
 
         <div class="grid gap-2 pt-2 md:p-0">
             <InputLabel class="text-base-more" value="Planta" />
-            <select class="border border-stone-300 rounded-lg">
+            <select class="border border-stone-300 rounded-lg" v-model="form.planta">
                 <option value="">Seleccionar uno</option>
                 <option value="GEBOC">GEBOC</option>
                 <option value="GECON">GECON</option>
