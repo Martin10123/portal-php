@@ -19,7 +19,6 @@ class ProjectsController extends Controller
 
     public function getProjectSelect(ProjectRequest $request)
     {
-
         $dataResponse = Requerimiento::select('Planta', 'ClienteExterno', 'TipoBuque')
             ->where('Caso', $request->Caso)
             ->orderBy('Proceso', 'desc')

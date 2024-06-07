@@ -2,12 +2,9 @@
 
 namespace App\Providers;
 
-//use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 use Laravel\Fortify\Fortify;
 
 class AuthServiceProvider extends ServiceProvider

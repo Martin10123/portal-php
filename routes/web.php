@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProjectsController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -17,6 +18,7 @@ Route::middleware([
         return Inertia::render('Sigedin');
     })->name('Sigedin');
 
+    Route::get('/users', [UserController::class, 'index'])->name('get.users');
 
     Route::get("/projects", [ProjectsController::class, "index"])->name('get.projects');
 
@@ -25,10 +27,6 @@ Route::middleware([
     Route::get('Sigedin/Request/AddRequest', function () {
         return Inertia::render('Request/AddRequest');
     })->name('AddRequest');
-
-    Route::get('/', function () {
-        return Inertia::render('');
-    })->name('Request');
 
     Route::get('Sigedin/Request/ApproveRequest', function () {
         return Inertia::render('Request/ApproveRequest');

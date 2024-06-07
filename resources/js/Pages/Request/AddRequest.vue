@@ -23,15 +23,16 @@
 
                     <TabsLine :tabs="tabs" :changeTab="changeTab" />
 
-                    <form class="grid w-full bg-white mt-2 p-4 rounded-lg gap-2">
+                    <div class="grid w-full bg-white mt-2 p-4 rounded-lg gap-2">
                         <h2 class="text-2xl font-medium mb-4">Operativo</h2>
 
-                        <ProjectCase v-if="tabs == 1" />
+                        <ProjectCase :form="form" v-if="tabs == 1" />
 
-                        <Interested v-if="tabs == 2" />
+                        <Interested :form="form" v-if="tabs == 2" />
 
-                        <ButtonsAddRequest :tabs="tabs" :nextTab="nextTab" :prevTab="prevTab" />
-                    </form>
+                        <ButtonsAddRequest :tabs="tabs" :nextTab="nextTab" :prevTab="prevTab"
+                            :on-submit-form="submitForm" />
+                    </div>
 
                     <div
                         class="size-16 rounded-full shadow-md flex justify-center items-center text-2xl cursor-pointer fixed bottom-2 left-2 bg-blue-700 text-white">
@@ -41,6 +42,7 @@
             </div>
         </section>
     </main>
+
 </template>
 
 <script setup>
@@ -50,6 +52,8 @@ import ButtonsAddRequest from "@/Components/AddRequest/ButtonsAddRequest.vue";
 import TabsLine from "@/Components/AddRequest/TabsLine.vue";
 import SideBarMain from "@/Components/SideBar/SideBarMain.vue";
 import { ref } from "vue";
+import { useForm } from "@inertiajs/vue3";
+import Swal from "sweetalert2";
 
 const tabs = ref(1);
 
@@ -59,6 +63,27 @@ const changeTab = (tab) => {
 
 const nextTab = (e) => {
     e.preventDefault();
+
+    console.log(form);
+
+    if (form.buque == '' ||
+        form.caso == '' ||
+        form.clienteExterno == ''
+        || form.tipoBuque == ''
+        || form.planta == ''
+        || form.interesado.length == 0
+        || form.solicitante.length == 0
+        || form.tipoServicio == '') {
+
+        Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Complete los campos requeridos",
+        });
+
+        return;
+    }
+
     tabs.value += 1;
 };
 
@@ -66,4 +91,28 @@ const prevTab = (e) => {
     e.preventDefault();
     tabs.value -= 1;
 };
+
+const form = useForm({
+    buque: '',
+    caso: '',
+    clienteExterno: '',
+    tipoBuque: '',
+    planta: '',
+    interesado: [],
+    solicitante: [],
+    grafo: '',
+    tipoServicio: '',
+    servicioSolicitado: '',
+    pendiente: '',
+    tipoCopia: '',
+    fechaSolucion: '',
+    solicitudGenerada: '',
+    consecutivoEC: '',
+    descripcionServicio: '',
+    informacionAdjunta: [],
+})
+
+const submitForm = () => {
+    console.log(form);
+}
 </script>
