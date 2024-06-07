@@ -5,7 +5,9 @@
             'absolute bg-white w-11/12 bottom-28 left-1/2 transform rounded-lg -translate-x-1/2 shadow-lg': true, 'hidden': !openProfile,
             'md:w-96 md:fixed md:left-72': !openMenu
         }">
+            <Link href="/Sigedin/Profile/Profile">
             <li class="p-3 border-b cursor-pointer">Ver perfil</li>
+            </Link>
             <li class="p-3 border-b cursor-pointer">Configuraciones</li>
             <li class="p-3 border-b cursor-pointer" @click="logout">Cerrar sesión</li>
         </ul>
@@ -34,13 +36,11 @@
 <script setup>
 
 import { computed, ref } from 'vue';
-import { router, usePage } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 
 const { props } = usePage();
 
 const userActive = computed(() => props.auth.user);
-
-console.log(userActive.value);
 
 const { openMenu } = defineProps({
     openMenu: Boolean

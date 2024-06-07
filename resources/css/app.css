@@ -5,3 +5,11 @@
 [x-cloak] {
     display: none;
 }
+
+.vs--searchable .vs__dropdown-toggle {
+    height: 2.6rem;
+}
+
+.vs__search::placeholder {
+    color: #b1b6bb !important;
+}

@@ -1,19 +1,58 @@
 <script setup>
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
+import axios from 'axios';
+import { onMounted, ref } from 'vue';
+
+const searchProject = ref('')
+
+const projects = ref([])
+
+const getProjects = async () => {
+    try {
+        const { data } = await axios.get(route('get.projects'))
+
+        projects.value = data
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const onSelectProject = async (project) => {
+
+    try {
+        const response = await axios.post(route('get.project.select'), {
+            project
+        })
+        console.log(response);
+    } catch (error) {
+        console.log(error);
+    }
+
+}
+
+onMounted(() => {
+    getProjects();
+})
 
 </script>
 
 <template>
     <div class="scmid995:flex scmid995:gap-2 ">
         <div class="grid gap-2">
-            <InputLabel class="text-base-more" value="Caso" />
-            <TextInput placeholder="8000..." />
+            <InputLabel class="text-base-more" value="Caso - proceso" />
+            <TextInput class="bg-slate-300" disabled placeholder="8000..." />
         </div>
 
         <div class="grid gap-2 flex-1 pt-2 md:p-0">
             <InputLabel class="text-base-more" value="Proyecto" />
-            <TextInput placeholder="Proyecto..." />
+            <v-select v-model="searchProject" :options="projects" placeholder="Proyecto..." label="buque">
+                <template v-slot:option="option">
+                    <div @click="() => onSelectProject(option)">
+                        {{ option.caso }} - {{ option.buque }}
+                    </div>
+                </template>
+            </v-select>
         </div>
     </div>
 
@@ -51,12 +90,12 @@ import TextInput from '@/Components/TextInput.vue';
 
     <div class="grid gap-2">
         <InputLabel class="text-base-more" value="Interesado:" />
-        <TextInput placeholder="Interesado..." />
+        <v-select multiple placeholder="Interesado..." />
     </div>
 
     <div class="grid gap-2">
         <InputLabel class="text-base-more" value="Solicitante:" />
-        <TextInput placeholder="Solicitante..." />
+        <v-select multiple placeholder="Solicitante..." />
     </div>
 
     <div class="grid gap-2">

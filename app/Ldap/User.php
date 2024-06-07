@@ -42,4 +42,49 @@ class User extends Model
 
         return "data:$mime;base64,$image";
     }
+
+    public function getIsAdmin()
+    {
+        return $this->admin[0] ?? null;
+    }
+
+    public function getIdResponsable()
+    {
+        return $this->idresponsable[0] ?? null;
+    }
+
+    public function getCedula()
+    {
+        return $this->employeeid[0] ?? null;
+    }
+
+    public function getEstado()
+    {
+        return $this->useraccountcontrol[0] ?? null;
+    }
+
+    public function getGerencia()
+    {
+        return $this->department[0] ?? null;
+    }
+
+    public function getOficina()
+    {
+        return $this->physicaldeliveryofficename[0] ?? null;
+    }
+
+    public function getNumSap()
+    {
+        return $this->employeenumber[0] ?? null;
+    }
+
+    public function getIdentificacion()
+    {
+        return $this->employeeid[0] ?? null;
+    }
+
+    public function getCargo()
+    {
+        return $this->title[0] ?? null;
+    }
 }

@@ -20,12 +20,10 @@ class AuthServiceProvider extends ServiceProvider
         //
     }
 
-    /**
-     * Bootstrap services.
-     */
     public function boot(): void
     {
         Fortify::authenticateUsing(function ($request) {
+
             $validated = Auth::validate([
                 'samaccountname' => $request->username,
                 'password' => $request->password
@@ -38,17 +36,19 @@ class AuthServiceProvider extends ServiceProvider
 
                 $userSelect = DB::table('sigedin.guest.responsable')
                     ->where('usuario', $usernameCotecmat)
-                    ->select('IsAdmin', 'IdResponsable', 'Cedula', 'Nombre', 'usuario', 'Estado')
+                    ->where('Estado', 'Activo')
+                    ->select('IsAdmin', 'IdResponsable')
                     ->get()
                     ->first();
 
-                if ($userSelect) {
-                    $userDA->IsAdmin = $userSelect->IsAdmin;
-                    $userDA->IdResponsable = $userSelect->IdResponsable;
-                    $userDA->Estado = $userSelect->Estado;
-                    $userDA->Cedula = $userSelect->Cedula;
-                    $userDA->isPrivileged = strtoupper($userDA->gerencia) == 'GEDIN' && $userDA->IsAdmin == 1;
+                if ($userSelect == null) {
+                    $request->session()->put('IsPrivileged', -1);
+                    return $userDA;
                 }
+
+                $request->session()->put('IsAdmin', $userSelect->IsAdmin);
+                $request->session()->put('IdResponsable', $userSelect->IdResponsable);
+                $request->session()->put('IsPrivileged', $userSelect->IsAdmin == 1 && strtoupper($userSelect->userDA) == 'GEDIN') ? 1 : 0;
 
                 return $userDA;
             }

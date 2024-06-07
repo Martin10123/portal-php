@@ -34,11 +34,6 @@ class User extends Authenticatable implements LdapAuthenticatable
         'name',
         'email',
         'password',
-        'IsAdmin',
-        'IdResponsable',
-        'Cedula',
-        'Estado',
-        'isPrivileged',
     ];
 
     /**
@@ -66,6 +61,9 @@ class User extends Authenticatable implements LdapAuthenticatable
         'num_sap',
         'identificacion',
         'cargo',
+        'IsAdmin',
+        'IdResponsable',
+        'IsPrivileged'
     ];
 
     /**
@@ -129,5 +127,20 @@ class User extends Authenticatable implements LdapAuthenticatable
     public function getCargoAttribute()
     {
         return $this->ldap->title[0] ?? null;
+    }
+
+    public function getIsAdminAttribute()
+    {
+        return session("IsAdmin") ?? null;
+    }
+
+    public function getIdResponsableAttribute()
+    {
+        return session("IdResponsable") ?? null;
+    }
+
+    public function getIsPrivilegedAttribute()
+    {
+        return session("IsPrivileged") ?? null;
     }
 }
