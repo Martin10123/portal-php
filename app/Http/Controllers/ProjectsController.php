@@ -9,7 +9,7 @@ class ProjectsController extends Controller
 {
     public function index()
     {
-        $data = Requerimiento::select('caso', 'buque')->distinct()->orderBy('buque')->get();
+        $data = Requerimiento::select('caso', 'buque', 'planta')->distinct()->orderBy('buque')->get();
 
         return response()->json($data);
     }

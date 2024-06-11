@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ConsecutiveController;
 use App\Http\Controllers\ProjectsController;
 use App\Http\Controllers\TipoServicioController;
 use App\Http\Controllers\UserController;
@@ -24,6 +25,8 @@ Route::middleware([
     Route::get('/tipoServicios', [TipoServicioController::class, 'index'])->name('get.tipoServicios');
 
     Route::post('/getTipoServicio', [TipoServicioController::class, 'getServicioSolicitado'])->name('post.getTipoServicio');
+
+    Route::get('/getConsecutive/{solicitud}', [ConsecutiveController::class, 'index'])->name('get.consecutive');
 
     Route::get("/projects", [ProjectsController::class, "index"])->name('get.projects');
 

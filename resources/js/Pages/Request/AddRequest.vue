@@ -27,10 +27,10 @@
 
                     <div class="grid w-full bg-white mt-2 p-4 rounded-lg gap-2">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-2xl font-medium mb-4">{{ form.tipoRegistro }}</h2>
+                            <h2 class="text-2xl font-medium">{{ form.tipoRegistro }}</h2>
 
-                            <h4 v-if="form.caso" class="text-xl">
-                                <span class="font-semibold">Número de caso:</span>
+                            <h4 v-if="form.caso" class="">
+                                <span class=" font-semibold">Número de caso:</span>
                                 {{ form.caso }}
                             </h4>
                         </div>
@@ -51,7 +51,6 @@
             </article>
         </section>
     </main>
-
 </template>
 
 <script setup>
@@ -60,66 +59,8 @@ import ProjectCase from "@/Components/AddRequest/ProjectCase.vue";
 import ButtonsAddRequest from "@/Components/AddRequest/ButtonsAddRequest.vue";
 import TabsLine from "@/Components/AddRequest/TabsLine.vue";
 import SideBarMain from "@/Components/SideBar/SideBarMain.vue";
-import { ref } from "vue";
-import { useForm } from "@inertiajs/vue3";
-import Swal from "sweetalert2";
+import { useAddRequest } from "@/composables/useAddRequest";
 
-const form = useForm({
-    tipoRegistro: 'Operativo',
-    buque: '',
-    caso: '',
-    clienteExterno: '',
-    tipoBuque: '',
-    planta: '',
-    interesado: [],
-    solicitante: [],
-    grafo: '',
-    tipoServicio: '',
-    servicioSolicitado: [],
-    pendiente: '',
-    tipoCopia: '',
-    fechaSolucion: '',
-    solicitudGenerada: '',
-    consecutivoEC: '',
-    descripcionServicio: '',
-    informacionAdjunta: [],
-})
+const { form, nextTab, prevTab, submitForm, tabs } = useAddRequest()
 
-const tabs = ref(1);
-
-const nextTab = (e) => {
-    e.preventDefault();
-
-    if (form.buque == '' ||
-        form.caso == '' ||
-        form.clienteExterno == ''
-        || form.tipoBuque == ''
-        || form.planta == ''
-        || form.interesado.length == 0
-        || form.solicitante.length == 0
-        || form.tipoServicio < 0 || form.tipoServicio > 5
-        || form.servicioSolicitado.length == 0
-    ) {
-
-        Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: "Complete los campos requeridos",
-        });
-
-        return;
-    }
-
-    tabs.value += 1;
-};
-
-const prevTab = (e) => {
-    e.preventDefault();
-    tabs.value -= 1;
-};
-
-
-const submitForm = () => {
-    console.log(form);
-}
 </script>

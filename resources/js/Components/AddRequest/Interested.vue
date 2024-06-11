@@ -1,63 +1,39 @@
 <script setup>
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { getAllHolidays } from '@/Data/getHolidays';
-import { usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
-import { ref } from 'vue';
+import OptionsByPlanos from './OptionsByPlanos.vue';
+import { useInterested } from '@/composables/useInterested';
 
 const { form } = defineProps({
     form: Object,
 })
 
-const { props } = usePage();
-
-const userActive = ref(props.auth.user);
-const disabledDatesHolidays = computed(() => {
-    return getAllHolidays()
-})
-
-const startDateByTrespuesta = computed(() => {
-    return new Date(new Date().setDate(new Date().getDate() + Number(form.servicioSolicitado.trespuesta)))
-})
-
-const getFiles = (e) => {
-
-    const files = e.target.files;
-
-    let totalSize = 0;
-
-    for (let i = 0; i < files.length; i++) {
-        totalSize += files[i].size;
-    }
-
-    if (totalSize > 15728640) {
-        alert('El tamaño total de los archivos no puede superar los 15mb');
-        return;
-    }
-
-}
+const {
+    disabledDatesHolidays,
+    disabledTipoCopia,
+    getFiles,
+    startDateByTrespuesta,
+    userActive,
+    validIfOptionsContainSomeWordWithPlano
+} = useInterested({ form })
 
 </script>
 
 <template>
-    <div class="grid gap-2">
-        <InputLabel class="text-base-more" value="Pendiente:" />
-        <TextInput placeholder="Pendiente..." type="checkbox" v-model="form.pendiente" />
-    </div>
-
     <div class="scmid995:grid scmid995:grid-cols-2 scmid995:gap-2">
-        <div class="grid gap-2">
+        <div class="grid gap-2 mb-2 md:mb-0">
             <InputLabel class="text-base-more" value="Tipo de copia:" />
-            <select class="border border-stone-300 rounded-lg bg-gray-300" disabled v-model="form.tipoCopia">
-                <option value="******">******</option>
+            <select :class="['border border-stone-300 rounded-lg', disabledTipoCopia ? 'bg-gray-300' : '']"
+                :disabled="disabledTipoCopia" v-model="form.tipoCopia">
+                <option value="">Selecciona uno</option>
+                <option value="Fisico">Fisico</option>
+                <option value="Digital">Digital</option>
             </select>
         </div>
         <div class="grid gap-2">
             <InputLabel class="text-base-more" value="Fecha de solución (Días háblies):" />
-            <VueDatePicker v-model="form.fechaSolucion" auto-apply placeholder="Fecha de solución..."
-                :disabled-week-days="[6, 0]" :min-date="startDateByTrespuesta"
-                :disabled-dates="disabledDatesHolidays" />
+            <VueDatePicker v-model="form.fechaSolucion" placeholder="Fecha de solución..." :disabled-week-days="[6, 0]"
+                :disabled-dates="new Date()" auto-apply />
         </div>
     </div>
 
@@ -70,6 +46,8 @@ const getFiles = (e) => {
         <InputLabel class="text-base-more" value="Consecutivo EC:" />
         <TextInput placeholder="Consecutivo EC..." disabled class="bg-gray-300" v-model="form.consecutivoEC" />
     </div>
+
+    <OptionsByPlanos v-if="validIfOptionsContainSomeWordWithPlano" :form="form" />
 
     <div class="grid gap-2">
         <InputLabel class="text-base-more" value="Descripción servicio:" />
@@ -95,7 +73,5 @@ const getFiles = (e) => {
                     accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" />
             </label>
         </div>
-
-
     </div>
 </template>
