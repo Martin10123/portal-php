@@ -10,6 +10,8 @@ const { form } = defineProps({
 
 const projects = ref([])
 const usersEmails = ref([])
+const tipoServicios = ref([])
+const servicioSolicitado = ref([])
 
 const getProjects = async () => {
     try {
@@ -37,51 +39,78 @@ const getEmailsUsers = async () => {
     }
 }
 
-watch(() => form.buque, ({ caso, buque }) => {
-    onSelectProject({
-        caso,
-        buque
-    })
+const getTipoServicios = async () => {
+    try {
+        const { data } = await axios.get(route('get.tipoServicios'))
+
+        tipoServicios.value = data
+
+    } catch (error) {
+        console.log("Error en getTipoServicios: ", error);
+    }
+}
+
+watch(() => form.buque, (project) => {
+    onSelectProject(project)
 })
 
 
-const onSelectProject = async ({ caso, buque }) => {
+const onSelectProject = async (project) => {
+
+    if (project === null) {
+        return
+    }
+
     try {
         const { data } = await axios.post(route('post.project.select'), {
-            Buque: "buque",
-            Caso: 22,
+            Buque: project.buque,
+            Caso: project.caso,
         })
 
-        // form.buque = buque
-        // form.caso = caso
-        // form.tipoBuque = data.tipoBuque
-        // form.planta = data.planta
-        // form.clienteExterno = data.clienteExterno
+        form.caso = project.caso
+
+        form.tipoBuque = data.tipoBuque ? data.tipoBuque : ''
+        form.planta = data.planta ? data.planta : ''
+        form.clienteExterno = data.clienteExterno ? data.clienteExterno : ''
 
     } catch (error) {
         console.error('Error en: onSelectProject:', error)
     }
 }
 
+const onSelectTipoServicio = async (tipoServicio) => {
+    if (tipoServicio === null || tipoServicio === '') {
+        return
+    }
+
+    try {
+        const { data } = await axios.post(route('post.getTipoServicio'), {
+            idTservicio: tipoServicio,
+        })
+
+        servicioSolicitado.value = data
+
+    } catch (error) {
+        console.error('Error en: onSelectTipoServicio:', error)
+    }
+}
+
+watch(() => form.tipoServicio, (tipoServicio) => {
+    onSelectTipoServicio(tipoServicio)
+})
 
 onMounted(() => {
     getProjects();
     getEmailsUsers()
+    getTipoServicios()
 })
 
 </script>
 
 <template>
-    <div class="scmid995:flex scmid995:gap-2 ">
-        <div class="grid gap-2">
-            <InputLabel class="text-base-more" value="Caso - proceso *" />
-            <TextInput class="bg-gray-300" disabled placeholder="8000..." v-model="form.caso" />
-        </div>
-
-        <div class="grid gap-2 flex-1 pt-2 md:p-0">
-            <InputLabel class="text-base-more" value="Proyecto *" />
-            <v-select v-model="form.buque" :options="projects" placeholder="Proyecto..." label="casoBuque" />
-        </div>
+    <div class="grid gap-2 flex-1 pt-2 md:p-0">
+        <InputLabel class="text-base-more" value="Proyecto *" />
+        <v-select v-model="form.buque" :options="projects" placeholder="Proyecto..." label="casoBuque" />
     </div>
 
     <div class="grid gap-2">
@@ -118,10 +147,13 @@ onMounted(() => {
 
     <div class="grid gap-2">
         <InputLabel class="text-base-more" value="Interesado *" />
-        <v-select multiple :options="usersEmails" label="usuario" placeholder="Interesado..." v-model="form.interesado">
+        <v-select multiple :options="usersEmails" placeholder="Interesado..." v-model="form.interesado"
+            :get-option-label="(option) => option.nombre">
             <template v-slot:option="option">
                 <div>
                     {{ option.correo }}
+                    <br>
+                    <cite class="text-sm">{{ option.nombre }}</cite>
                 </div>
             </template>
         </v-select>
@@ -129,11 +161,13 @@ onMounted(() => {
 
     <div class="grid gap-2">
         <InputLabel class="text-base-more" value="Solicitante *" />
-        <v-select multiple :options="usersEmails" label="usuario" placeholder="Solicitante..."
-            v-model="form.solicitante">
+        <v-select multiple :options="usersEmails" placeholder="Solicitante..."
+            :get-option-label="(option) => option.nombre" v-model="form.solicitante">
             <template v-slot:option="option">
                 <div>
                     {{ option.correo }}
+                    <br>
+                    <cite class="text-sm">{{ option.nombre }}</cite>
                 </div>
             </template>
         </v-select>
@@ -144,21 +178,21 @@ onMounted(() => {
         <TextInput placeholder="Grafo..." v-model="form.grafo" />
     </div>
 
-    <div class="scmid995:grid scmid995:grid-cols-2 scmid995:gap-2">
+    <div class="scmid995:grid scmid995:grid-cols-2 scmid995:gap-2 w-full">
         <div class="grid gap-2">
             <InputLabel class="text-base-more" value="Tipo de servicio *" />
-            <select class="border border-stone-300 rounded-lg" v-model="form.tipoServicio">
+            <select class="border border-stone-300 rounded-lg w-full" v-model="form.tipoServicio">
                 <option value="">Seleccionar uno</option>
-                <option value="Gestión del Diseño">Gestión del Diseño</option>
-                <option value="Consultoría en ingeniería naval">Consultoría en ingeniería naval</option>
-                <option value="Otros">Otros</option>
+                <option v-for="option in tipoServicios" :key="option.id" :value="option.id">
+                    {{ option.descripcion }}</option>
             </select>
         </div>
-        <div class="grid gap-2">
+        <div class="grid gap-2 pt-2 md:p-0">
             <InputLabel class="text-base-more" value="Servicio solicitado *" />
-            <select class="border border-stone-300 rounded-lg" v-model="form.servicioSolicitado">
-                <option value="">Seleccionar uno</option>
-                <option value="******">******</option>
+            <select class="border border-stone-300 rounded-lg w-full" v-model="form.servicioSolicitado">
+                <option v-for="serSoli in servicioSolicitado" :key="serSoli.NombreTipo" :value="serSoli">
+                    {{ serSoli.NombreTipo }}
+                </option>
             </select>
         </div>
     </div>

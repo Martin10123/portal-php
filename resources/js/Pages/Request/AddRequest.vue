@@ -3,9 +3,10 @@
         <SideBarMain />
 
         <section class="w-full flex justify-center">
-            <div class="grid lg:grid-cols-auto-img p-4 lg:h-full">
+            <article class="grid lg:grid-cols-auto-img mx-4 py-4 lg:h-full">
                 <div class="w-100 h-full hidden lg:block">
-                    <img class="h-full object-cover rounded-s-lg" src="../../Assets/cotecmarImg.jpg" alt="">
+                    <img class="h-full object-cover rounded-s-lg" src="../../Assets/cotecmarImg.jpg"
+                        alt="Logo de cotecmar">
                 </div>
 
                 <section class="w-full before:w-full before:h-screen rounded-lg shadow-lg md:rounded-e-lg before:bg-slate-200 before:fixed before:top-0 before:-z-10 p-2 before:left-0
@@ -14,17 +15,25 @@
                         REGISTRO SOLICITUD DE SERVICIO DE DISEÑO Y/O INGENIERIA
                     </h1>
 
-                    <select class="w-full border border-stone-300 cursor-pointer outline-0 p-4 rounded-lg " id="">
+                    <select class="w-full border border-stone-300 cursor-pointer outline-0 p-4 rounded-lg"
+                        v-model="form.tipoRegistro">
                         <option value="Interno">Seleccionar uno</option>
                         <option value="Administrativo">Administrativo</option>
                         <option value="Operativo">Operativo</option>
                         <option value="PDTI">PDTI</option>
                     </select>
 
-                    <TabsLine :tabs="tabs" :changeTab="changeTab" />
+                    <TabsLine :tabs="tabs" />
 
                     <div class="grid w-full bg-white mt-2 p-4 rounded-lg gap-2">
-                        <h2 class="text-2xl font-medium mb-4">Operativo</h2>
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-2xl font-medium mb-4">{{ form.tipoRegistro }}</h2>
+
+                            <h4 v-if="form.caso" class="text-xl">
+                                <span class="font-semibold">Número de caso:</span>
+                                {{ form.caso }}
+                            </h4>
+                        </div>
 
                         <ProjectCase :form="form" v-if="tabs == 1" />
 
@@ -39,7 +48,7 @@
                         <i class="fa-solid fa-question"></i>
                     </div>
                 </section>
-            </div>
+            </article>
         </section>
     </main>
 
@@ -55,16 +64,31 @@ import { ref } from "vue";
 import { useForm } from "@inertiajs/vue3";
 import Swal from "sweetalert2";
 
-const tabs = ref(1);
+const form = useForm({
+    tipoRegistro: 'Operativo',
+    buque: '',
+    caso: '',
+    clienteExterno: '',
+    tipoBuque: '',
+    planta: '',
+    interesado: [],
+    solicitante: [],
+    grafo: '',
+    tipoServicio: '',
+    servicioSolicitado: [],
+    pendiente: '',
+    tipoCopia: '',
+    fechaSolucion: '',
+    solicitudGenerada: '',
+    consecutivoEC: '',
+    descripcionServicio: '',
+    informacionAdjunta: [],
+})
 
-const changeTab = (tab) => {
-    tabs.value = tab;
-};
+const tabs = ref(1);
 
 const nextTab = (e) => {
     e.preventDefault();
-
-    console.log(form);
 
     if (form.buque == '' ||
         form.caso == '' ||
@@ -73,7 +97,9 @@ const nextTab = (e) => {
         || form.planta == ''
         || form.interesado.length == 0
         || form.solicitante.length == 0
-        || form.tipoServicio == '') {
+        || form.tipoServicio < 0 || form.tipoServicio > 5
+        || form.servicioSolicitado.length == 0
+    ) {
 
         Swal.fire({
             icon: "error",
@@ -92,25 +118,6 @@ const prevTab = (e) => {
     tabs.value -= 1;
 };
 
-const form = useForm({
-    buque: '',
-    caso: '',
-    clienteExterno: '',
-    tipoBuque: '',
-    planta: '',
-    interesado: [],
-    solicitante: [],
-    grafo: '',
-    tipoServicio: '',
-    servicioSolicitado: '',
-    pendiente: '',
-    tipoCopia: '',
-    fechaSolucion: '',
-    solicitudGenerada: '',
-    consecutivoEC: '',
-    descripcionServicio: '',
-    informacionAdjunta: [],
-})
 
 const submitForm = () => {
     console.log(form);

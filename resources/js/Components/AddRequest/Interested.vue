@@ -1,7 +1,9 @@
 <script setup>
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
+import { getAllHolidays } from '@/Data/getHolidays';
 import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { ref } from 'vue';
 
 const { form } = defineProps({
@@ -11,6 +13,13 @@ const { form } = defineProps({
 const { props } = usePage();
 
 const userActive = ref(props.auth.user);
+const disabledDatesHolidays = computed(() => {
+    return getAllHolidays()
+})
+
+const startDateByTrespuesta = computed(() => {
+    return new Date(new Date().setDate(new Date().getDate() + Number(form.servicioSolicitado.trespuesta)))
+})
 
 const getFiles = (e) => {
 
@@ -46,7 +55,9 @@ const getFiles = (e) => {
         </div>
         <div class="grid gap-2">
             <InputLabel class="text-base-more" value="Fecha de solución (Días háblies):" />
-            <TextInput type="date" v-model="form.fechaSolucion" />
+            <VueDatePicker v-model="form.fechaSolucion" auto-apply placeholder="Fecha de solución..."
+                :disabled-week-days="[6, 0]" :min-date="startDateByTrespuesta"
+                :disabled-dates="disabledDatesHolidays" />
         </div>
     </div>
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProjectsController;
+use App\Http\Controllers\TipoServicioController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,6 +20,10 @@ Route::middleware([
     })->name('Sigedin');
 
     Route::get('/users', [UserController::class, 'index'])->name('get.users');
+
+    Route::get('/tipoServicios', [TipoServicioController::class, 'index'])->name('get.tipoServicios');
+
+    Route::post('/getTipoServicio', [TipoServicioController::class, 'getServicioSolicitado'])->name('post.getTipoServicio');
 
     Route::get("/projects", [ProjectsController::class, "index"])->name('get.projects');
 

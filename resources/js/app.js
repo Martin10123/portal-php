@@ -1,12 +1,14 @@
 import "./bootstrap";
 import "../css/app.css";
 import "vue-select/dist/vue-select.css";
+import "@vuepic/vue-datepicker/dist/main.css";
 
 import { createApp, h } from "vue";
 import { createInertiaApp } from "@inertiajs/vue3";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import { ZiggyVue } from "../../vendor/tightenco/ziggy";
 import VueSelect from "vue-select";
+import VueDatePicker from "@vuepic/vue-datepicker";
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
 
@@ -22,6 +24,7 @@ createInertiaApp({
             .use(plugin)
             .use(ZiggyVue)
             .component("v-select", VueSelect)
+            .component("VueDatePicker", VueDatePicker)
             .mount(el);
     },
     progress: {
