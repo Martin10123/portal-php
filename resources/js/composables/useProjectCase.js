@@ -1,27 +1,26 @@
+import { usePage } from "@inertiajs/vue3";
 import axios from "axios";
+import Swal from "sweetalert2";
 import { ref, watch, onMounted } from "vue";
 
 export const useProjectCase = ({ form }) => {
+    const { props } = usePage();
+
     const projects = ref([]);
     const usersEmails = ref([]);
     const tipoServicios = ref([]);
     const servicioSolicitado = ref([]);
     const listPlanta = ref([]);
+    const userActive = ref(props.auth.user);
 
     const getProjects = async () => {
         try {
             const { data } = await axios.get(route("get.projects"));
 
-            projects.value = data.map((project) => ({
-                buque: project.buque,
-                caso: project.caso,
-                casoBuque: `${project.caso} - ${project.buque}`,
-            }));
+            projects.value = data.projects;
 
-            const plantasSet = new Set(data.map((project) => project.planta));
-
-            listPlanta.value = Array.from(plantasSet).filter(
-                (planta) => planta !== null
+            listPlanta.value = data.dataPlanta.filter(
+                (planta) => planta.Planta !== null
             );
         } catch (error) {
             console.log("Error en getProjects: ", error);
@@ -48,13 +47,6 @@ export const useProjectCase = ({ form }) => {
         }
     };
 
-    watch(
-        () => form.buque,
-        (project) => {
-            onSelectProject(project);
-        }
-    );
-
     const onSelectProject = async (project) => {
         if (project === null) {
             return;
@@ -67,6 +59,7 @@ export const useProjectCase = ({ form }) => {
             });
 
             form.caso = project.caso;
+            form.proceso = data.proceso ? Number(data.proceso) + 1 : "";
 
             form.tipoBuque = data.tipoBuque ? data.tipoBuque : "";
             form.planta = data.planta ? data.planta : "";
@@ -77,6 +70,40 @@ export const useProjectCase = ({ form }) => {
             console.error("Error en: onSelectProject:", error);
         }
     };
+
+    const onCreateProject = async (project) => {
+        Swal.fire({
+            title: "Nuevo proyecto",
+            text: "Ingrese los datos del nuevo proyecto",
+            icon: "info",
+        });
+
+        const { data } = await axios.get(route("get.consecutive", "Regular"));
+
+        form.caso = Number(data[0].consecutivo) + 1;
+        form.proceso = 1;
+    };
+
+    watch(
+        () => form.buque,
+        (project) => {
+            if (project === null) {
+                form.caso = "";
+                form.proceso = "";
+                form.tipoBuque = "";
+                form.planta = "";
+                form.clienteExterno = "";
+
+                return;
+            }
+
+            if (project.buque) {
+                onSelectProject(project);
+            } else {
+                onCreateProject(project);
+            }
+        }
+    );
 
     const onSelectTipoServicio = async (tipoServicio) => {
         if (tipoServicio === null || tipoServicio === "") {
@@ -109,6 +136,10 @@ export const useProjectCase = ({ form }) => {
         getProjects();
         getEmailsUsers();
         getTipoServicios();
+
+        if (form.tipoServicio !== "") {
+            onSelectTipoServicio(form.tipoServicio.id);
+        }
     });
 
     return {
@@ -117,5 +148,6 @@ export const useProjectCase = ({ form }) => {
         tipoServicios,
         servicioSolicitado,
         listPlanta,
+        userActive,
     };
 };

@@ -1,3 +1,4 @@
+import { validFormBeforeNextTab, validFormRequest } from "@/Validations";
 import { useForm } from "@inertiajs/vue3";
 import Swal from "sweetalert2";
 import { ref } from "vue";
@@ -7,6 +8,7 @@ export const useAddRequest = () => {
         tipoRegistro: "Operativo",
         buque: "",
         caso: "",
+        proceso: "",
         clienteExterno: "",
         tipoBuque: "",
         planta: "",
@@ -34,28 +36,16 @@ export const useAddRequest = () => {
     const nextTab = (e) => {
         e.preventDefault();
 
-        if (
-            form.buque == "" ||
-            form.caso == "" ||
-            form.clienteExterno == "" ||
-            form.tipoBuque == "" ||
-            form.planta == "" ||
-            form.interesado.length == 0 ||
-            form.solicitante.length == 0 ||
-            form.tipoServicio < 0 ||
-            form.tipoServicio > 5 ||
-            form.servicioSolicitado.length == 0
-        ) {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: "Complete los campos requeridos",
-            });
-
+        if (!validFormBeforeNextTab(form)) {
             return;
         }
 
         if (form.grafo === "") {
+            if (form.servicioSolicitado.NombreTipo.includes("Estimación")) {
+                form.grafo = "N/A";
+                return;
+            }
+
             form.grafo = "Pendiente";
         }
 
@@ -68,45 +58,15 @@ export const useAddRequest = () => {
     };
 
     const submitForm = () => {
-        if (form.fechaSolucion === "" || form.descripcionServicio === "") {
-            Swal.fire({
-                icon: "error",
-                title: "Complete los campos requeridos",
-                text: "La fecha de solución y la descripción del servicio son obligatorios",
-            });
-
+        if (!validFormRequest(form)) {
             return;
         }
 
-        if (form.servicioSolicitado === "Copias de Planos o Escaner") {
-            if (form.tipoCopia === "") {
-                Swal.fire({
-                    icon: "error",
-                    title: "Complete los campos requeridos",
-                    text: "El tipo de copia es obligatorio",
-                });
-
-                return;
-            }
-        }
-
-        if (form.servicioSolicitado.includes("Plano")) {
-            if (
-                form.armador === "" ||
-                form.casaClasificadora === "" ||
-                form.numeroIMO === "" ||
-                form.inspectorCampo === "" ||
-                form.gerenteProyecto === ""
-            ) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Complete los campos requeridos",
-                    text: "Los campos de armador, casa clasificadora, número IMO, inspector de campo y gerente de proyecto son obligatorios",
-                });
-
-                return;
-            }
-        }
+        Swal.fire({
+            icon: "success",
+            title: "Campos guardados correctamente",
+            text: "La solicitud ha sido registrada correctamente",
+        });
     };
 
     return {

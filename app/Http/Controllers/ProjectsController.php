@@ -9,14 +9,28 @@ class ProjectsController extends Controller
 {
     public function index()
     {
-        $data = Requerimiento::select('caso', 'buque', 'planta')->distinct()->orderBy('buque')->get();
+        $data = Requerimiento::select('caso', 'buque')->distinct()->orderBy('buque')->get();
+        $Dataplanta = Requerimiento::select('Planta')->distinct()->orderBy('planta', 'asc')->get();;
 
-        return response()->json($data);
+        $result = $data->map(function ($item) {
+            return [
+                'caso' => $item->caso,
+                'buque' => $item->buque,
+                'buqueCaso' => $item->caso . ' - ' . $item->buque
+            ];
+        });
+
+        return response()->json(
+            [
+                'projects' => $result,
+                'dataPlanta' => $Dataplanta
+            ]
+        );
     }
 
     public function getProjectSelect(ProjectRequest $request)
     {
-        $dataResponse = Requerimiento::select('Planta', 'ClienteExterno', 'TipoBuque')
+        $dataResponse = Requerimiento::select('Planta', 'ClienteExterno', 'TipoBuque', 'Proceso')
             ->where('Caso', $request->Caso)
             ->orderBy('Proceso', 'desc')
             ->first();
@@ -26,7 +40,8 @@ class ProjectsController extends Controller
             'buque' => $request->Buque,
             'planta' => $dataResponse->Planta,
             'clienteExterno' => $dataResponse->ClienteExterno,
-            'tipoBuque' => $dataResponse->TipoBuque
+            'tipoBuque' => $dataResponse->TipoBuque,
+            'proceso' => $dataResponse->Proceso
         ];
 
         return response()->json($data);

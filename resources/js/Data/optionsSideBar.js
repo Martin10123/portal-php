@@ -1,9 +1,11 @@
+import RequestIcon from "../Assets/RequestIcon.vue";
+
 export const optionsItemSidebar = [
     {
         title: "Solicitudes",
         hasSubItems: true,
-        icon: "fa-solid fa-list",
-        other: [
+        Icon: RequestIcon,
+        subItems: [
             { title: "Agregar solicitud", goTo: "/Sigedin/Request/AddRequest" },
             {
                 title: "Aprobar solicitud",

@@ -23,6 +23,23 @@ const getHolyWeek = (year) => {
     return holyWeek;
 };
 
+// const getAdditionalDays = (daysToAdd) => {
+//     let additionalDays = [];
+//     let date = new Date();
+
+//     const isWeekend = (date) => date.getDay() % 6 === 0;
+
+//     for (let i = 0; i < daysToAdd; i++) {
+//         do {
+//             date.setDate(date.getDate() + 1);
+//         } while (isWeekend(date));
+
+//         additionalDays.push(new Date(date));
+//     }
+
+//     return additionalDays;
+// };
+
 const getFixedHolidays = (year) => {
     return [
         new Date(year, 0, 1),

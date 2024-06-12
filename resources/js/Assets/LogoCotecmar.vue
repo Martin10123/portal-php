@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link } from "@inertiajs/vue3";
 </script>
 
 <template>
     <Link href="/Sigedin" target="_blank">
-    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="5rem" height="5rem"
-        viewBox="0 0 2048.000000 2048.000000" preserveAspectRatio="xMidYMid meet">
-
+    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="4rem" height="4rem"
+        class="fill-current text-blue-500 object-cover" viewBox="0 0 2048.000000 2048.000000"
+        preserveAspectRatio="xMidYMid meet">
         <g transform="translate(0.000000,2048.000000) scale(0.100000,-0.100000)" fill="blue" stroke="none">
             <path d="M13720 16046 c0 -24 -3 -26 -50 -26 -47 0 -50 -2 -50 -25 0 -23 3
 -25 50 -25 l50 0 0 -210 0 -210 -85 0 -85 0 0 -30 0 -30 85 0 85 0 0 -119 0
@@ -125,6 +125,5 @@ l10 37 -137 45 c-75 25 -140 46 -143 46 -3 0 -9 -15 -12 -32 -11 -57 -62 -152
 -21 -268 -24 l-223 -4 0 186 0 186 208 0 c114 0 225 -5 246 -10z" />
         </g>
     </svg>
-
     </Link>
 </template>

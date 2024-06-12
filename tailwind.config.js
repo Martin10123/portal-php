@@ -26,8 +26,10 @@ export default {
             inset: {
                 "-1000": "-200rem",
                 1000: "200rem",
+                "tp-4": "4.05rem",
             },
             height: {
+                "screen-calc-4": "calc(100vh - 4.1rem)",
                 "screen-calc-6": "calc(100vh - 6rem)",
                 "screen-calc-8": "calc(100vh - 8.3rem)",
             },

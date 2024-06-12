@@ -1,45 +1,49 @@
 import { getAllHolidays } from "@/Data/getHolidays";
-import { usePage } from "@inertiajs/vue3";
 import axios from "axios";
 import { onMounted, computed, ref } from "vue";
 
 export const useInterested = ({ form }) => {
-    const { props } = usePage();
-
-    const userActive = ref(props.auth.user);
     const disabledDatesHolidays = computed(() => {
-        return getAllHolidays();
+        const daysToAdd = Number(form.servicioSolicitado.trespuesta);
+
+        return getAllHolidays(daysToAdd);
     });
 
     const disabledTipoCopia = computed(() => {
-        return form.servicioSolicitado != "Copias de Planos o Escaner";
-    });
-
-    const startDateByTrespuesta = computed(() => {
-        return new Date(
-            new Date().setDate(
-                new Date().getDate() +
-                    Number(form.servicioSolicitado.trespuesta)
-            )
-        );
+        if (
+            form.servicioSolicitado.NombreTipo != "Copias de Planos o Escaner"
+        ) {
+            form.tipoCopia = "";
+            return true;
+        } else {
+            return false;
+        }
     });
 
     const validIfOptionsContainSomeWordWithPlano = computed(() => {
-        return form.servicioSolicitado.includes("Plano");
+        if (
+            form.servicioSolicitado.NombreTipo === "Copias de Planos o Escaner"
+        ) {
+            return;
+        }
+
+        return form.servicioSolicitado.NombreTipo?.toLowerCase().includes(
+            "plano"
+        );
     });
 
     const validIfOptionsContainSomeWordWithCostos = computed(() => {
-        return form.servicioSolicitado.includes("Costos");
+        return form.servicioSolicitado.NombreTipo?.includes("Costos");
     });
 
     const getConsecutivoECDB = async () => {
         try {
-            if (form.tipoRegistro === "Operativo") {
-                form.tipoRegistro = "Regular";
+            if (!form.servicioSolicitado.NombreTipo.includes("Estimación")) {
+                return;
             }
 
             const { data } = await axios.get(
-                route("get.consecutive", form.tipoRegistro)
+                route("get.consecutive", "Estimaciones")
             );
 
             form.consecutivoEC = data[0].consecutivo;
@@ -70,10 +74,8 @@ export const useInterested = ({ form }) => {
     });
 
     return {
-        userActive,
         disabledDatesHolidays,
         disabledTipoCopia,
-        startDateByTrespuesta,
         validIfOptionsContainSomeWordWithPlano,
         validIfOptionsContainSomeWordWithCostos,
         getFiles,
