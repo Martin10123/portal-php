@@ -1,6 +1,7 @@
 <template>
-  <main class="w-full h-screen bg-slate-200 flex items-center">
-    <SideBarMain />
+  <Navbar :toggle-open-sidebar="toggleOpenSidebar" />
+  <main class="w-full bg-slate-200 flex items-center">
+    <SideBarMain :openSidebar="openSidebar" :toggleOpenSidebar="toggleOpenSidebar" />
 
     <div class="bg-slate-200 flex flex-col items-center justify-center w-full h-full">
       <h1 class="text-3xl font-bold text-slate-900">Bienvenido, {{ user.name }}</h1>
@@ -10,11 +11,14 @@
 </template>
 
 <script setup>
+import Navbar from '@/Components/SideBar/Navbar.vue';
 import SideBarMain from '@/Components/SideBar/SideBarMain.vue';
+import { useNavSidebar } from '@/Composables';
 import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const { props } = usePage();
+const { openSidebar, toggleOpenSidebar } = useNavSidebar()
 
 const user = computed(() => props.auth.user);
 const IsPrivileged = computed(() => props.auth.user.IsPrivileged);

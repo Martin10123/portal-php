@@ -55,6 +55,15 @@ export const useInterested = ({ form }) => {
     const getFiles = (e) => {
         const files = e.target.files;
 
+        axios
+            .post(route("files.create"), files[0])
+            .then((response) => {
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
         let totalSize = 0;
 
         for (let i = 0; i < files.length; i++) {

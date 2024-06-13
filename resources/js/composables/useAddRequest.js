@@ -31,7 +31,7 @@ export const useAddRequest = () => {
         gerenteProyecto: "",
     });
 
-    const tabs = ref(1);
+    const tabs = ref(2);
 
     const nextTab = (e) => {
         e.preventDefault();

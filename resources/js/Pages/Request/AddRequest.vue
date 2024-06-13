@@ -1,9 +1,9 @@
 <template>
     <main class="">
-        <Navbar />
+        <Navbar :toggleOpenSidebar="toggleOpenSidebar" />
 
         <section class="sm:flex">
-            <SideBarMain />
+            <SideBarMain :openSidebar="openSidebar" :toggleOpenSidebar="toggleOpenSidebar" />
 
             <section class="w-full flex justify-center">
                 <article class="grid lg:grid-cols-auto-img mx-4 py-4 lg:h-full">
@@ -65,7 +65,8 @@ import ButtonsAddRequest from "@/Components/AddRequest/ButtonsAddRequest.vue";
 import TabsLine from "@/Components/AddRequest/TabsLine.vue";
 import SideBarMain from "@/Components/SideBar/SideBarMain.vue";
 import Navbar from "@/Components/SideBar/Navbar.vue";
-import { useAddRequest } from "@/Composables/useAddRequest";
+import { useAddRequest, useNavSidebar } from "@/Composables";
 
 const { form, nextTab, prevTab, submitForm, tabs } = useAddRequest();
+const { openSidebar, toggleOpenSidebar } = useNavSidebar()
 </script>

@@ -3,7 +3,7 @@
         <div class="px-3 lg:px-5 lg:pl-3">
             <div class="flex items-center justify-between">
                 <div class="flex items-center justify-start rtl:justify-end">
-                    <button type="button"
+                    <button type="button" @click="toggleOpenSidebar"
                         class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
                         <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
                             xmlns="http://www.w3.org/2000/svg">
@@ -19,42 +19,41 @@
                     </Link>
                 </div>
                 <div class="flex items-center">
-                    <div class="flex items-center ms-3">
+                    <div class="flex items-center ms-3 relative">
                         <div>
-                            <button type="button"
-                                class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-                                aria-expanded="false" data-dropdown-toggle="dropdown-user">
+                            <button type="button" @click="toggleProfile"
+                                class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">
                                 <span class="sr-only">Open user menu</span>
-                                <img class="w-8 h-8 rounded-full"
-                                    src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+                                <img class="w-8 h-8 rounded-full object-cover" :src="userActive.photo"
                                     alt="user photo" />
                             </button>
                         </div>
-                        <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
-                            id="dropdown-user">
+                        <div
+                            :class="['w-max z-50 my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600 absolute right-0 top-8', openProfile ? '' : 'hidden']">
                             <div class="px-4 py-3" role="none">
-                                <p class="text-sm text-gray-900 dark:text-white" role="none">
-                                    Neil Sims
+                                <p class="text-sm font-semibold text-gray-900 dark:text-white" role="none">
+                                    {{ userActive.name }}
                                 </p>
                                 <p class="text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
-                                    neil.sims@flowbite.com
+                                    {{ userActive.username }}@cotecmar.com
+                                    <br>
+                                    {{ userActive.cargo }} - {{ userActive.gerencia }}
                                 </p>
                             </div>
                             <ul class="py-1" role="none">
                                 <li>
                                     <a href="#"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                                        role="menuitem">Dashboard</a>
+                                        role="menuitem">Perfil</a>
                                 </li>
                                 <li>
                                     <a href="#"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                                        role="menuitem">Settings</a>
+                                        role="menuitem">Configuraciones</a>
                                 </li>
-                                <li>
-                                    <a href="#"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                                        role="menuitem">Sign out</a>
+                                <li class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer"
+                                    role="menuitem" @click="logout">
+                                    Salir
                                 </li>
                             </ul>
                         </div>
@@ -64,10 +63,30 @@
         </div>
     </nav>
 
-    <!-- <div v-if="openSidebar" class="bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40" @click="onOpenSidebar"></div> -->
 </template>
 
 <script setup>
 import LogoCotecmar from '@/Assets/LogoCotecmar.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { ref } from 'vue';
+
+defineProps({
+    toggleOpenSidebar: Function
+})
+
+const { props } = usePage();
+
+const userActive = computed(() => props.auth.user);
+
+const logout = () => {
+    router.post(route('logout'));
+}
+
+const openProfile = ref(false);
+
+const toggleProfile = () => {
+    openProfile.value = !openProfile.value;
+}
+
 </script>

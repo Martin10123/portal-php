@@ -29,7 +29,7 @@
 
     <div class="grid gap-2">
         <InputLabel class="text-base-more" value="Gerente del proyecto" />
-        <textarea class="border rounded-lg border-stone-300 h-20" placeholder="Gerente del proyecto..."
+        <textarea class="border rounded-lg border-stone-300 h-20 resize-none" placeholder="Gerente del proyecto..."
             v-model="form.gerenteProyecto" />
         <InputError :message="form.errors.gerenteProyecto" />
     </div>

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ConsecutiveController;
 use App\Http\Controllers\ProjectsController;
+use App\Http\Controllers\RequirementController;
 use App\Http\Controllers\TipoServicioController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -22,15 +23,13 @@ Route::middleware([
 
     Route::get('/users', [UserController::class, 'index'])->name('get.users');
 
+    // routes for the request module
     Route::get('/tipoServicios', [TipoServicioController::class, 'index'])->name('get.tipoServicios');
-
     Route::post('/getTipoServicio', [TipoServicioController::class, 'getServicioSolicitado'])->name('post.getTipoServicio');
-
     Route::get('/getConsecutive/{solicitud}', [ConsecutiveController::class, 'index'])->name('get.consecutive');
-
     Route::get("/projects", [ProjectsController::class, "index"])->name('get.projects');
-
     Route::post("/getProject", [ProjectsController::class, "getProjectSelect"])->name('post.project.select');
+    Route::post('/files', [RequirementController::class, 'create'])->name('files.create');
 
     Route::get('Sigedin/Request/AddRequest', function () {
         return Inertia::render('Request/AddRequest');

@@ -40,7 +40,7 @@ const {
 
     <div class="grid gap-2">
         <InputLabel class="text-base-more" value="Descripción servicio:" />
-        <textarea class="border rounded-lg border-stone-300 h-20" placeholder="Descripción servicio..."
+        <textarea class="border rounded-lg border-stone-300 h-20 resize-none" placeholder="Descripción servicio..."
             v-model="form.descripcionServicio" />
         <InputError :message="form.errors.descripcionServicio" />
     </div>
@@ -58,7 +58,7 @@ const {
         </div>
     </div>
 
-    <OptionsByPlanos v-if="!validIfOptionsContainSomeWordWithPlano" :form="form" />
+    <OptionsByPlanos v-if="validIfOptionsContainSomeWordWithPlano" :form="form" />
 
 
     <div class="grid gap-2">

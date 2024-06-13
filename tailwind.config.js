@@ -26,7 +26,7 @@ export default {
             inset: {
                 "-1000": "-200rem",
                 1000: "200rem",
-                "tp-4": "4.05rem",
+                401: "4.1rem",
             },
             height: {
                 "screen-calc-4": "calc(100vh - 4.1rem)",
