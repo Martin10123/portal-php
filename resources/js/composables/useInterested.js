@@ -55,15 +55,6 @@ export const useInterested = ({ form }) => {
     const getFiles = (e) => {
         const files = e.target.files;
 
-        axios
-            .post(route("files.create"), files[0])
-            .then((response) => {
-                console.log(response);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-
         let totalSize = 0;
 
         for (let i = 0; i < files.length; i++) {
@@ -74,6 +65,12 @@ export const useInterested = ({ form }) => {
             alert("El tamaño total de los archivos no puede superar los 15mb");
             return;
         }
+
+        form.files = files;
+    };
+
+    const getFileById = (id) => {
+        window.location = route("file.download", { id });
     };
 
     onMounted(() => {
@@ -88,5 +85,6 @@ export const useInterested = ({ form }) => {
         validIfOptionsContainSomeWordWithPlano,
         validIfOptionsContainSomeWordWithCostos,
         getFiles,
+        getFileById,
     };
 };

@@ -4,6 +4,7 @@ import TextInput from '@/Components/TextInput.vue';
 import OptionsByPlanos from './OptionsByPlanos.vue';
 import { useInterested } from '@/Composables/useInterested';
 import InputError from '../InputError.vue';
+import { Link } from '@inertiajs/vue3';
 
 const { form } = defineProps({
     form: Object,
@@ -13,7 +14,8 @@ const {
     disabledDatesHolidays,
     disabledTipoCopia,
     getFiles,
-    validIfOptionsContainSomeWordWithPlano
+    validIfOptionsContainSomeWordWithPlano,
+    getFileById
 } = useInterested({ form })
 
 </script>
@@ -60,6 +62,7 @@ const {
 
     <OptionsByPlanos v-if="validIfOptionsContainSomeWordWithPlano" :form="form" />
 
+    <p @click="getFileById(1)">aaaa</p>
 
     <div class="grid gap-2">
         <InputLabel class="text-base-more" value="Informacion Adjunta (15mb en total):" />

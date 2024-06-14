@@ -29,7 +29,7 @@ Route::middleware([
     Route::get('/getConsecutive/{solicitud}', [ConsecutiveController::class, 'index'])->name('get.consecutive');
     Route::get("/projects", [ProjectsController::class, "index"])->name('get.projects');
     Route::post("/getProject", [ProjectsController::class, "getProjectSelect"])->name('post.project.select');
-    Route::post('/files', [RequirementController::class, 'create'])->name('files.create');
+    Route::post("/requeriment", [RequirementController::class, "postRequeriment"])->name('post.requeriment');
 
     Route::get('Sigedin/Request/AddRequest', function () {
         return Inertia::render('Request/AddRequest');

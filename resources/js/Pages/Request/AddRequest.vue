@@ -66,7 +66,23 @@ import TabsLine from "@/Components/AddRequest/TabsLine.vue";
 import SideBarMain from "@/Components/SideBar/SideBarMain.vue";
 import Navbar from "@/Components/SideBar/Navbar.vue";
 import { useAddRequest, useNavSidebar } from "@/Composables";
+import Swal from "sweetalert2";
+import { watch } from "vue";
 
-const { form, nextTab, prevTab, submitForm, tabs } = useAddRequest();
+const { form, nextTab, prevTab, submitForm, tabs, isLoadingRequest } = useAddRequest();
 const { openSidebar, toggleOpenSidebar } = useNavSidebar()
+
+watch(isLoadingRequest, (value) => {
+    if (value) {
+        Swal.fire({
+            title: "Cargando...",
+            html: "Espere un momento por favor",
+            timerProgressBar: true,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+    }
+});
+
 </script>

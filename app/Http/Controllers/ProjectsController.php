@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProjectRequest;
-use App\Models\Requerimiento;
+use App\Models\Requeriment;
 
 class ProjectsController extends Controller
 {
     public function index()
     {
-        $data = Requerimiento::select('caso', 'buque')->distinct()->orderBy('buque')->get();
-        $Dataplanta = Requerimiento::select('Planta')->distinct()->orderBy('planta', 'asc')->get();;
+        $data = Requeriment::select('caso', 'buque')->distinct()->orderBy('buque')->get();
+        $Dataplanta = Requeriment::select('Planta')->distinct()->orderBy('planta', 'asc')->get();;
 
         $result = $data->map(function ($item) {
             return [
@@ -30,7 +30,7 @@ class ProjectsController extends Controller
 
     public function getProjectSelect(ProjectRequest $request)
     {
-        $dataResponse = Requerimiento::select('Planta', 'ClienteExterno', 'TipoBuque', 'Proceso')
+        $dataResponse = Requeriment::select('Planta', 'ClienteExterno', 'TipoBuque', 'Proceso')
             ->where('Caso', $request->Caso)
             ->orderBy('Proceso', 'desc')
             ->first();
