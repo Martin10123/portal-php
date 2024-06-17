@@ -23,7 +23,7 @@ Route::middleware([
 
     Route::get('/users', [UserController::class, 'index'])->name('get.users');
 
-    // routes for the request module
+    // Servicios para el modulo de solicitudes
     Route::get('/tipoServicios', [TipoServicioController::class, 'index'])->name('get.tipoServicios');
     Route::post('/getTipoServicio', [TipoServicioController::class, 'getServicioSolicitado'])->name('post.getTipoServicio');
     Route::get('/getConsecutive/{solicitud}', [ConsecutiveController::class, 'index'])->name('get.consecutive');
@@ -31,6 +31,7 @@ Route::middleware([
     Route::post("/getProject", [ProjectsController::class, "getProjectSelect"])->name('post.project.select');
     Route::post("/requeriment", [RequirementController::class, "postRequeriment"])->name('post.requeriment');
 
+    // rutas para el modulo de solicitudes
     Route::get('Sigedin/Request/AddRequest', function () {
         return Inertia::render('Request/AddRequest');
     })->name('AddRequest');
@@ -39,7 +40,7 @@ Route::middleware([
         return Inertia::render('Request/ApproveRequest');
     })->name('ApproveRequest');
 
-    Route::get('Sigedin/Profile/Profile', function () {
-        return Inertia::render('Profile/Profile');
+    Route::get('Sigedin/Profile/ProfileUser', function () {
+        return Inertia::render('Profile/ProfileUser');
     })->name('Profile');
 });

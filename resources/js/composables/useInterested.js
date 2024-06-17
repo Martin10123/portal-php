@@ -69,10 +69,6 @@ export const useInterested = ({ form }) => {
         form.files = files;
     };
 
-    const getFileById = (id) => {
-        window.location = route("file.download", { id });
-    };
-
     onMounted(() => {
         if (validIfOptionsContainSomeWordWithCostos.value) {
             getConsecutivoECDB();
@@ -85,6 +81,5 @@ export const useInterested = ({ form }) => {
         validIfOptionsContainSomeWordWithPlano,
         validIfOptionsContainSomeWordWithCostos,
         getFiles,
-        getFileById,
     };
 };

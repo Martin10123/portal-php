@@ -10,9 +10,10 @@ class UserController extends Controller
     {
         $users = DB::table('sigedin.guest.responsable')
             ->select('Correo', 'Nombre', 'Usuario')
+            ->where('Estado', 'Activo')
             ->get();
 
-        $usersa = $users->map(function ($user) {
+        $usersSet = $users->map(function ($user) {
             return [
                 'correo' => $user->Correo,
                 'nombre' => $user->Nombre,
@@ -20,6 +21,6 @@ class UserController extends Controller
             ];
         });
 
-        return response()->json($usersa);
+        return response()->json($usersSet);
     }
 }

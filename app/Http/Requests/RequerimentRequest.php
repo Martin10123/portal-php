@@ -36,7 +36,7 @@ class RequerimentRequest extends FormRequest
             'Detalle' => ['required', 'string'],
             'Titulo' => ['required', 'string'],
             'FechaSolicitud' => ['required', 'date'],
-            'Asignado' => ['required', 'string'],
+            'usuarioIngreso' => ['required', 'string'],
             'FechaSolucion' => ['required', 'date'],
             'Estado' => ['required', 'string'],
             'OT' => ['required', 'string'],

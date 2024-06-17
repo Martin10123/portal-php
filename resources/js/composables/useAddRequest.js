@@ -60,23 +60,11 @@ export const useAddRequest = () => {
         tabs.value -= 1;
     };
 
-    const showDateNow = (fecha) => {
-        const opcionesFecha = {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        };
+    const formatNamesAndEmails = (array) => {
+        const nombresString = array.map((item) => item.nombre).join("; ");
+        const correosString = array.map((item) => item.correo).join("; ");
 
-        const opcionesHora = {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-        };
-
-        const fechaHoy = fecha.toLocaleDateString("es-ES", opcionesFecha);
-        const horaActual = fecha.toLocaleTimeString("es-ES", opcionesHora);
-
-        return `${fechaHoy} - ${horaActual}`;
+        return { nombresString, correosString };
     };
 
     const submitForm = async () => {
@@ -87,54 +75,52 @@ export const useAddRequest = () => {
         try {
             isLoadingRequest.value = true;
 
-            const solicitanteNombresString = form.solicitante
-                .map((solicitante) => solicitante.nombre)
-                .join(", ");
-            const solicitanteCorreosString = form.solicitante
-                .map((solicitante) => solicitante.correo)
-                .join(", ");
-            const interesadoNombresString = form.interesado
-                .map((interesado) => interesado.nombre)
-                .join(", ");
-            const interesadoCorreosString = form.interesado
-                .map((interesado) => interesado.correo)
-                .join(", ");
+            const {
+                nombresString: solicitanteNombresString,
+                correosString: solicitanteCorreosString,
+            } = formatNamesAndEmails(form.solicitante);
+            const {
+                nombresString: interesadoNombresString,
+                correosString: interesadoCorreosString,
+            } = formatNamesAndEmails(form.interesado);
 
-            const formPost = {
-                Caso: form.caso,
-                Buque: form.buque.buque,
-                Proceso: form.proceso,
-                ClienteExterno: form.clienteExterno,
-                TipoBuque: form.tipoBuque,
-                Planta: form.planta,
-                Solicitante: solicitanteNombresString,
-                CorreoSolicitante: solicitanteCorreosString,
-                Interesado: interesadoNombresString,
-                CorreoInteresado: interesadoCorreosString,
-                IdTipoServicio: form.tipoServicio.id,
-                Detalle: form.servicioSolicitado.NombreTipo,
-                Titulo: form.tipoServicio.descripcion,
-                FechaSolicitud: new Date(),
-                Asignado: form.solicitudGenerada,
-                FechaSolucion: form.fechaSolucion,
-                Estado: "Activa",
-                Asignado: props.auth.user.name,
-                TipoCopia: form.tipoCopia,
-                Armador: form.armador,
-                CasaClasificadora: form.casaClasificadora,
-                NumeroIMO: form.numeroIMO,
-                InspectorCampo: form.inspectorCampo,
-                GerenteProyecto: form.gerenteProyecto,
-                OT: form.grafo,
-                Files: form.files,
-            };
+            const formData = new FormData();
+            formData.append("Caso", form.caso);
+            formData.append("Buque", form.buque.buque);
+            formData.append("Proceso", form.proceso);
+            formData.append("ClienteExterno", form.clienteExterno);
+            formData.append("TipoBuque", form.tipoBuque);
+            formData.append("Planta", form.planta);
+            formData.append("Solicitante", solicitanteNombresString);
+            formData.append("CorreoSolicitante", solicitanteCorreosString);
+            formData.append("Interesado", interesadoNombresString);
+            formData.append("CorreoInteresado", interesadoCorreosString);
+            formData.append("IdTipoServicio", form.tipoServicio.id);
+            formData.append("Detalle", form.servicioSolicitado.NombreTipo);
+            formData.append("Titulo", form.tipoServicio.descripcion);
+            formData.append("FechaSolicitud", new Date().toISOString());
+            formData.append(
+                "FechaSolucion",
+                new Date(form.fechaSolucion).toISOString()
+            );
+            formData.append("Estado", "Activa");
+            formData.append("UsuarioIngreso", props.auth.user.name);
+            formData.append("TipoCopia", form.tipoCopia);
+            formData.append("Armador", form.armador);
+            formData.append("CasaClasificadora", form.casaClasificadora);
+            formData.append("NumeroIMO", form.numeroIMO);
+            formData.append("InspectorCampo", form.inspectorCampo);
+            formData.append("GerenteProyecto", form.gerenteProyecto);
+            formData.append("OT", form.grafo);
+
+            for (let i = 0; i < form.files.length; i++) {
+                formData.append("Files[]", form.files[i]);
+            }
 
             const response = await axios.post(
                 route("post.requeriment"),
-                formPost
+                formData
             );
-
-            console.log(response);
 
             isLoadingRequest.value = false;
 
@@ -143,8 +129,19 @@ export const useAddRequest = () => {
                 title: "Campos guardados correctamente",
                 text: "La solicitud ha sido registrada correctamente",
             });
+
+            form.reset();
+            tabs.value = 1;
         } catch (error) {
             console.log("Error al guardar la solicitud", error);
+
+            isLoadingRequest.value = false;
+
+            Swal.fire({
+                icon: "error",
+                title: "Error al guardar la solicitud",
+                text: "Por favor intenta nuevamente",
+            });
         }
     };
 

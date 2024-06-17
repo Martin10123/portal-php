@@ -1,41 +1,51 @@
+// Definir mensajes de error en un objeto
+const errorMessages = {
+    required: "Este campo es obligatorio",
+    tipoBuque: "El campo tipo de buque es obligatorio",
+    interesado: "El campo interesado es obligatorio",
+    solicitante: "El campo solicitante es obligatorio",
+    tipoServicio: "El campo tipo de servicio es obligatorio",
+    servicioSolicitado: "El campo servicio solicitado es obligatorio",
+    fechaSolucion: "El campo fecha de solución es obligatorio",
+    descripcionServicio: "El campo descripción del servicio es obligatorio",
+    tipoCopia: "El campo tipo de copia es obligatorio",
+    armador: "El campo armador es obligatorio",
+    casaClasificadora: "El campo casa clasificadora es obligatorio",
+    numeroIMO: "El campo número IMO es obligatorio",
+    inspectorCampo: "El campo inspector de campo es obligatorio",
+    gerenteProyecto: "El campo gerente de proyecto es obligatorio",
+};
+
+// Función para validar campos antes de pasar a la siguiente pestaña
 export const validFormBeforeNextTab = (form) => {
     form.clearErrors();
 
-    if (form.buque === "") {
-        form.setError("buque", "El campo proyecto es obligatorio");
-    }
-    if (form.caso === "") {
-        form.setError("caso", "El campo caso es obligatorio");
-    }
-    if (form.clienteExterno === "") {
-        form.setError(
-            "clienteExterno",
-            "El campo cliente externo es obligatorio"
-        );
-    }
-    if (form.tipoBuque === "") {
-        form.setError("tipoBuque", "El campo tipo de buque es obligatorio");
-    }
-    if (form.planta === "") {
-        form.setError("planta", "El campo planta es obligatorio");
-    }
-    if (form.interesado.length === 0) {
-        form.setError("interesado", "El campo interesado es obligatorio");
-    }
-    if (form.solicitante.length === 0) {
-        form.setError("solicitante", "El campo solicitante es obligatorio");
-    }
-    if (form.tipoServicio < 0 || form.tipoServicio > 5) {
-        form.setError(
-            "tipoServicio",
-            "El campo tipo de servicio es obligatorio"
-        );
-    }
-    if (form.servicioSolicitado.length === 0) {
-        form.setError(
-            "servicioSolicitado",
-            "El campo servicio solicitado es obligatorio"
-        );
+    const {
+        buque,
+        caso,
+        clienteExterno,
+        tipoBuque,
+        planta,
+        interesado,
+        solicitante,
+        tipoServicio,
+        servicioSolicitado,
+    } = form;
+
+    if (!buque) form.setError("buque", errorMessages.required);
+    if (!caso) form.setError("caso", errorMessages.required);
+    if (!clienteExterno)
+        form.setError("clienteExterno", errorMessages.required);
+    if (!tipoBuque) form.setError("tipoBuque", errorMessages.tipoBuque);
+    if (!planta) form.setError("planta", errorMessages.required);
+    if (interesado.length === 0)
+        form.setError("interesado", errorMessages.interesado);
+    if (solicitante.length === 0)
+        form.setError("solicitante", errorMessages.solicitante);
+    if (tipoServicio < 0 || tipoServicio > 5)
+        form.setError("tipoServicio", errorMessages.tipoServicio);
+    if (servicioSolicitado.length === 0) {
+        form.setError("servicioSolicitado", errorMessages.servicioSolicitado);
         return false;
     }
 
@@ -45,52 +55,42 @@ export const validFormBeforeNextTab = (form) => {
 export const validFormRequest = (form) => {
     form.clearErrors();
 
-    if (form.fechaSolucion === "") {
-        form.setError(
-            "fechaSolucion",
-            "El campo fecha de solución es obligatorio"
-        );
-    }
-    if (form.descripcionServicio === "") {
-        form.setError(
-            "descripcionServicio",
-            "El campo descripción del servicio es obligatorio"
-        );
+    const {
+        fechaSolucion,
+        descripcionServicio,
+        servicioSolicitado,
+        tipoCopia,
+        armador,
+        casaClasificadora,
+        numeroIMO,
+        inspectorCampo,
+        gerenteProyecto,
+    } = form;
+
+    if (!fechaSolucion)
+        form.setError("fechaSolucion", errorMessages.fechaSolucion);
+    if (!descripcionServicio) {
+        form.setError("descripcionServicio", errorMessages.descripcionServicio);
         return false;
     }
-    if (form.servicioSolicitado.NombreTipo === "Copias de Planos o Escaner") {
-        if (form.tipoCopia === "") {
-            form.setError("tipoCopia", "El campo tipo de copia es obligatorio");
+    if (servicioSolicitado.NombreTipo === "Copias de Planos o Escaner") {
+        if (!tipoCopia) {
+            form.setError("tipoCopia", errorMessages.tipoCopia);
+            return false;
         }
-        return false;
     }
     if (
-        form.servicioSolicitado.NombreTipo.includes("Plano") &&
-        form.servicioSolicitado.NombreTipo !== "Copias de Planos o Escaner"
+        servicioSolicitado.NombreTipo.toLowerCase().includes("plano") &&
+        servicioSolicitado.NombreTipo !== "Copias de Planos o Escaner"
     ) {
-        if (form.armador === "") {
-            form.setError("armador", "El campo armador es obligatorio");
-        }
-        if (form.casaClasificadora === "") {
-            form.setError(
-                "casaClasificadora",
-                "El campo casa clasificadora es obligatorio"
-            );
-        }
-        if (form.numeroIMO === "") {
-            form.setError("numeroIMO", "El campo número IMO es obligatorio");
-        }
-        if (form.inspectorCampo === "") {
-            form.setError(
-                "inspectorCampo",
-                "El campo inspector de campo es obligatorio"
-            );
-        }
-        if (form.gerenteProyecto === "") {
-            form.setError(
-                "gerenteProyecto",
-                "El campo gerente de proyecto es obligatorio"
-            );
+        if (!armador) form.setError("armador", errorMessages.armador);
+        if (!casaClasificadora)
+            form.setError("casaClasificadora", errorMessages.casaClasificadora);
+        if (!numeroIMO) form.setError("numeroIMO", errorMessages.numeroIMO);
+        if (!inspectorCampo)
+            form.setError("inspectorCampo", errorMessages.inspectorCampo);
+        if (!gerenteProyecto) {
+            form.setError("gerenteProyecto", errorMessages.gerenteProyecto);
             return false;
         }
     }

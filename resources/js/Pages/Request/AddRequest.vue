@@ -7,7 +7,7 @@
 
             <section class="w-full flex justify-center">
                 <article class="grid lg:grid-cols-auto-img mx-4 py-4 lg:h-full">
-                    <div class="w-100 h-full hidden lg:block">
+                    <div class="max-w-96 h-full hidden lg:block">
                         <img class="h-full object-cover rounded-s-lg" src="../../Assets/cotecmarImg.jpg"
                             alt="Logo de cotecmar">
                     </div>
@@ -19,7 +19,7 @@
                         </h1>
 
                         <select class="w-full border border-stone-300 cursor-pointer outline-0 p-4 rounded-lg"
-                            v-model="form.tipoRegistro">
+                            v-model="form.tipoRegistro" disabled>
                             <option value="Interno">Seleccionar uno</option>
                             <option value="Administrativo">Administrativo</option>
                             <option value="Operativo">Operativo</option>
