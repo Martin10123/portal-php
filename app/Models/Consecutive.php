@@ -15,4 +15,6 @@ class Consecutive extends Model
         'solicitud',
         'consecutivo'
     ];
+
+    public $timestamps = false;
 }

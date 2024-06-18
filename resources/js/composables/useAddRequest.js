@@ -1,4 +1,5 @@
 import { validFormBeforeNextTab, validFormRequest } from "@/Validations";
+import { removeAccentsAndCompareTexts } from "@/Validations/removeAccentsOfWords";
 import { useForm, usePage } from "@inertiajs/vue3";
 import Swal from "sweetalert2";
 import { ref } from "vue";
@@ -44,12 +45,16 @@ export const useAddRequest = () => {
         }
 
         if (form.grafo === "") {
-            if (form.servicioSolicitado.NombreTipo.includes("Estimación")) {
-                form.grafo = "N/A";
-                return;
-            }
-
             form.grafo = "Pendiente";
+
+            if (
+                removeAccentsAndCompareTexts(
+                    form.servicioSolicitado.NombreTipo,
+                    "Estimación"
+                )
+            ) {
+                form.grafo = "N/A";
+            }
         }
 
         tabs.value += 1;
@@ -85,6 +90,7 @@ export const useAddRequest = () => {
             } = formatNamesAndEmails(form.interesado);
 
             const formData = new FormData();
+            formData.append("TipoUsuario", form.tipoRegistro);
             formData.append("Caso", form.caso);
             formData.append("Buque", form.buque.buque);
             formData.append("Proceso", form.proceso);
@@ -96,9 +102,10 @@ export const useAddRequest = () => {
             formData.append("Interesado", interesadoNombresString);
             formData.append("CorreoInteresado", interesadoCorreosString);
             formData.append("IdTipoServicio", form.tipoServicio.id);
-            formData.append("Detalle", form.servicioSolicitado.NombreTipo);
+            formData.append("TituloReq", form.servicioSolicitado.NombreTipo);
             formData.append("Titulo", form.tipoServicio.descripcion);
             formData.append("FechaSolicitud", new Date().toISOString());
+            formData.append("Consecutivo", form.consecutivoEC);
             formData.append(
                 "FechaSolucion",
                 new Date(form.fechaSolucion).toISOString()
@@ -109,7 +116,7 @@ export const useAddRequest = () => {
             formData.append("Armador", form.armador);
             formData.append("CasaClasificadora", form.casaClasificadora);
             formData.append("NumeroIMO", form.numeroIMO);
-            formData.append("InspectorCampo", form.inspectorCampo);
+            formData.append("Informador", form.inspectorCampo);
             formData.append("GerenteProyecto", form.gerenteProyecto);
             formData.append("OT", form.grafo);
 
@@ -121,6 +128,8 @@ export const useAddRequest = () => {
                 route("post.requeriment"),
                 formData
             );
+
+            console.log(response);
 
             isLoadingRequest.value = false;
 

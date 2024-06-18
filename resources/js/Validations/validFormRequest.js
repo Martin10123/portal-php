@@ -1,3 +1,5 @@
+import { removeAccentsAndCompareTexts } from "./removeAccentsOfWords";
+
 // Definir mensajes de error en un objeto
 const errorMessages = {
     required: "Este campo es obligatorio",
@@ -32,18 +34,38 @@ export const validFormBeforeNextTab = (form) => {
         servicioSolicitado,
     } = form;
 
-    if (!buque) form.setError("buque", errorMessages.required);
-    if (!caso) form.setError("caso", errorMessages.required);
-    if (!clienteExterno)
+    if (!buque) {
+        form.setError("buque", errorMessages.required);
+        return false;
+    }
+    if (!caso) {
+        form.setError("caso", errorMessages.required);
+        return false;
+    }
+    if (!clienteExterno) {
         form.setError("clienteExterno", errorMessages.required);
-    if (!tipoBuque) form.setError("tipoBuque", errorMessages.tipoBuque);
-    if (!planta) form.setError("planta", errorMessages.required);
-    if (interesado.length === 0)
+        return false;
+    }
+    if (!tipoBuque) {
+        form.setError("tipoBuque", errorMessages.tipoBuque);
+        return false;
+    }
+    if (!planta) {
+        form.setError("planta", errorMessages.required);
+        return false;
+    }
+    if (interesado.length === 0) {
         form.setError("interesado", errorMessages.interesado);
-    if (solicitante.length === 0)
+        return false;
+    }
+    if (solicitante.length === 0) {
         form.setError("solicitante", errorMessages.solicitante);
-    if (tipoServicio < 0 || tipoServicio > 5)
+        return false;
+    }
+    if (tipoServicio < 0 || tipoServicio > 5) {
         form.setError("tipoServicio", errorMessages.tipoServicio);
+        return false;
+    }
     if (servicioSolicitado.length === 0) {
         form.setError("servicioSolicitado", errorMessages.servicioSolicitado);
         return false;
@@ -52,6 +74,7 @@ export const validFormBeforeNextTab = (form) => {
     return true;
 };
 
+// Función para validar campos antes de enviar la solicitud
 export const validFormRequest = (form) => {
     form.clearErrors();
 
@@ -67,28 +90,49 @@ export const validFormRequest = (form) => {
         gerenteProyecto,
     } = form;
 
-    if (!fechaSolucion)
+    if (!fechaSolucion) {
         form.setError("fechaSolucion", errorMessages.fechaSolucion);
+        return false;
+    }
     if (!descripcionServicio) {
         form.setError("descripcionServicio", errorMessages.descripcionServicio);
         return false;
     }
-    if (servicioSolicitado.NombreTipo === "Copias de Planos o Escaner") {
+    if (
+        removeAccentsAndCompareTexts(
+            servicioSolicitado.NombreTipo,
+            "Copias de Planos o Escaner"
+        )
+    ) {
         if (!tipoCopia) {
             form.setError("tipoCopia", errorMessages.tipoCopia);
             return false;
         }
     }
+
     if (
-        servicioSolicitado.NombreTipo.toLowerCase().includes("plano") &&
-        servicioSolicitado.NombreTipo !== "Copias de Planos o Escaner"
+        removeAccentsAndCompareTexts(servicioSolicitado.NombreTipo, "plano") &&
+        !removeAccentsAndCompareTexts(
+            servicioSolicitado.NombreTipo,
+            "Copias de Planos o Escaner"
+        )
     ) {
-        if (!armador) form.setError("armador", errorMessages.armador);
-        if (!casaClasificadora)
+        if (!armador) {
+            form.setError("armador", errorMessages.armador);
+            return false;
+        }
+        if (!casaClasificadora) {
             form.setError("casaClasificadora", errorMessages.casaClasificadora);
-        if (!numeroIMO) form.setError("numeroIMO", errorMessages.numeroIMO);
-        if (!inspectorCampo)
+            return false;
+        }
+        if (!numeroIMO) {
+            form.setError("numeroIMO", errorMessages.numeroIMO);
+            return false;
+        }
+        if (!inspectorCampo) {
             form.setError("inspectorCampo", errorMessages.inspectorCampo);
+            return false;
+        }
         if (!gerenteProyecto) {
             form.setError("gerenteProyecto", errorMessages.gerenteProyecto);
             return false;
