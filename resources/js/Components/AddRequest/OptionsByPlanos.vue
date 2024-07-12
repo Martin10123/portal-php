@@ -1,5 +1,5 @@
 <template>
-    <div class="scmid995:grid scmid995:grid-cols-2 scmid995:gap-2">
+    <div class="grid scmid995:grid-cols-2 gap-2">
         <div class="grid gap-2">
             <InputLabel class="text-base-more" value="Armador" />
             <TextInput placeholder="Armador..." v-model="form.armador" />
@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <div class="scmid995:grid scmid995:grid-cols-2 scmid995:gap-2">
+    <div class="grid scmid995:grid-cols-2 gap-2">
         <div class="grid gap-2">
             <InputLabel class="text-base-more" value="Número IMO" />
             <TextInput type="number" placeholder="Número IMO..." v-model="form.numeroIMO" />

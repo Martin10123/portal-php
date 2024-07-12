@@ -137,7 +137,7 @@ export const useProjectCase = ({ form }) => {
         getEmailsUsers();
         getTipoServicios();
 
-        if (form.tipoServicio !== "") {
+        if (form.tipoServicio && form.tipoServicio !== "") {
             onSelectTipoServicio(form.tipoServicio.id);
         }
     });

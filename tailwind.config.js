@@ -11,9 +11,13 @@ export default {
         "./resources/views/**/*.blade.php",
         "./resources/js/**/*.vue",
     ],
-
     theme: {
         extend: {
+            backgroundColor: {
+                "primary-cotecmar": "#023f86",
+                "secondary-cotecmar": "yellow",
+                "tertiary-cotecmar": "#0071ce",
+            },
             fontFamily: {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
             },
@@ -38,6 +42,16 @@ export default {
             },
             gridTemplateColumns: {
                 "auto-img": "30% 1fr",
+                "01": "20rem 1fr",
+            },
+            colors: {
+                primary: "rgb(var(--primary))",
+                "primary-hover": "rgb(var(--primary-hover))",
+                "primary-active-color": "rgb(var(--primary-active-color))",
+
+                "primary-50": "rgb(var(--primary-50))",
+                "primary-100": "rgb(var(--primary-100))",
+                "primary-200": "rgb(var(--primary-200))",
             },
         },
     },

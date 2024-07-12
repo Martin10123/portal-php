@@ -22,3 +22,21 @@
 .filepond--credits {
     display: none;
 }
+
+.p-button {
+    background: var(--primary) !important;
+}
+
+:root {
+    --primary-50: #023f86;
+    --primary-100: yellow;
+    --primary-200: #0071ce;
+
+    --primary: var(--primary-50);
+    --primary-hover: var(--primary-50);
+    --primary-active-color: var(--primary-50);
+
+    --primary-highlight-opacity: 0.1;
+    --primary-highlight-inverse: var(--primary-50);
+    --primary-highlight-hover-opacity: 0.2;
+}

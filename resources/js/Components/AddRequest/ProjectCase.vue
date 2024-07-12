@@ -32,7 +32,7 @@ const {
         <InputError :message="form.errors.clienteExterno" />
     </div>
 
-    <div class="scmid995:grid scmid995:grid-cols-2 scmid995:gap-2 w-full">
+    <div class="grid scmid995:grid-cols-2 gap-2 w-full">
         <div class="grid gap-2">
             <InputLabel class="text-base-more" value="Tipo de buque *" />
             <select class="border border-stone-300 rounded-lg" v-model="form.tipoBuque">
@@ -86,7 +86,7 @@ const {
         <InputError :message="form.errors.solicitante" />
     </div>
 
-    <div class="scmid995:grid scmid995:grid-cols-2 scmid995:gap-2 w-full">
+    <div class="grid scmid995:grid-cols-2 gap-2 w-full">
         <div class="grid gap-2">
             <InputLabel class="text-base-more" value="Tipo de servicio *" />
             <select class="border border-stone-300 rounded-lg w-full" v-model="form.tipoServicio">

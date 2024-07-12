@@ -4,7 +4,6 @@ import TextInput from '@/Components/TextInput.vue';
 import OptionsByPlanos from './OptionsByPlanos.vue';
 import { useInterested } from '@/Composables/useInterested';
 import InputError from '../InputError.vue';
-import { Link } from '@inertiajs/vue3';
 
 const { form } = defineProps({
     form: Object,
@@ -20,7 +19,7 @@ const {
 </script>
 
 <template>
-    <div class="scmid995:grid scmid995:grid-cols-2 scmid995:gap-2">
+    <div class="grid scmid995:grid-cols-2 gap-2">
         <div class="grid gap-2 mb-2 md:mb-0">
             <InputLabel class="text-base-more" value="Tipo de copia:" />
             <select :class="['border border-stone-300 rounded-lg', disabledTipoCopia ? 'bg-gray-300' : '']"
@@ -46,7 +45,7 @@ const {
         <InputError :message="form.errors.descripcionServicio" />
     </div>
 
-    <div class="scmid995:grid scmid995:grid-cols-2 scmid995:gap-2">
+    <div class="grid scmid995:grid-cols-2 gap-2">
         <div class="grid gap-2 mb-2 md:mb-0">
             <InputLabel class="text-base-more" value="Grafo (Si no agrega un grafo este se pondra como pendiente) *" />
             <TextInput placeholder="Grafo..." v-model="form.grafo" />
