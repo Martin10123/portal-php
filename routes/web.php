@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ConsecutiveController;
 use App\Http\Controllers\ProjectsController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\RequirementController;
 use App\Http\Controllers\TipoServicioController;
 use App\Http\Controllers\UserController;
@@ -30,6 +31,10 @@ Route::middleware([
     Route::get("/projects", [ProjectsController::class, "index"])->name('get.projects');
     Route::post("/getProject", [ProjectsController::class, "getProjectSelect"])->name('post.project.select');
     Route::post("/requeriment", [RequirementController::class, "postRequeriment"])->name('post.requeriment');
+    Route::get("/reports", [ReportsController::class, "index"])->name('get.reports');
+    Route::post("/getReport", [ReportsController::class, "getReport"])->name('post.report');
+    Route::get("/getStagePersonnel", [ReportsController::class, "getStagePersonnel"])->name('get.stagePersonnel');
+    Route::get("/getSWBSPersonnel", [ReportsController::class, "getSWBSPersonnel"])->name('get.swbsPersonnel');
 
     // rutas 
     Route::get('Sigedin/Request/AddRequest', function () {

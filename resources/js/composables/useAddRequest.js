@@ -129,8 +129,6 @@ export const useAddRequest = () => {
                 formData
             );
 
-            console.log(response);
-
             isLoadingRequest.value = false;
 
             Swal.fire({

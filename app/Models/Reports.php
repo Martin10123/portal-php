@@ -10,9 +10,6 @@ class Reports extends Model
     use HasFactory;
 
     protected $table = 'guest.planilla_grafos';
-    protected $primaryKey = 'id';
-    public $timestamps = false;
-    public $incrementing = true;
 
     protected $fillable = [
         'Grafo_OP',

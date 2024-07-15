@@ -1,72 +1,76 @@
 <script setup>
-import { ref } from 'vue';
 import EditIcon from '@/Assets/EditIcon.vue';
 import TextInput from '../TextInput.vue';
+import PaginationPersonnel from './PaginationPersonnel.vue';
+import HeaderTable from './HeaderTable.vue';
+import { computed } from 'vue';
 
-const rows = ref([
-    {
-        id: 1,
-        operacion: 'Acompañamiento al Cliente Interno',
-        swbs: '000',
-        fase: 'Ingeniería de Transición',
-        grafo: '255886_10',
-        bloque: '2999',
-        estado: 'Activo',
-        editing: false
-    },
-    {
-        id: 2,
-        operacion: 'Acompañamiento al Cliente Interno',
-        swbs: '000',
-        fase: 'Ingeniería de Transición',
-        grafo: '255886_10',
-        bloque: '2999',
-        estado: 'Activo',
-        editing: false
-    },
-]);
+const props = defineProps({
+    projectSelect: Array
+})
 
-const startEditing = (index) => {
-    rows.value[index].editing = true;
+const projectsWithEditing = computed(() => {
+    return props.projectSelect.map(project => ({
+        ...project,
+        editing: false
+    }));
+});
+
+const onCheckAllProjects = (event) => {
+    projectsWithEditing.value.forEach(project => {
+        project.editing = event.target.checked;
+    });
 };
 
-const saveEdit = (index) => {
-    rows.value[index].editing = false;
+const onCheckProject = (project) => {
+    projectsWithEditing.value.forEach(p => {
+        if (p.Id === project.Id) {
+            p.editing = !p.editing;
+        }
+    });
+};
+
+const startEditing = (ids) => {
+
+};
+
+const saveEdit = (ids) => {
 };
 </script>
 
 <template>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <caption
-                class="p-5 text-2xl font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
-                Proyecto encontrado
-                <p class="pt-3 mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-                    PROYECTO: LANCHA AMBULANCIA MARÍTIMA - LAM-TAM.
-                </p>
-                <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">CASO: 2020</p>
-                <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">CODIGO SAP: C-24-0001</p>
-            </caption>
+            <HeaderTable :project-select="projectSelect" :start-editing="startEditing" />
+
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
+                    <th class="w-4 p-4">
+                        <div class="flex items-center">
+                            <input id="checkbox-table-search-3" type="checkbox" @click="onCheckAllProjects"
+                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                            <label for="checkbox-table-search-3" class="sr-only">checkbox</label>
+                        </div>
+                    </th>
                     <th scope="col" class="px-6 py-3">Operación proceso</th>
                     <th scope="col" class="px-6 py-3">SWBS</th>
                     <th scope="col" class="px-6 py-3">Fase</th>
                     <th scope="col" class="px-6 py-3">Grafo</th>
                     <th scope="col" class="px-6 py-3">Bloque</th>
                     <th scope="col" class="px-6 py-3">Estado</th>
-                    <th scope="col" class="px-6 py-3"><span class="sr-only">Edit</span></th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(row, index) in rows" :key="row.id"
+                <tr v-for="(project, index) in projectsWithEditing" :key="project.Id"
                     class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50">
-                    <template v-if="row.editing">
+                    <template v-if="project.editing">
                         <td class="px-4 py-2">
-                            <TextInput v-model="row.operacion" class="w-full" />
                         </td>
                         <td class="px-4 py-2">
-                            <select v-model="row.swbs"
+                            <TextInput v-model="project.Operación_Proceso" class="w-full" />
+                        </td>
+                        <td class="px-4 py-2">
+                            <select v-model="project.SWBS"
                                 class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer">
                                 <option value="000">000</option>
                                 <option value="100">100</option>
@@ -80,16 +84,16 @@ const saveEdit = (index) => {
                             </select>
                         </td>
                         <td class="px-4 py-2">
-                            <TextInput v-model="row.fase" class="w-full" />
+                            <TextInput v-model="project.Fase" class="w-full" />
                         </td>
                         <td class="px-4 py-2">
-                            <TextInput v-model="row.grafo" class="w-full" />
+                            <TextInput v-model="project.Grafo_OP" class="w-full" />
                         </td>
                         <td class="px-4 py-2">
-                            <TextInput v-model="row.bloque" class="w-full" />
+                            <TextInput v-model="project.Bloque" class="w-full" />
                         </td>
                         <td class="px-4 py-2">
-                            <select v-model="row.estado"
+                            <select v-model="project.Estado"
                                 class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer">
                                 <option value="Inactivo">Inactivo</option>
                                 <option value="Activo">Activo</option>
@@ -100,19 +104,25 @@ const saveEdit = (index) => {
                         </td>
                     </template>
                     <template v-else>
-                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                            {{ row.operacion }}</td>
-                        <td class="px-6 py-4">{{ row.swbs }}</td>
-                        <td class="px-6 py-4">{{ row.fase }}</td>
-                        <td class="px-6 py-4">{{ row.grafo }}</td>
-                        <td class="px-6 py-4">{{ row.bloque }}</td>
-                        <td class="px-6 py-4">{{ row.estado }}</td>
-                        <td class="px-6 py-4 text-right">
-                            <EditIcon @click="startEditing(index)" class="w-5 h-5 cursor-pointer" />
+                        <td class="w-4 p-4">
+                            <div class="flex items-center">
+                                <input id="checkbox-table-search-3" type="checkbox" @click="onCheckProject(project)"
+                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                <label for="checkbox-table-search-3" class="sr-only">checkbox</label>
+                            </div>
                         </td>
+                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            {{ project.Operación_Proceso }}</td>
+                        <td class="px-6 py-4">{{ project.SWBS }}</td>
+                        <td class="px-6 py-4">{{ project.Fase }}</td>
+                        <td class="px-6 py-4">{{ project.Grafo_OP }}</td>
+                        <td class="px-6 py-4">{{ project.Bloque || "N/A" }}</td>
+                        <td class="px-6 py-4">{{ project.Estado }}</td>
                     </template>
                 </tr>
             </tbody>
         </table>
+
+        <PaginationPersonnel :project-select="projectSelect" />
     </div>
 </template>
