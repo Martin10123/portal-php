@@ -15,8 +15,7 @@ export const useProjectCase = ({ form }) => {
 
     const getProjects = async () => {
         try {
-            const { data } = await axios.get(route("get.projects"));
-
+            const { data } = await axios.get(route("projects.index"));
             projects.value = data.projects;
 
             listPlanta.value = data.dataPlanta.filter(
@@ -29,8 +28,7 @@ export const useProjectCase = ({ form }) => {
 
     const getEmailsUsers = async () => {
         try {
-            const { data } = await axios.get(route("get.users"));
-
+            const { data } = await axios.get(route("users.index"));
             usersEmails.value = data;
         } catch (error) {
             console.log("Error en getEmailsUsers: ", error);
@@ -39,8 +37,7 @@ export const useProjectCase = ({ form }) => {
 
     const getTipoServicios = async () => {
         try {
-            const { data } = await axios.get(route("get.tipoServicios"));
-
+            const { data } = await axios.get(route("tipoServicios.index"));
             tipoServicios.value = data;
         } catch (error) {
             console.log("Error en getTipoServicios: ", error);
@@ -53,7 +50,7 @@ export const useProjectCase = ({ form }) => {
         }
 
         try {
-            const { data } = await axios.post(route("post.project.select"), {
+            const { data } = await axios.post(route("projects.select"), {
                 Buque: project.buque,
                 Caso: project.caso,
             });
@@ -78,7 +75,9 @@ export const useProjectCase = ({ form }) => {
             icon: "info",
         });
 
-        const { data } = await axios.get(route("get.consecutive", "Regular"));
+        const { data } = await axios.get(
+            route("consecutives.index", "Regular")
+        );
 
         form.caso = Number(data[0].consecutivo) + 1;
         form.proceso = 1;
@@ -111,7 +110,7 @@ export const useProjectCase = ({ form }) => {
         }
 
         try {
-            const { data } = await axios.post(route("post.getTipoServicio"), {
+            const { data } = await axios.post(route("tipoServicios.get"), {
                 idTservicio: tipoServicio,
             });
 

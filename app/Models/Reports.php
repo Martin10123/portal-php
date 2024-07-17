@@ -9,9 +9,15 @@ class Reports extends Model
 {
     use HasFactory;
 
-    protected $table = 'guest.planilla_grafos';
+    protected $table = 'guest.planilla_grafos2';
+
+    protected $primaryKey = 'Id';
+    protected $keyType = 'int';
+    public $incrementing = true;
+    public $timestamps = false;
 
     protected $fillable = [
+        'Id',
         'Grafo_OP',
         'Proyecto',
         'Codigo_SAP',

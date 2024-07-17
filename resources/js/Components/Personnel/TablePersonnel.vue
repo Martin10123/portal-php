@@ -1,47 +1,8 @@
-<script setup>
-import EditIcon from '@/Assets/EditIcon.vue';
-import TextInput from '../TextInput.vue';
-import PaginationPersonnel from './PaginationPersonnel.vue';
-import HeaderTable from './HeaderTable.vue';
-import { computed } from 'vue';
-
-const props = defineProps({
-    projectSelect: Array
-})
-
-const projectsWithEditing = computed(() => {
-    return props.projectSelect.map(project => ({
-        ...project,
-        editing: false
-    }));
-});
-
-const onCheckAllProjects = (event) => {
-    projectsWithEditing.value.forEach(project => {
-        project.editing = event.target.checked;
-    });
-};
-
-const onCheckProject = (project) => {
-    projectsWithEditing.value.forEach(p => {
-        if (p.Id === project.Id) {
-            p.editing = !p.editing;
-        }
-    });
-};
-
-const startEditing = (ids) => {
-
-};
-
-const saveEdit = (ids) => {
-};
-</script>
-
 <template>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <HeaderTable :project-select="projectSelect" :start-editing="startEditing" />
+            <HeaderTable :project-select="projectSelect" :start-editing="startEditing" :selected-stage="selectedStage"
+                :selected-swbs="selectedSwbs" :value-project="valueProject" />
 
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
@@ -58,71 +19,55 @@ const saveEdit = (ids) => {
                     <th scope="col" class="px-6 py-3">Grafo</th>
                     <th scope="col" class="px-6 py-3">Bloque</th>
                     <th scope="col" class="px-6 py-3">Estado</th>
+                    <th scope="col" class="px-6 py-3" v-if="showOnlyOne"></th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(project, index) in projectsWithEditing" :key="project.Id"
+                <tr v-for="(project) in paginatedProjects" :key="project.Id"
                     class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50">
-                    <template v-if="project.editing">
-                        <td class="px-4 py-2">
-                        </td>
-                        <td class="px-4 py-2">
-                            <TextInput v-model="project.Operación_Proceso" class="w-full" />
-                        </td>
-                        <td class="px-4 py-2">
-                            <select v-model="project.SWBS"
-                                class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer">
-                                <option value="000">000</option>
-                                <option value="100">100</option>
-                                <option value="200">200</option>
-                                <option value="300">300</option>
-                                <option value="400">400</option>
-                                <option value="500">500</option>
-                                <option value="600">600</option>
-                                <option value="700">700</option>
-                                <option value="800">800</option>
-                            </select>
-                        </td>
-                        <td class="px-4 py-2">
-                            <TextInput v-model="project.Fase" class="w-full" />
-                        </td>
-                        <td class="px-4 py-2">
-                            <TextInput v-model="project.Grafo_OP" class="w-full" />
-                        </td>
-                        <td class="px-4 py-2">
-                            <TextInput v-model="project.Bloque" class="w-full" />
-                        </td>
-                        <td class="px-4 py-2">
-                            <select v-model="project.Estado"
-                                class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer">
-                                <option value="Inactivo">Inactivo</option>
-                                <option value="Activo">Activo</option>
-                            </select>
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            <button @click="saveEdit(index)" class="text-blue-600 hover:text-blue-900">Guardar</button>
-                        </td>
-                    </template>
-                    <template v-else>
-                        <td class="w-4 p-4">
-                            <div class="flex items-center">
-                                <input id="checkbox-table-search-3" type="checkbox" @click="onCheckProject(project)"
-                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                <label for="checkbox-table-search-3" class="sr-only">checkbox</label>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                            {{ project.Operación_Proceso }}</td>
-                        <td class="px-6 py-4">{{ project.SWBS }}</td>
-                        <td class="px-6 py-4">{{ project.Fase }}</td>
-                        <td class="px-6 py-4">{{ project.Grafo_OP }}</td>
-                        <td class="px-6 py-4">{{ project.Bloque || "N/A" }}</td>
-                        <td class="px-6 py-4">{{ project.Estado }}</td>
-                    </template>
+
+                    <FormOneSelect v-if="showOnlyOne && project.selected" :all-operation="allOperation"
+                        :all-s-w-b-s="allSWBS" :all-stage="allStage" :selected-project="selectedProject"
+                        :on-cancel-edit="onCancelEdit" :on-update-project-selected="onUpdateProjectSelected" />
+
+                    <ItemsTable v-else :project="project" :on-check-project="onCheckProject" />
                 </tr>
             </tbody>
         </table>
 
-        <PaginationPersonnel :project-select="projectSelect" />
+        <PaginationPersonnel :project-select="projectSelect" :pagination="pagination" @change-page="onChangePage" />
+
+        <FormSelects :show-modal-form="showModalForm" :handle-modal-form="handleModalForm"
+            :selected-project="selectedProject" :all-operation="allOperation" :all-s-w-b-s="allSWBS"
+            :all-stage="allStage" />
     </div>
 </template>
+
+<script setup>
+import PaginationPersonnel from './PaginationPersonnel.vue';
+import HeaderTable from './HeaderTable.vue';
+import FormSelects from './FormSelects.vue';
+import { useTablePersonnel } from '@/Composables';
+import FormOneSelect from './FormOneSelect.vue';
+import ItemsTable from './ItemsTable.vue';
+
+const props = defineProps({
+    projectSelect: Array,
+    selectedStage: String,
+    selectedSwbs: String,
+    valueProject: Object,
+})
+
+const {
+    handleModalForm,
+    onCheckAllProjects,
+    onCheckProject,
+    selectedProject,
+    showModalForm,
+    startEditing,
+    showOnlyOne,
+    paginatedProjects,
+    allOperation, allSWBS, allStage, onCancelEdit, onUpdateProjectSelected, onChangePage, pagination
+} = useTablePersonnel({ props })
+
+</script>

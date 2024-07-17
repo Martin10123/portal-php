@@ -22,34 +22,60 @@ Route::middleware([
         return Inertia::render('Sigedin');
     })->name('Sigedin');
 
-    Route::get('/users', [UserController::class, 'index'])->name('get.users');
+    // Usuarios
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+    });
 
-    // Servicios 
-    Route::get('/tipoServicios', [TipoServicioController::class, 'index'])->name('get.tipoServicios');
-    Route::post('/getTipoServicio', [TipoServicioController::class, 'getServicioSolicitado'])->name('post.getTipoServicio');
-    Route::get('/getConsecutive/{solicitud}', [ConsecutiveController::class, 'index'])->name('get.consecutive');
-    Route::get("/projects", [ProjectsController::class, "index"])->name('get.projects');
-    Route::post("/getProject", [ProjectsController::class, "getProjectSelect"])->name('post.project.select');
-    Route::post("/requeriment", [RequirementController::class, "postRequeriment"])->name('post.requeriment');
-    Route::get("/reports", [ReportsController::class, "index"])->name('get.reports');
-    Route::post("/getReport", [ReportsController::class, "getReport"])->name('post.report');
-    Route::get("/getStagePersonnel", [ReportsController::class, "getStagePersonnel"])->name('get.stagePersonnel');
-    Route::get("/getSWBSPersonnel", [ReportsController::class, "getSWBSPersonnel"])->name('get.swbsPersonnel');
+    // Servicios
+    Route::prefix('tipoServicios')->name('tipoServicios.')->group(function () {
+        Route::get('/', [TipoServicioController::class, 'index'])->name('index');
+        Route::post('/get', [TipoServicioController::class, 'getServicioSolicitado'])->name('get');
+    });
 
-    // rutas 
-    Route::get('Sigedin/Request/AddRequest', function () {
-        return Inertia::render('Request/AddRequest');
-    })->name('AddRequest');
+    // Consecutivos
+    Route::prefix('consecutives')->name('consecutives.')->group(function () {
+        Route::get('/{solicitud}', [ConsecutiveController::class, 'index'])->name('index');
+    });
 
-    Route::get('Sigedin/Request/AssignRequest', function () {
-        return Inertia::render('Request/AssignRequest');
-    })->name('AssignRequest');
+    // Proyectos
+    Route::prefix('projects')->name('projects.')->group(function () {
+        Route::get('/', [ProjectsController::class, 'index'])->name('index');
+        Route::post('/select', [ProjectsController::class, 'getProjectSelect'])->name('select');
+    });
 
-    Route::get('Sigedin/Personnel/Reports', function () {
-        return Inertia::render('Personnel/Reports');
-    })->name('Reports');
+    // Requerimientos
+    Route::prefix('requirements')->name('requirements.')->group(function () {
+        Route::post('/', [RequirementController::class, 'postRequeriment'])->name('post');
+    });
 
-    Route::get('Sigedin/Profile/ProfileUser', function () {
-        return Inertia::render('Profile/ProfileUser');
-    })->name('Profile');
+    // Reportes
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [ReportsController::class, 'index'])->name('index');
+        Route::post('/searchReport', [ReportsController::class, 'searchReport'])->name('searchReport');
+        Route::get('/stagePersonnel', [ReportsController::class, 'getStagePersonnel'])->name('stagePersonnel');
+        Route::get('/swbsPersonnel', [ReportsController::class, 'getSWBSPersonnel'])->name('swbsPersonnel');
+        Route::get('/operationsPersonnel', [ReportsController::class, 'getOperationPersonnel'])->name('operationsPersonnel');
+        Route::post('/updateGraph', [ReportsController::class, 'updateGraph'])->name('updateGraph');
+        Route::post('/updateMassaGraphs', [ReportsController::class, 'updateMassaGraphs'])->name('updateMassaGraphs');
+    });
+
+    // Vistas
+    Route::prefix('Sigedin')->group(function () {
+        Route::get('Request/AddRequest', function () {
+            return Inertia::render('Request/AddRequest');
+        })->name('AddRequest');
+
+        Route::get('Request/AssignRequest', function () {
+            return Inertia::render('Request/AssignRequest');
+        })->name('AssignRequest');
+
+        Route::get('Personnel/Reports', function () {
+            return Inertia::render('Personnel/Reports');
+        })->name('Reports');
+
+        Route::get('Profile/ProfileUser', function () {
+            return Inertia::render('Profile/ProfileUser');
+        })->name('Profile');
+    });
 });

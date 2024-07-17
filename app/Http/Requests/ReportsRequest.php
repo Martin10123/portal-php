@@ -22,7 +22,17 @@ class ReportsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'Proyecto' => ['required', 'string'],
+            "id" => ['required', 'numeric'],
+            'graph' => ['nullable', 'string'],
+            'stage' => ['nullable', 'string'],
+            'swbs' => ['nullable', 'string'],
+            'operation' => ['nullable', 'string'],
+            'state' => ['nullable', 'string'],
+            'block' => ['nullable', 'string'],
+            'project' => ['nullable', 'string'],
+            'case' => ['nullable', 'string'],
+            'codeSap' => ['nullable', 'string'],
+            "reports" => ['nullable', 'array'],
         ];
     }
 }
