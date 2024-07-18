@@ -48,11 +48,16 @@ import TablePersonnel from '@/Components/Personnel/TablePersonnel.vue';
 import { useReports } from '@/Composables';
 
 const {
-    SWBSPersonnel, filteredProjects,
-    openSidebar, projectsReport,
-    selectedStage, selectedSwbs,
+    SWBSPersonnel,
+    filteredProjects,
+    openSidebar,
+    projectsReport,
+    selectedStage,
+    selectedSwbs,
     stageProjectRef,
-    toggleOpenSidebar, valueProject, clearValues
+    toggleOpenSidebar,
+    valueProject,
+    clearValues
 } = useReports()
 
 </script>
