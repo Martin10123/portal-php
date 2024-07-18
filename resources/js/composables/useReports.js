@@ -11,7 +11,7 @@ export const useReports = () => {
     const filteredProjects = ref([]);
     const selectedSwbs = ref("");
     const selectedStage = ref("");
-    const valueProject = ref();
+    const valueProject = ref(null);
 
     const fetchReports = async () => {
         try {
@@ -70,6 +70,27 @@ export const useReports = () => {
         varRef.value = [...new Set(data.map((item) => item[label]))];
     };
 
+    const clearValues = (value) => {
+        if (
+            selectedSwbs.value === "" &&
+            selectedStage.value === "" &&
+            !valueProject.value
+        ) {
+            return;
+        }
+
+        if (value === 1) {
+            selectedSwbs.value = "";
+            selectedStage.value = "";
+            valueProject.value = null;
+        } else if (value === 2) {
+            selectedSwbs.value = "";
+            selectedStage.value = "";
+        } else if (value === 3) {
+            selectedStage.value = "";
+        }
+    };
+
     watch(valueProject, (newValueProject) => {
         if (newValueProject) {
             fetchReportByProject(newValueProject.Proyecto);
@@ -93,7 +114,6 @@ export const useReports = () => {
 
     return {
         openSidebar,
-        toggleOpenSidebar,
         valueProject,
         projectsReport,
         projectSelect,
@@ -102,5 +122,7 @@ export const useReports = () => {
         selectedSwbs,
         selectedStage,
         filteredProjects,
+        toggleOpenSidebar,
+        clearValues,
     };
 };

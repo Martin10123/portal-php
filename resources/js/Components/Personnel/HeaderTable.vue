@@ -3,10 +3,12 @@
         class="px-5 text-2xl font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
         <div class="flex justify-between pb-4">
             <div class="flex gap-2 items-center">
-                <p class="text-sm font-normal text-gray-500 cursor-pointer">Home</p>
-                <p class="text-sm font-normal text-gray-500 cursor-pointer" v-if="valueProject">> {{
-                    valueProject.Proyecto }}</p>
-                <p class="text-sm font-normal text-gray-500 cursor-pointer" v-if="selectedSwbs">> {{ selectedSwbs }}</p>
+                <p class="text-sm font-normal text-gray-500 cursor-pointer" @click="clearValues(1)">Home</p>
+                <p class="text-sm font-normal text-gray-500 cursor-pointer" @click="clearValues(2)" v-if="valueProject">
+                    > {{
+                        valueProject.Proyecto }}</p>
+                <p class="text-sm font-normal text-gray-500 cursor-pointer" @click="clearValues(3)" v-if="selectedSwbs">
+                    > {{ selectedSwbs }}</p>
                 <p class="text-sm font-normal text-gray-500 cursor-pointer" v-if="selectedStage">> {{ selectedStage }}
                 </p>
             </div>
@@ -25,6 +27,7 @@ const props = defineProps({
     selectedStage: String,
     selectedSwbs: String,
     valueProject: Object,
+    clearValues: Function,
 })
 
 </script>

@@ -35,7 +35,7 @@
 
             <div class="p-4">
                 <TablePersonnel :project-select="filteredProjects" :selected-stage="selectedStage"
-                    :selected-swbs="selectedSwbs" :value-project="valueProject" />
+                    :selected-swbs="selectedSwbs" :value-project="valueProject" :clear-values="clearValues" />
             </div>
         </section>
     </main>
@@ -52,7 +52,7 @@ const {
     openSidebar, projectsReport,
     selectedStage, selectedSwbs,
     stageProjectRef,
-    toggleOpenSidebar, valueProject
+    toggleOpenSidebar, valueProject, clearValues
 } = useReports()
 
 </script>

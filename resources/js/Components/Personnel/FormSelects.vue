@@ -1,7 +1,7 @@
 <template>
     <Modal :show="showModalForm" @close="handleModalForm">
         <template #header>
-            <h1 class="text-lg font-bold">{{ titleHeader }}</h1>
+            <h1 class="text-lg font-bold">Editar grafos en masa</h1>
         </template>
         <form @submit.prevent="onSaveGrafoEdit">
             <div class="w-full p-4 grid gap-4">
@@ -66,8 +66,11 @@
                 </div>
             </div>
             <div class="p-4">
-                <button type="submit"
-                    class="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Guardar</button>
+                <button type="submit" :disabled="loadingSave"
+                    :class="{ 'cursor-not-allowed bg-slate-300': loadingSave }"
+                    class="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">{{
+                        loadingSave
+                            ? 'Guardando...' : 'Guardar' }}</button>
             </div>
 
         </form>
@@ -77,8 +80,7 @@
 <script setup>
 import Modal from '@/Components/Modal.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { useForm } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { useFormSelects } from '@/Composables';
 
 const props = defineProps({
     showModalForm: Boolean,
@@ -87,59 +89,9 @@ const props = defineProps({
     allOperation: Array,
     allStage: Array,
     allSWBS: Array,
+    onUpdateProjectSelected: Function,
 });
 
-const titleHeader = computed(() => {
-    return props.selectedProject?.length > 1 ? "Editar grafos en masa" : "Editar grafo";
-});
-
-const form = useForm({
-    operation: "",
-    stage: "",
-    swbs: "",
-    codeSap: "",
-    block: "",
-    state: true,
-    project: "",
-    case: "",
-});
-
-const onSaveGrafoEdit = async () => {
-
-    if (
-        form.operation.trim() === "" &&
-        form.stage.trim() === "" &&
-        form.swbs.trim() === "" &&
-        form.codeSap.trim() === "" &&
-        form.block.trim() === "" &&
-        form.project.trim() === "" &&
-        form.case.trim() === "") {
-        return;
-    }
-
-    try {
-
-        const response = await axios.post(route("reports.updateMassaGraphs"), {
-            id: 0,
-            block: form.block,
-            case: form.case,
-            codeSap: form.codeSap,
-            operation: form.operation,
-            project: form.project,
-            stage: form.stage,
-            state: form.state ? "Activo" : "Inactivo",
-            swbs: form.swbs,
-            reports: props.selectedProject,
-
-        });
-
-        console.log(response);
-
-    } catch (error) {
-        console.log(error);
-    }
-
-}
-
+const { form, loadingSave, onSaveGrafoEdit } = useFormSelects({ props })
 
 </script>

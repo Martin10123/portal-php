@@ -44,10 +44,12 @@
     </td>
     <td class="px-2 py-2">
         <div class="w-full flex gap-2">
-            <button class="text-blue-500 hover:text-blue-700" @click="onSaveProjectSelect">
+            <button class="text-blue-500 hover:text-blue-700" @click="onSaveProjectSelect" :disabled="loadingSave"
+                :class="{ 'cursor-not-allowed': loadingSave }">
                 <i class="fa-solid fa-check text-xl"></i>
             </button>
-            <button class="text-red-500 hover:text-red-700" @click="onCanceledProjectSelect">
+            <button class="text-red-500 hover:text-red-700" @click="onCanceledProjectSelect" :disabled="loadingSave"
+                :class="{ 'cursor-not-allowed': loadingSave }">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
         </div>
@@ -56,10 +58,9 @@
 
 <script setup>
 import TextInput from '@/Components/TextInput.vue';
-import { useForm } from '@inertiajs/vue3';
+import { useFormOneSelect } from '@/Composables';
 import Swal from 'sweetalert2';
-import { ref } from 'vue';
-import { onMounted } from 'vue';
+import { watch } from 'vue';
 
 const props = defineProps({
     allOperation: Array,
@@ -70,96 +71,21 @@ const props = defineProps({
     onUpdateProjectSelected: Function
 });
 
-const showOperationOption = ref(false);
-const showSWBSOption = ref(false);
-const showStageOption = ref(false);
+const { form, loadingSave, onCanceledProjectSelect, onSaveProjectSelect, showOperationOption, showSWBSOption, showStageOption } = useFormOneSelect({ props })
 
-const form = useForm({
-    operation: props.selectedProject[0].Operación_Proceso,
-    swbs: props.selectedProject[0].SWBS,
-    stage: props.selectedProject[0].Fase,
-    graph: props.selectedProject[0].Grafo_OP,
-    block: props.selectedProject[0].Bloque || "N/A",
-    state: true
-})
-
-const onSaveProjectSelect = async () => {
-
-    try {
-
-        const { isConfirmed } = await Swal.fire({
-            title: "Seguro que quieres guardar los cambios?",
-            text: "Los datos se actualizarán en la base de datos.",
-            icon: "info",
-            showCancelButton: true,
-            confirmButtonColor: "#023f86",
-            cancelButtonColor: "red",
-            confirmButtonText: "Actualizar"
-        })
-
-        if (!isConfirmed) return;
-
-        const formData = new FormData();
-
-        formData.append('operation', form.operation);
-        formData.append('swbs', form.swbs);
-        formData.append('stage', form.stage);
-        formData.append('graph', form.graph);
-        formData.append('block', form.block);
-        formData.append('state', form.state ? "Activo" : "Inactivo");
-        formData.append('id', props.selectedProject[0].Id);
-
-        const response = await axios.post(route("reports.updateGraph"), formData);
-
-        console.log(response);
-
-        if (response.status === 200) {
-            Swal.fire({
-                title: "Datos actualizados",
-                text: "Los datos se han actualizado correctamente.",
-                icon: "success",
-                confirmButtonColor: "#023f86",
-            });
-
-            props.onUpdateProjectSelected(response.data);
-
-            props.onCancelEdit(props.selectedProject[0].Id);
-
-        }
-
-    } catch (error) {
-        console.log(error);
+watch(loadingSave, (value) => {
+    if (value) {
+        Swal.fire({
+            title: "Cargando...",
+            html: "Espere un momento por favor",
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
     }
-}
-
-const onCanceledProjectSelect = () => {
-    Swal.fire({
-        title: "Seguro que quieres cancelar la edición?",
-        showDenyButton: true,
-        confirmButtonText: "Cancelar",
-        confirmButtonColor: "red",
-        denyButtonText: `Seguir`,
-        denyButtonColor: "green",
-    }).then((result) => {
-        if (result.isConfirmed) {
-            props.onCancelEdit(props.selectedProject[0].Id);
-        }
-    });
-}
-
-onMounted(() => {
-    if (!props.allOperation.some(operation => operation.detalle === props.selectedProject[0].Operación_Proceso)) {
-        showOperationOption.value = true;
-    }
-
-    if (!props.allSWBS.some(swbs => swbs.swbs === props.selectedProject[0].SWBS)) {
-        showSWBSOption.value = true;
-    }
-
-    if (!props.allStage.some(stage => stage.fase === props.selectedProject[0].Fase)) {
-        showStageOption.value = true;
-    }
-
-})
+});
 
 </script>

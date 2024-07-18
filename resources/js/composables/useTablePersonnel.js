@@ -10,6 +10,7 @@ export const useTablePersonnel = ({ props }) => {
     const allStage = ref([]);
     const allSWBS = ref([]);
     const showOnlyOne = ref(false);
+    const checkAllProjects = ref(false);
 
     const pagination = ref(1);
     const itemsPerPage = 10;
@@ -50,6 +51,9 @@ export const useTablePersonnel = ({ props }) => {
 
     const onCheckAllProjects = (event) => {
         showOnlyOne.value = false;
+
+        checkAllProjects.value = event.target.checked;
+
         projectsWithEditing.value.forEach((project) => {
             project.selected = event.target.checked;
         });
@@ -57,6 +61,8 @@ export const useTablePersonnel = ({ props }) => {
 
     const onCheckProject = (project) => {
         showOnlyOne.value = false;
+        checkAllProjects.value = false;
+
         projectsWithEditing.value.forEach((p) => {
             if (p.Id === project.Id) {
                 p.selected = !p.selected;
@@ -114,6 +120,9 @@ export const useTablePersonnel = ({ props }) => {
                   }
                 : p
         );
+
+        checkAllProjects.value = false;
+        showModalForm.value = false;
         updatePaginatedProjects();
     };
 
@@ -150,6 +159,7 @@ export const useTablePersonnel = ({ props }) => {
         showOnlyOne,
         pagination,
         paginatedProjects,
+        checkAllProjects,
         onCancelEdit,
         onCheckAllProjects,
         onCheckProject,
