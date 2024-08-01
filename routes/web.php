@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ConsecutiveController;
 use App\Http\Controllers\ProjectsController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\RequirementController;
 use App\Http\Controllers\TipoServicioController;
+use App\Http\Controllers\TypeServicesCalendarController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -60,6 +62,17 @@ Route::middleware([
         Route::post('/updateMassaGraphs', [ReportsController::class, 'updateMassaGraphs'])->name('updateMassaGraphs');
     });
 
+    // Calendar
+    Route::prefix('calendarPage')->name('calendarPage.')->group(function () {
+        Route::get('/', [CalendarController::class, 'index'])->name('index');
+        Route::post('/create', [CalendarController::class, 'create'])->name('create');
+    });
+
+    //TypeServices
+    Route::prefix('typeServices')->name('typeServices.')->group(function () {
+        Route::get('/', [TypeServicesCalendarController::class, 'index'])->name('index');
+    });
+
     // Vistas
     Route::prefix('Sigedin')->group(function () {
         Route::get('Request/AddRequest', function () {
@@ -77,5 +90,9 @@ Route::middleware([
         Route::get('Profile/ProfileUser', function () {
             return Inertia::render('Profile/ProfileUser');
         })->name('Profile');
+
+        Route::get('CalendarPage/CalendarPage', function () {
+            return Inertia::render('CalendarPage/CalendarPage');
+        })->name('CalendarPage');
     });
 });

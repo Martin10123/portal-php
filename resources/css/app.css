@@ -1,6 +1,21 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,200;0,400;0,600;1,100;1,200;1,400&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,800;1,100;1,200;1,300;1,400;1,500;1,700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html {
+    scroll-behavior: smooth;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+}
 
 [x-cloak] {
     display: none;
@@ -39,4 +54,29 @@
     --primary-highlight-opacity: 0.1;
     --primary-highlight-inverse: var(--primary-50);
     --primary-highlight-hover-opacity: 0.2;
+}
+
+.fc .fc-toolbar.fc-header-toolbar {
+    padding: 0.5rem;
+}
+
+.fc .fc-button-primary {
+    background: var(--primary-200);
+    border-color: var(--primary-200);
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+    background: var(--primary-50);
+    border-color: var(--primary-50);
+}
+
+.vs__selected {
+    background-color: #cccccc1a !important;
+}
+
+.fc-nonbusiness {
+    background-color: #5a5a5a50;
+    pointer-events: none;
+    cursor: not-allowed;
 }

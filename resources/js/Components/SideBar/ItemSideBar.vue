@@ -3,7 +3,7 @@
         class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
         aria-controls="dropdown-example" data-collapse-toggle="dropdown-example">
 
-        <component :is="icon" />
+        <img class="w-8 h-8 object-cover" :src="icon" :alt="title">
 
         <span class="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">{{ title }}</span>
 
@@ -27,7 +27,7 @@ import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 
 defineProps({
-    icon: Object,
+    icon: String,
     hasSubItems: Boolean,
     subItems: Array,
     title: String,

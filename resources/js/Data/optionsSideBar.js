@@ -1,11 +1,12 @@
-import RequestIcon from "../Assets/RequestIcon.vue";
-import ReportsPayrof from "../Assets/ReportsPayrof.vue";
+import requestIcon from "@/Assets/requestIcon.svg";
+import reportsPayrof from "@/Assets/reportsPayrof.svg";
+import reserveIcon from "@/Assets/reserve.svg";
 
 export const optionsItemSidebar = [
     {
         title: "Solicitudes",
         hasSubItems: true,
-        icon: RequestIcon,
+        icon: requestIcon,
         subItems: [
             {
                 title: "Agregar solicitud",
@@ -20,7 +21,7 @@ export const optionsItemSidebar = [
     {
         title: "Planillación",
         hasSubItems: true,
-        icon: ReportsPayrof,
+        icon: reportsPayrof,
         subItems: [
             {
                 title: "Cargar",
@@ -29,6 +30,17 @@ export const optionsItemSidebar = [
             {
                 title: "Reportes",
                 goTo: "/Sigedin/Personnel/Reports",
+            },
+        ],
+    },
+    {
+        title: "Reservar XRLAB",
+        hasSubItems: true,
+        icon: reserveIcon,
+        subItems: [
+            {
+                title: "Reservar el laboratorio",
+                goTo: "/Sigedin/CalendarPage/CalendarPage",
             },
         ],
     },

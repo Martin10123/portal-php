@@ -133,24 +133,30 @@ class RequirementController extends Controller
             }
 
             if ($this->compareStrings($tituloReq, 'estimacion')) {
+                
                 $consecutivo = Consecutive::where('solicitud', 'Estimaciones')
                     ->first();
 
-                $getTheFourFirstNumber = (int) substr($consecutivo->consecutivo, 0, 4) + 1;
+                if ((int) substr($consecutivo->consecutivo, 4, 6)) {
+                    
+                } else {
+                    $getTheFourFirstNumber = (int) substr($consecutivo->consecutivo, 0, 4) + 1;
 
-                if ($getTheFourFirstNumber < 100) {
-                    $getTheFourFirstNumber = '00' . $getTheFourFirstNumber;
-                } else if ($getTheFourFirstNumber < 1000) {
-                    $getTheFourFirstNumber = '0' . $getTheFourFirstNumber;
+                    if ($getTheFourFirstNumber < 100) {
+                        $getTheFourFirstNumber = '00' . $getTheFourFirstNumber; 
+                    } else if ($getTheFourFirstNumber < 1000) {
+                        $getTheFourFirstNumber = '0' . $getTheFourFirstNumber;
+                    }
+    
+                    $consecutivo->consecutivo = (string) $getTheFourFirstNumber . substr($consecutivo->consecutivo, 4);
+                    $consecutivo->save();
+    
+                    $responseEstimacion = ([
+                        'message estimación' => 'Consecutivo actualizado correctamente',
+                        'sumOneToConsecutive' => $consecutivo,
+                    ]);
                 }
-
-                $consecutivo->consecutivo = (string) $getTheFourFirstNumber . substr($consecutivo->consecutivo, 4);
-                $consecutivo->save();
-
-                $responseEstimacion = ([
-                    'message estimación' => 'Consecutivo actualizado correctamente',
-                    'sumOneToConsecutive' => $consecutivo,
-                ]);
+                
             }
 
             return response()->json([$responseOperativo, $responseEstimacion]);

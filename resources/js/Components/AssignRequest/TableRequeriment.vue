@@ -15,7 +15,6 @@
             <template #body="slotProps">
                 <div class="flex gap-2">
                     <EditIcon />
-                    <CreateIcon />
                 </div>
             </template>
         </Column>
@@ -51,7 +50,6 @@ import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 
 import { ref } from 'vue';
-import CreateIcon from '@/Assets/CreateIcon.vue';
 import EditIcon from '@/Assets/EditIcon.vue';
 import axios from 'axios';
 

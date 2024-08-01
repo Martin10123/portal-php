@@ -12,6 +12,7 @@ import VueSelect from "vue-select";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import PrimeVue from "primevue/config";
 import Aura from "@primevue/themes/aura";
+import FullCalendar from "@fullcalendar/vue3";
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
 
@@ -33,6 +34,7 @@ createInertiaApp({
             })
             .component("v-select", VueSelect)
             .component("VueDatePicker", VueDatePicker)
+            .component("FullCalendar", FullCalendar)
             .mount(el);
     },
     progress: {

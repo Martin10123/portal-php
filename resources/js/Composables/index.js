@@ -6,3 +6,5 @@ export * from "./useTablePersonnel";
 export * from "./useReports";
 export * from "./useFormSelects";
 export * from "./useFormOneSelect";
+export * from "./useCalendarPage";
+export * from "./useModalCalendar";
