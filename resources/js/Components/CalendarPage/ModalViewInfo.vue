@@ -31,7 +31,7 @@
             </div>
             <ItemModalInfo
                 svgd="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3"
-                title="Recursos" :info="infoSelectedEvent.typeService" />
+                title="Recursos cargados" :info="infoSelectedEvent.resource.length" />
         </ul>
 
         <div class="px-4 pb-4">
@@ -88,7 +88,7 @@
             </div>
         </div>
 
-        <div class="p-4 grid grid-cols-2 gap-4">
+        <div class="p-4 grid grid-cols-2 gap-4" v-if="!disabledButton">
             <button class="py-2 px-4 rounded-md cursor-pointer flex gap-2 shadow-lg justify-center items-center"
                 @click="onEditThisEvent">
                 <EditIcon class="w-6 h-6 text-white" />
@@ -123,6 +123,8 @@ const props = defineProps({
     onEditEvent: Function,
 })
 
+const disabledButton = ref(false);
+
 const openModalInfo = ref(false);
 
 const onCloseModal = () => {
@@ -156,6 +158,25 @@ const donDeleteThisEvent = () => {
 
 onMounted(() => {
     openModalInfo.value = true
+
+    const validateIsPossibleEditDelete = () => {
+        const currentDate = new Date();
+        const eventDate = new Date(props.infoSelectedEvent.start);
+        const currentHour = currentDate.getHours();
+        const eventHour = eventDate.getHours();
+        const currentMinutes = currentDate.getMinutes();
+        const eventMinutes = eventDate.getMinutes();
+
+        if (currentDate.getDate() > eventDate.getDate() ||
+            (currentDate.getDate() === eventDate.getDate() && currentHour > eventHour) ||
+            (currentDate.getDate() === eventDate.getDate() && currentHour === eventHour && currentMinutes > eventMinutes)
+        ) {
+            disabledButton.value = true;
+        }
+    }
+
+    validateIsPossibleEditDelete()
+
 })
 
 </script>

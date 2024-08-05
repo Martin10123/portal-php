@@ -43,6 +43,7 @@
 <script setup>
 import Modal from '@/Components/Modal.vue';
 import { onMounted, ref, watch } from 'vue';
+import { format, setHours, addMinutes, startOfDay, isSameDay, isSameHour } from 'date-fns';
 
 const props = defineProps({
     openModalHours: Boolean,
@@ -55,20 +56,23 @@ const timeNecessary = ref(30);
 
 const generateHoursAvailable = (startHour = 7, endHour = 16.5, interval = 30) => {
     const hours = [];
-    const totalIntervals = Math.ceil((endHour - startHour) * (60 / interval));
+    const start = startOfDay(new Date());
+    const end = setHours(start, endHour);
+    let current = setHours(start, startHour);
 
-    for (let i = 0; i <= totalIntervals; i++) {
-        const hour = startHour + Math.floor((i * interval) / 60);
-        const minutes = (i * interval) % 60;
-        const hourString = `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-        const minuteValue = hour + minutes / 60;
+    while (current <= end) {
+        const hourString = format(current, 'HH:mm');
+        const minuteValue = current.getHours() + current.getMinutes() / 60;
+        const isAvailable = !(hourString === '12:30' || hourString === '13:00' || hourString === '16:30');
 
         hours.push({
             hour: hourString,
             minutes: minuteValue,
-            available: !((hourString === '12:30') || (hourString === '13:00') || (hourString === '16:30')),
-            hourByNewDate: new Date().setHours(hour, minutes),
+            available: isAvailable,
+            hourByNewDate: current,
         });
+
+        current = addMinutes(current, interval);
     }
 
     return hours;
@@ -87,47 +91,49 @@ const handleSelectHour = (hour) => {
 };
 
 const showHoursAvailable = () => {
-    const selectedDate = new Date(props.form.date).getDate();
-    const eventsDaySelected = props.events.filter(event => new Date(event.start).getDate() === selectedDate);
-    const hoursAlreadySelected = eventsDaySelected.map(event => getSelectedHours(event.start, event.end));
+    const selectedDate = new Date(props.form.date);
+    const eventsDaySelected = props.events.filter(event => isSameDay(new Date(event.start), selectedDate));
+
+    const hoursAlreadySelected = eventsDaySelected.map(event => {
+        if (isSameHour(new Date(event.start), selectedDate)) {
+            return getSelectedHours(new Date(event.start), new Date(event.start));
+        } else {
+            return getSelectedHours(new Date(event.start), new Date(event.end))
+        }
+    });
 
     hoursAvailable.value = hoursAvailable.value.map(hour => {
         if (!hour.available) {
             return hour;
         }
-        const isTaken = hoursAlreadySelected.some(([start, end]) => hour.minutes >= start && hour.minutes <= end);
+
+        const isTaken = hoursAlreadySelected.some(([start, end]) =>
+            (hour.minutes >= start && hour.minutes < end)
+        );
+
         return { ...hour, available: !isTaken };
     });
 };
 
 const formatDate = () => {
-    return new Date(props.form.date).toLocaleDateString('es-MX', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
+    return format(new Date(props.form.date), 'eeee d MMMM yyyy');
 };
 
 const getSelectedHours = (start, end) => {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const startHour = startDate.getHours();
-    const endHour = endDate.getHours();
-    const startMinutes = startDate.getMinutes();
-    const endMinutes = endDate.getMinutes();
+    const startMinutes = start.getMinutes();
+    const endMinutes = end.getMinutes();
 
     const isHalfHourStart = startMinutes >= 30 && startMinutes < 40;
     const isHalfHourEnd = endMinutes >= 30 && endMinutes < 40;
 
     if (isHalfHourStart && isHalfHourEnd) {
-        return [startHour + 0.5, endHour + 0.5];
+        return [start.getHours() + 0.5, end.getHours() + 0.5];
     } else if (isHalfHourStart) {
-        return [startHour + 0.5, endHour];
+        return [start.getHours() + 0.5, end.getHours()];
     } else if (isHalfHourEnd) {
-        return [startHour, endHour + 0.5];
+        return [start.getHours(), end.getHours() + 0.5];
     } else {
-        return [startHour, endHour];
+        return [start.getHours(), end.getHours()];
     }
 };
 
@@ -145,9 +151,9 @@ const disableHoursAccordingToValue = (value) => {
 
         const today = new Date();
         const hourNow = today.getHours();
-        const isSameDay = today.getDate() === new Date(props.form.date).getDate();
+        const isSameDay1 = isSameDay(today, new Date(props.form.date));
 
-        if (hourNow >= new Date(hour.hourByNewDate).getHours() && isSameDay) {
+        if (hourNow >= hour.hourByNewDate.getHours() && isSameDay1) {
             return { ...hour, available: false };
         }
 
@@ -164,10 +170,18 @@ const disableHoursAccordingToValue = (value) => {
     });
 };
 
-watch(timeNecessary, (value) => {
+const updateHours = (value) => {
     resetHoursAvailability();
     showHoursAvailable();
     disableHoursAccordingToValue(value);
+};
+
+watch(timeNecessary, (value) => {
+    updateHours(value);
+});
+
+watch(() => props.form.date, () => {
+    updateHours(timeNecessary.value);
 });
 
 onMounted(() => {

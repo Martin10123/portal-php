@@ -64,7 +64,7 @@
                                 :class="form.date ? 'cursor-pointer' : 'pointer-events-none'"
                                 @click="handleOpenModalHours">
                                 <span class="w-full h-full flex cursor-text">{{ form.dateHours.length > 0 ?
-                                    `${form.dateHours[0]} - ${form.dateHours[1]}` : "11:00 AM - 2:00 PM..."
+                                    `${form.dateHours[0]} - ${form.dateHours[1]}` : "11:00 AM - 12:00 PM..."
                                     }}</span>
                             </div>
                         </div>

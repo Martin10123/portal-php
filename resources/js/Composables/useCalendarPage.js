@@ -81,25 +81,58 @@ export const useCalendarPage = () => {
             };
         },
         select: function (info) {
-            const selectedDate = info.startStr.split("T")[0];
+            const start = new Date(info.startStr);
+            const end = new Date(info.endStr);
 
-            if (holidays.includes(selectedDate)) {
+            const today = new Date();
+            const currentMinutes = today.getMinutes();
+            const currentHours = today.getHours();
+
+            if (
+                start.getDate() === today.getDate() &&
+                (start.getHours() < currentHours ||
+                    (start.getHours() === currentHours &&
+                        start.getMinutes() < currentMinutes))
+            ) {
                 Swal.fire({
                     icon: "error",
                     title: "Error",
-                    text: "No se pueden crear eventos en días festivos",
+                    text: "No se puede crear eventos en horas pasadas",
                 });
                 return;
             }
 
-            onCreateEvent(info);
+            if (
+                info.view.type === "dayGridMonth" ||
+                (isWithinBusinessHours(start) && isWithinBusinessHours(end))
+            ) {
+                const selectedDate = info.startStr.split("T")[0];
+
+                if (holidays.includes(selectedDate)) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "No se pueden crear eventos en días festivos",
+                    });
+                    return;
+                }
+
+                onCreateEvent(info);
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "No se pueden crear eventos fuera del horario laboral",
+                });
+                return;
+            }
         },
         businessHours: {
             daysOfWeek: [1, 2, 3, 4, 5],
             startTime: "07:00",
             endTime: "18:00",
         },
-        datesSet: function (info) {
+        datesSet: function () {
             // Deshabilitar visualmente los días festivos
             holidays.forEach((holiday) => {
                 const cell = document.querySelector(
@@ -113,6 +146,22 @@ export const useCalendarPage = () => {
         },
     });
 
+    const isWithinBusinessHours = (date) => {
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+
+        const lunchStartMinute = 30;
+        const lunchEndMinute = 30;
+
+        return (
+            (hours === 12 && minutes < lunchStartMinute) ||
+            (hours === 13 && minutes >= lunchEndMinute) ||
+            (hours > 6 && hours <= 12) ||
+            (hours > 13 && hours < 16) ||
+            (hours === 16 && minutes <= 30)
+        );
+    };
+
     const handleOpenModalHours = () => {
         openModalHours.value = !openModalHours.value;
     };
@@ -122,8 +171,19 @@ export const useCalendarPage = () => {
     };
 
     const onCreateEvent = (eventSelect) => {
-        if (eventSelect.allDay) {
-            form.date = eventSelect.start;
+        form.date = eventSelect.start;
+
+        if (eventSelect.view.type !== "dayGridMonth") {
+            if (!eventSelect.isTrusted) {
+                form.dateHours = [
+                    new Date(eventSelect.startStr).toLocaleTimeString(),
+                    new Date(eventSelect.endStr).toLocaleTimeString(),
+                ];
+            }
+        }
+
+        if (eventSelect.isTrusted) {
+            infoSelectedEvent.value = {};
         }
 
         openModal.value = !openModal.value;
@@ -137,14 +197,22 @@ export const useCalendarPage = () => {
         onViewInfoEvent();
         openModal.value = !openModal.value;
 
-        // form.title = infoSelectedEvent.value.title;
-        // form.description = infoSelectedEvent.value.description;
-        // form.date = [
-        //     infoSelectedEvent.value.start,
-        //     infoSelectedEvent.value.end,
-        // ];
-        // form.participants = infoSelectedEvent.value.participants;
-        // form.priority = infoSelectedEvent.value.priority;
+        form.title = infoSelectedEvent.value.title;
+        form.description = infoSelectedEvent.value.description;
+        form.date = new Date(infoSelectedEvent.value.start);
+        form.dateHours = [
+            new Date(infoSelectedEvent.value.start).toLocaleTimeString(),
+            new Date(infoSelectedEvent.value.end).toLocaleTimeString(),
+        ];
+        form.division = infoSelectedEvent.value.division;
+        form.isArRequired =
+            infoSelectedEvent.value.isArRequired === "1" ? true : false;
+        form.typeService = infoSelectedEvent.value.typeService;
+        form.participantsNecesary =
+            infoSelectedEvent.value.participantsNecesary;
+        form.participantsOptional =
+            infoSelectedEvent.value.participantsOptional || [];
+        form.resource = infoSelectedEvent.value.resource;
     };
 
     const onSaveEvent = () => {
@@ -159,8 +227,42 @@ export const useCalendarPage = () => {
         }
     };
 
-    const onSaveUpdateEvent = () => {
+    const onSaveUpdateEvent = async () => {
         try {
+            console.log(form.data());
+
+            // Falta agregar la parte de los participantes necesarios que no se guardan debido a que no respeta el json inicial de la base de datos
+            // tambien la parte del tipo de servicio que no se guarda correctamente debido a que no se respeta el json inicial de la base de datos y solo se guarda la descripcion
+
+            const response = await axios.put(
+                route("calendarPage.update", infoSelectedEvent.value.id),
+                {
+                    title: form.title,
+                    description: form.description,
+                    starting_date: formatDateSelect(
+                        form.date,
+                        form.dateHours[0]
+                    ),
+                    ending_date: formatDateSelect(form.date, form.dateHours[1]),
+                    participants_necesary: form.participantsNecesary
+                        .map((item) => item.correo)
+                        .join(","),
+                    participants_optional:
+                        form.participantsOptional
+                            .map((item) => item.correo)
+                            .join(",") || "",
+                    resource: form.resource.join(","),
+                    division: form.division,
+                    isVRRequired: form.isArRequired,
+                    type_service_ID: form.typeService,
+                    backgroundColor: getRandomColor(),
+                    calendar_status: true,
+                    uid_user: props.auth.user.guid,
+                }
+            );
+
+            console.log(response);
+
             calendarOptions.value.events = calendarOptions.value.events.map(
                 (event) => {
                     if (event.id === Number(infoSelectedEvent.value.id)) {
@@ -168,8 +270,17 @@ export const useCalendarPage = () => {
                             ...event,
                             title: form.title,
                             description: form.description,
-                            start: form.date[0],
-                            end: form.date[1],
+                            start: formatDateSelect(
+                                form.date,
+                                form.dateHours[0]
+                            ),
+                            end: formatDateSelect(form.date, form.dateHours[1]),
+                            participantsNecesary: form.participantsNecesary,
+                            participantsOptional: form.participantsOptional,
+                            resource: form.resource,
+                            division: form.division,
+                            isArRequired: form.isArRequired,
+                            typeService: form.typeService,
                         };
                     }
 
@@ -216,7 +327,7 @@ export const useCalendarPage = () => {
             resource: form.resource.join(","),
             division: form.division,
             isVRRequired: form.isArRequired,
-            type_service_ID: form.typeService.description,
+            type_service_ID: form.typeService,
             backgroundColor: getRandomColor(),
             calendar_status: true,
             uid_user: props.auth.user.guid,
@@ -245,14 +356,11 @@ export const useCalendarPage = () => {
 
     const onSaveCreateEvent = async () => {
         try {
-            console.log(form.data());
             const eventData = prepareEventData(form, props);
             const response = await axios.post(
                 route("calendarPage.create"),
                 eventData
             );
-
-            console.log(response.data);
 
             if (response.data.ok) {
                 addEventToCalendar(response.data.data, form);
@@ -294,7 +402,7 @@ export const useCalendarPage = () => {
                     resource: event.resource.split(","),
                     division: event.division,
                     isArRequired: event.isVRRequired,
-                    typeService: event.type_service_ID,
+                    typeService: event.type_services.description,
                     backgroundColor: event.backgroundColor,
                 };
             });

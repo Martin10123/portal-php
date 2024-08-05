@@ -12,7 +12,7 @@ class CalendarController extends Controller
     public function index()
     {
         try {
-            $calendar = Calendar::all();
+            $calendar = Calendar::with('typeServices')->get();
 
             return response()->json([
                 'message' => 'Datos obtenidos correctamente',
@@ -42,16 +42,15 @@ class CalendarController extends Controller
                 'backgroundColor' => $request->backgroundColor,
                 'division' => $request->division,
                 'isVRRequired' => $request->isVRRequired,
-                'type_service_ID' => $request->type_service_ID,
+                'type_service_ID' => $request->type_service_ID["type_service_ID"],
                 'uid_user' => $request->uid_user,
                 'calendar_status' => $request->calendar_status,
             ]);
 
             $typeServicesController = new TypeServicesCalendarController();
-            $exitsThisType = $typeServicesController->exitsType($request->type_service_ID);
+            $typeServicesController->exitsType($request->type_service_ID["description"]);
 
             return response()->json([
-                "newType" => $exitsThisType ? "Tipo de servicio creado correctamente " . $exitsThisType->description : null,
                 'message' => 'Evento creado en el calendario correctamente',
                 'data' => $responseDB,
                 "ok" => true
@@ -65,27 +64,42 @@ class CalendarController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function update(CalendarRequest $request, $id)
     {
-    }
+        try {
+            $calendar = Calendar::find($id);
 
-    public function show($id)
-    {
-    }
+            $calendar->title = $request->title;
+            $calendar->description = $request->description;
+            $calendar->starting_date = $request->starting_date;
+            $calendar->ending_date = $request->ending_date;
+            $calendar->participants_necesary = $request->participants_necesary;
+            $calendar->participants_optional = $request->participants_optional;
+            $calendar->resource = $request->resource;
+            $calendar->backgroundColor = $request->backgroundColor;
+            $calendar->division = $request->division;
+            $calendar->isVRRequired = $request->isVRRequired;
+            $calendar->type_service_ID = $request->type_service_ID["type_service_ID"];
+            $calendar->uid_user = $request->uid_user;
+            $calendar->calendar_status = $request->calendar_status;
 
-    public function edit($id)
-    {
-    }
+            $calendar->save();
 
-    public function update(Request $request, $id)
-    {
+            return response()->json([
+                'message' => 'Evento actualizado en el calendario correctamente',
+                'data' => $calendar,
+                "ok" => true
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Error al actualizar los datos de la base de datos',
+                "error" => $th,
+                "ok" => false
+            ], 500);
+        }
     }
 
     public function destroy($id)
-    {
-    }
-
-    public function getCalendarEvents()
     {
     }
 }

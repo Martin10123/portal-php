@@ -17,7 +17,7 @@
 
 defineProps({
     title: String,
-    info: String,
+    info: String | Number,
     svgd: String
 })
 </script>

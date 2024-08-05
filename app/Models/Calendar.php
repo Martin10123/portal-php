@@ -32,4 +32,9 @@ class Calendar extends Model
         'uid_user',
         'calendar_status',
     ];
+
+    public function typeServices()
+    {
+        return $this->belongsTo(TypeServices::class, 'type_service_ID');
+    }
 }

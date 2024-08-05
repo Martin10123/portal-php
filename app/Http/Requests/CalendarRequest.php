@@ -28,7 +28,7 @@ class CalendarRequest extends FormRequest
             'backgroundColor' => 'required|string',
             'division' => 'required|string',
             'isVRRequired' => 'required|boolean',
-            'type_service_ID' => 'required|string',
+            'type_service_ID' => 'required|array',
             'uid_user' => 'required|string',
             'calendar_status' => 'required|boolean',
         ];

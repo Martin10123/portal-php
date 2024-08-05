@@ -66,6 +66,7 @@ Route::middleware([
     Route::prefix('calendarPage')->name('calendarPage.')->group(function () {
         Route::get('/', [CalendarController::class, 'index'])->name('index');
         Route::post('/create', [CalendarController::class, 'create'])->name('create');
+        Route::put('/update/{id}', [CalendarController::class, 'update'])->name('update');
     });
 
     //TypeServices
