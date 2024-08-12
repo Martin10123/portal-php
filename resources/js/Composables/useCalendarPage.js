@@ -14,6 +14,9 @@ export const useCalendarPage = () => {
     const openShowInfo = ref(false);
     const openModalHours = ref(false);
     const infoSelectedEvent = ref({});
+
+    const isLoadingData = ref(false);
+
     const { props } = usePage();
 
     const getRandomColor = () => {
@@ -78,6 +81,7 @@ export const useCalendarPage = () => {
                 division: info.event.extendedProps.division,
                 isArRequired: info.event.extendedProps.isArRequired,
                 typeService: info.event.extendedProps.typeService,
+                uidUser: info.event.extendedProps.uidUser,
             };
         },
         select: function (info) {
@@ -130,7 +134,7 @@ export const useCalendarPage = () => {
         businessHours: {
             daysOfWeek: [1, 2, 3, 4, 5],
             startTime: "07:00",
-            endTime: "18:00",
+            endTime: "16:30",
         },
         datesSet: function () {
             // Deshabilitar visualmente los días festivos
@@ -201,8 +205,8 @@ export const useCalendarPage = () => {
         form.description = infoSelectedEvent.value.description;
         form.date = new Date(infoSelectedEvent.value.start);
         form.dateHours = [
-            new Date(infoSelectedEvent.value.start).toLocaleTimeString(),
-            new Date(infoSelectedEvent.value.end).toLocaleTimeString(),
+            new Date(infoSelectedEvent.value.start).toLocaleTimeString("es-ES"),
+            new Date(infoSelectedEvent.value.end).toLocaleTimeString("es-ES"),
         ];
         form.division = infoSelectedEvent.value.division;
         form.isArRequired =
@@ -229,10 +233,9 @@ export const useCalendarPage = () => {
 
     const onSaveUpdateEvent = async () => {
         try {
-            console.log(form.data());
-
-            // Falta agregar la parte de los participantes necesarios que no se guardan debido a que no respeta el json inicial de la base de datos
-            // tambien la parte del tipo de servicio que no se guarda correctamente debido a que no se respeta el json inicial de la base de datos y solo se guarda la descripcion
+            if (!validateFormCalendar({ ...form.data() })) {
+                return;
+            }
 
             const response = await axios.put(
                 route("calendarPage.update", infoSelectedEvent.value.id),
@@ -244,13 +247,8 @@ export const useCalendarPage = () => {
                         form.dateHours[0]
                     ),
                     ending_date: formatDateSelect(form.date, form.dateHours[1]),
-                    participants_necesary: form.participantsNecesary
-                        .map((item) => item.correo)
-                        .join(","),
-                    participants_optional:
-                        form.participantsOptional
-                            .map((item) => item.correo)
-                            .join(",") || "",
+                    participants_necesary: form.participantsNecesary.join(","),
+                    participants_optional: form.participantsOptional.join(","),
                     resource: form.resource.join(","),
                     division: form.division,
                     isVRRequired: form.isArRequired,
@@ -261,39 +259,61 @@ export const useCalendarPage = () => {
                 }
             );
 
-            console.log(response);
+            if (response.data.ok) {
+                calendarOptions.value.events = calendarOptions.value.events.map(
+                    (event) => {
+                        if (event.id === Number(infoSelectedEvent.value.id)) {
+                            return {
+                                ...event,
+                                title: form.title,
+                                description: form.description,
+                                start: formatDateSelect(
+                                    form.date,
+                                    form.dateHours[0]
+                                ),
+                                end: formatDateSelect(
+                                    form.date,
+                                    form.dateHours[1]
+                                ),
+                                participantsNecesary: form.participantsNecesary,
+                                participantsOptional: form.participantsOptional,
+                                resource: form.resource,
+                                division: form.division,
+                                isArRequired: form.isArRequired,
+                                typeService: form.typeService,
+                            };
+                        }
 
-            calendarOptions.value.events = calendarOptions.value.events.map(
-                (event) => {
-                    if (event.id === Number(infoSelectedEvent.value.id)) {
-                        return {
-                            ...event,
-                            title: form.title,
-                            description: form.description,
-                            start: formatDateSelect(
-                                form.date,
-                                form.dateHours[0]
-                            ),
-                            end: formatDateSelect(form.date, form.dateHours[1]),
-                            participantsNecesary: form.participantsNecesary,
-                            participantsOptional: form.participantsOptional,
-                            resource: form.resource,
-                            division: form.division,
-                            isArRequired: form.isArRequired,
-                            typeService: form.typeService,
-                        };
+                        return event;
                     }
+                );
 
-                    return event;
-                }
-            );
+                form.reset();
+                openModal.value = false;
+                openShowInfo.value = false;
+                infoSelectedEvent.value = {};
 
-            form.reset();
-            openModal.value = false;
-            openShowInfo.value = false;
-            infoSelectedEvent.value = {};
+                Swal.fire({
+                    icon: "success",
+                    title: "Evento actualizado",
+                    text: "El evento se ha actualizado correctamente",
+                });
+            } else {
+                console.log(response);
+
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "No se pudo actualizar el evento",
+                });
+            }
         } catch (error) {
             console.log(error);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Ha ocurrido un error al actualizar el evento, intente de nuevo",
+            });
         }
     };
 
@@ -317,13 +337,8 @@ export const useCalendarPage = () => {
             description: form.description,
             starting_date: formatDateSelect(form.date, form.dateHours[0]),
             ending_date: formatDateSelect(form.date, form.dateHours[1]),
-            participants_necesary: form.participantsNecesary
-                .map((item) => item.correo)
-                .join(","),
-            participants_optional:
-                form.participantsOptional
-                    .map((item) => item.correo)
-                    .join(",") || "",
+            participants_necesary: form.participantsNecesary.join(","),
+            participants_optional: form.participantsOptional.join(",") || "",
             resource: form.resource.join(","),
             division: form.division,
             isVRRequired: form.isArRequired,
@@ -357,6 +372,8 @@ export const useCalendarPage = () => {
     const onSaveCreateEvent = async () => {
         try {
             const eventData = prepareEventData(form, props);
+            console.log(eventData);
+
             const response = await axios.post(
                 route("calendarPage.create"),
                 eventData
@@ -384,8 +401,56 @@ export const useCalendarPage = () => {
         }
     };
 
+    const onDeleteEvent = async () => {
+        try {
+
+            openShowInfo.value = false;            
+
+            const responseSwal = await Swal.fire({
+                title: "Estas seguro que quieres eliminar este evento?",
+                showDenyButton: true,
+                confirmButtonText: "Eliminar",
+                denyButtonText: `Cancelar`,
+            });
+
+            if (responseSwal.isConfirmed) {
+                const response = await axios.delete(route("calendarPage.delete", infoSelectedEvent.value.id));
+                
+                if (response.data.ok) {
+                    events.value = events.value.filter(
+                        (event) => event.id !== Number(infoSelectedEvent.value.id)
+                    );
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "Evento eliminado",
+                        text: "El evento se ha eliminado correctamente",
+                    });
+
+                    infoSelectedEvent.value = {};
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "No se pudo eliminar el evento",
+                    });
+                }
+            } 
+        } catch (error) {
+            console.log(error);
+
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Ha ocurrido un error al eliminar el evento",
+            });
+        }
+    };
+
     const getAllEvents = async () => {
         try {
+            isLoadingData.value = true;
+
             const response = await axios.get(route("calendarPage.index"));
 
             events.value = response.data.data.map((event) => {
@@ -402,12 +467,15 @@ export const useCalendarPage = () => {
                     resource: event.resource.split(","),
                     division: event.division,
                     isArRequired: event.isVRRequired,
-                    typeService: event.type_services.description,
+                    typeService: event.type_services,
                     backgroundColor: event.backgroundColor,
+                    uidUser: event.uid_user,
                 };
             });
         } catch (error) {
             console.log(error);
+        } finally {
+            isLoadingData.value = false;
         }
     };
 
@@ -423,10 +491,12 @@ export const useCalendarPage = () => {
         calendarOptions,
         openModalHours,
         events,
+        isLoadingData,
         onCreateEvent,
         onSaveEvent,
         onViewInfoEvent,
         onEditEvent,
         handleOpenModalHours,
+        onDeleteEvent
     };
 };

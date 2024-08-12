@@ -15,7 +15,7 @@
                     <Link href="/Sigedin" class="flex ms-2 md:me-24">
                     <LogoCotecmar />
                     <span
-                        class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">Cotecmar</span>
+                        class="self-center text-xl font-medium sm:text-2xl whitespace-nowrap dark:text-white">Cotecmar</span>
                     </Link>
                 </div>
                 <div class="flex items-center">

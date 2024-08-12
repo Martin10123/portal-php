@@ -1,7 +1,13 @@
 <template>
     <Navbar />
 
-    <section class="h-[calc(100vh-4.1rem)]">
+    <div v-if="isLoadingData">
+        <div class="flex justify-center items-center h-[calc(100vh-4.1rem)]">
+            <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary-cotecmar"></div>
+        </div>
+    </div>
+
+    <section v-else class="h-[calc(100vh-4.1rem)]">
         <article class="relative h-full">
 
             <FullCalendar class="w-full" :options="calendarOptions" />
@@ -17,7 +23,7 @@
             :open-modal-hours="openModalHours" :events="events" />
 
         <ModalViewInfo v-if="openShowInfo" :on-view-info-event="onViewInfoEvent"
-            :info-selected-event="infoSelectedEvent" :on-edit-event="onEditEvent" />
+            :info-selected-event="infoSelectedEvent" :on-edit-event="onEditEvent" :on-delete-event="onDeleteEvent" />
     </section>
 </template>
 
@@ -36,11 +42,13 @@ const {
     openModal,
     openShowInfo,
     events,
+    isLoadingData,
     onSaveEvent,
     onCreateEvent,
     onViewInfoEvent,
     onEditEvent,
     handleOpenModalHours,
+    onDeleteEvent
 } = useCalendarPage()
 
 </script>

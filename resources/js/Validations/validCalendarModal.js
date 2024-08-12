@@ -40,9 +40,9 @@ export const validateFormCalendar = ({
         return false;
     }
 
-    if (participantsNecesary.length <= 0) {
+    if (participantsNecesary.length < 2) {
         alertMessage(
-            "Al menos 3 participantes son necesarios para hacer un evento!"
+            "Al menos 2 participantes son necesarios para hacer un evento!"
         );
         return false;
     }

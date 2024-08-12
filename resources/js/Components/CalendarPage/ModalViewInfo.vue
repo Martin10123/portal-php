@@ -10,7 +10,7 @@
                 title="Titulo" :info="infoSelectedEvent.title" />
             <ItemModalInfo
                 svgd="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 0 1-1.125-1.125v-3.75ZM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 0 1-1.125-1.125v-8.25ZM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 0 1-1.125-1.125v-2.25Z"
-                title="Tipo de servicio" :info="infoSelectedEvent.typeService" />
+                title="Tipo de servicio" :info="infoSelectedEvent.typeService.description" />
             <ItemModalInfo
                 svgd="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
                 title="Descripción" :info="infoSelectedEvent.description" />
@@ -46,7 +46,7 @@
             </div>
 
             <div class="grid grid-cols-2 max-h-[10rem] overflow-auto">
-                <p class="pl-12 pb-1 grid grid-cols-[0fr,1fr] gap-2"
+                <p class="pl-12 pb-1 grid grid-cols-[0fr,1fr] gap-2" :key="user"
                     v-for="user in infoSelectedEvent.participantsNecesary">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
@@ -73,7 +73,7 @@
             </div>
 
             <div class="grid grid-cols-2 max-h-[10rem] overflow-auto">
-                <p class="pl-12 pb-1 grid grid-cols-[0fr,1fr] gap-2"
+                <p class="pl-12 pb-1 grid grid-cols-[0fr,1fr] gap-2" :key="user"
                     v-for="user in infoSelectedEvent.participantsOptional">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-6">
@@ -90,13 +90,13 @@
 
         <div class="p-4 grid grid-cols-2 gap-4" v-if="!disabledButton">
             <button class="py-2 px-4 rounded-md cursor-pointer flex gap-2 shadow-lg justify-center items-center"
-                @click="onEditThisEvent">
+                v-if="isUserCreator" @click="onEditThisEvent">
                 <EditIcon class="w-6 h-6 text-white" />
                 Editar
             </button>
             <button
                 class="bg-slate-200 text-red-500 py-2 rounded-md cursor-pointer flex gap-2 shadow-lg justify-center items-center"
-                @click="donDeleteThisEvent">
+                v-if="isUserCreator" @click="onDeleteEvent">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -112,19 +112,25 @@
 
 <script setup>
 import Modal from '../Modal.vue';
-import { onMounted, watch } from 'vue';
-import { ref } from 'vue';
+import { onMounted, watch, computed, ref } from 'vue';
 import ItemModalInfo from './ItemModalInfo.vue';
 import EditIcon from '@/Assets/EditIcon.vue';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage()
 
 const props = defineProps({
     infoSelectedEvent: Object,
     onViewInfoEvent: Function,
     onEditEvent: Function,
+    onDeleteEvent: Function,
+})
+
+const isUserCreator = computed(() => {
+    return props.infoSelectedEvent.uidUser === page.props.auth.user.guid;
 })
 
 const disabledButton = ref(false);
-
 const openModalInfo = ref(false);
 
 const onCloseModal = () => {
@@ -150,10 +156,6 @@ watch(() => openModalInfo.value, (value) => {
 
 const onEditThisEvent = () => {
     props.onEditEvent();
-}
-
-const donDeleteThisEvent = () => {
-    console.log('delete this event');
 }
 
 onMounted(() => {

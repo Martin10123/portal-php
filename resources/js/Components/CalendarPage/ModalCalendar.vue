@@ -44,7 +44,7 @@
                             <label class="font-medium">División</label>
                             <select class="w-full border-gray-300 rounded-md shadow-sm" v-model="form.division">
                                 <option value="">Seleccionar</option>
-                                <option v-for="division in listDivisiones" :value="division">{{ division }}
+                                <option v-for="division in listDivisiones" :key="division" :value="division">{{ division }}
                                 </option>
                             </select>
                         </div>
@@ -73,7 +73,7 @@
                     <div class="grid gap-2">
                         <label class="font-medium">Participantes necesarios</label>
                         <v-select multiple :options="usersEmails" placeholder="Participantes..." append-to-body
-                            :calculate-position="calcSpacing" v-model="form.participantsNecesary" label="nombre">
+                            :calculate-position="calcSpacing" v-model="form.participantsNecesary" label="correo" :reduce="email => email.correo">
                             <template v-slot:option="option">
                                 <div>
                                     {{ option.correo }}
@@ -85,8 +85,8 @@
                     </div>
                     <div class="grid gap-2">
                         <label class="font-medium">Participantes opcionales</label>
-                        <v-select multiple :options="usersEmails" placeholder="Participantes..." label="nombre"
-                            append-to-body :calculate-position="calcSpacing" v-model="form.participantsOptional">
+                        <v-select multiple :options="usersEmails" placeholder="Participantes..." label="correo"
+                            append-to-body :calculate-position="calcSpacing" v-model="form.participantsOptional" :reduce="email => email.correo">
                             <template v-slot:option="option">
                                 <div>
                                     {{ option.correo }}
@@ -131,7 +131,7 @@ const props = defineProps({
     events: Array
 });
 
-const { calcSpacing, listaTipoServicios, usersEmails } = useModalCalendar()
+const { calcSpacing, listaTipoServicios, usersEmails } = useModalCalendar(props.form)
 
 </script>
 

@@ -2,22 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Calendar;
 use App\Http\Requests\CalendarRequest;
 use App\Http\Controllers\TypeServicesCalendarController;
+use App\Mail\EventDetailsMail;
+use Illuminate\Support\Facades\Mail;
 
 class CalendarController extends Controller
 {
     public function index()
     {
         try {
-            $calendar = Calendar::with('typeServices')->get();
+            $calendar = Calendar::with('typeServices')
+                ->where('calendar_status', 1)
+                ->get();
 
             return response()->json([
                 'message' => 'Datos obtenidos correctamente',
                 'data' => $calendar,
-                "ok" => true
+                "ok" => true,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -101,5 +104,49 @@ class CalendarController extends Controller
 
     public function destroy($id)
     {
+        try {
+
+            $calendar = Calendar::find($id);
+            $calendar->calendar_status = 0;
+            $calendar->save();
+
+            return response()->json([
+                'message' => 'Evento eliminado en el calendario correctamente',
+                'data' => $calendar,
+                "ok" => true
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Error al eliminar los datos de la base de datos',
+                "error" => $th,
+                "ok" => false
+            ], 500);
+        }
+    }
+
+    public function sendEmailEvent() 
+    {
+        try {
+
+            $data = array('name'=>"Our Code World");
+            // Path or name to the blade template to be rendered
+            $template_path = 'emails.event-details';
+    
+            Mail::send($template_path, $data, function($message) {
+                // Set the receiver and subject of the mail.
+                $message->to('anyemail@emails.com', 'Receiver Name')->subject('Laravel HTML Mail');
+                // Set the sender
+                $message->from('mymail@mymailaccount.com','Our Code World');
+            });
+            
+            dd('Correo enviado correctamente');
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Error al enviar el correo',
+                "error" => $th,
+                "ok" => false
+            ], 500);
+        }
     }
 }

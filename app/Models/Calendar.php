@@ -37,4 +37,5 @@ class Calendar extends Model
     {
         return $this->belongsTo(TypeServices::class, 'type_service_ID');
     }
+
 }

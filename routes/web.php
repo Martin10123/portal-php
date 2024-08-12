@@ -8,6 +8,7 @@ use App\Http\Controllers\RequirementController;
 use App\Http\Controllers\TipoServicioController;
 use App\Http\Controllers\TypeServicesCalendarController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -67,7 +68,9 @@ Route::middleware([
         Route::get('/', [CalendarController::class, 'index'])->name('index');
         Route::post('/create', [CalendarController::class, 'create'])->name('create');
         Route::put('/update/{id}', [CalendarController::class, 'update'])->name('update');
+        Route::delete('/delete/{id}', [CalendarController::class, 'destroy'])->name('delete');
     });
+    Route::get('/sendEmailEvent', [CalendarController::class, 'sendEmailEvent'])->name('sendEmail');
 
     //TypeServices
     Route::prefix('typeServices')->name('typeServices.')->group(function () {
