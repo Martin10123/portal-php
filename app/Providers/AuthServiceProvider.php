@@ -29,10 +29,10 @@ class AuthServiceProvider extends ServiceProvider
             $userDA = Auth::getLastAttempted();
 
             if ($validated) {
-                $usernameCotecmat = strtoupper("COTECMAR\\$request->username");
+                $usernameCotecmar = strtoupper("COTECMAR\\$request->username");
 
                 $userSelect = DB::table('sigedin.guest.responsable')
-                    ->where('usuario', $usernameCotecmat)
+                    ->where('usuario', $usernameCotecmar)
                     ->where('Estado', 'Activo')
                     ->select('IsAdmin', 'IdResponsable')
                     ->get()
@@ -45,7 +45,6 @@ class AuthServiceProvider extends ServiceProvider
 
                 $request->session()->put('IsAdmin', $userSelect->IsAdmin);
                 $request->session()->put('IdResponsable', $userSelect->IdResponsable);
-                $request->session()->put('IsPrivileged', $userSelect->IsAdmin == 1 && strtoupper($userSelect->userDA) == 'GEDIN') ? 1 : 0;
 
                 return $userDA;
             }

@@ -11,20 +11,20 @@
         <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
             <li>
                 <button :disabled="pagination === 1" @click="changePage(pagination - 1)"
-                    class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700">
+                    class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-transparent dark:hover:bg-gray-700 dark:hover:text-white">
                     Previous
                 </button>
             </li>
             <li v-for="page in totalPages" :key="page">
                 <button @click="changePage(page)"
-                    :class="{ 'bg-blue-500 text-white': pagination === page, 'text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700': pagination !== page }"
+                    :class="{ 'bg-blue-500 dark:bg-slate-700 text-white': pagination === page, 'text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700 dark:bg-transparent dark:hover:bg-gray-700 dark:hover:text-white': pagination !== page }"
                     class="flex items-center justify-center px-3 h-8 leading-tight border border-gray-300">
                     {{ page }}
                 </button>
             </li>
             <li>
                 <button :disabled="pagination === totalPages" @click="changePage(pagination + 1)"
-                    class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700">
+                    class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-transparent dark:hover:bg-gray-700 dark:hover:text-white">
                     Next
                 </button>
             </li>

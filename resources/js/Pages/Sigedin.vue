@@ -1,11 +1,11 @@
 <template>
   <Navbar :toggle-open-sidebar="toggleOpenSidebar" />
-  <main class="w-full bg-slate-200 flex items-center">
+  <main class="w-full bg-slate-200 dark:bg-transparent flex items-center">
     <SideBarMain :openSidebar="openSidebar" :toggleOpenSidebar="toggleOpenSidebar" />
 
-    <div class="bg-slate-200 flex flex-col items-center justify-center w-full h-full">
-      <h1 class="text-3xl font-bold text-slate-900">Bienvenido, {{ user.name }}</h1>
-      <p class="text-slate-700">Estas en linea ahora, pero {{ showMessageIfAdmin }}</p>
+    <div class="bg-slate-200 dark:bg-transparent flex flex-col items-center justify-center w-full h-full">
+      <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Bienvenido, {{ user.name }}</h1>
+      <p class="text-slate-700 dark:text-slate-400">Estas en linea ahora, pero {{ showMessageIfAdmin }}</p>
     </div>
   </main>
 </template>
@@ -21,12 +21,11 @@ const { props } = usePage();
 const { openSidebar, toggleOpenSidebar } = useNavSidebar()
 
 const user = computed(() => props.auth.user);
-const IsPrivileged = computed(() => props.auth.user.IsPrivileged);
 let showMessageIfAdmin = ''
 
-if (IsPrivileged.value == 1) {
+if (props.auth.user.IsAdmin == 1) {
   showMessageIfAdmin = 'eres admin';
-} else if (IsPrivileged.value == 0) {
+} else if (props.auth.user.IsAdmin == 0) {
   showMessageIfAdmin = 'no eres admin';
 } else {
   showMessageIfAdmin = 'eres invitado';

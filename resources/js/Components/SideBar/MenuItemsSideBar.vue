@@ -1,10 +1,9 @@
 <template>
     <ul class="px-3 pt-4 grid gap-3 relative">
         <li :class="{ 'text-lg border-b-2 p-3 py-4 shadow-md rounded-lg cursor-pointer hover:bg-slate-100 transition duration-150 ease-in-out scale-100 relative': true, }"
-            v-for="{ title, hasSubItems, other, Icon } in optionsItemSidebar">
+            v-for="{ title, hasSubItems, other } in optionsItemSidebar" :key="title">
             <span class="flex justify-between items-center" @click="onOpenItems">
                 <span class="flex items-center gap-4">
-                    <Icon />
                     <span>
                         {{ title }}
                     </span>
@@ -18,7 +17,7 @@
             <ul v-if="hasSubItems" :class="{
                 'pl-10 pt-3': true, 'transition duration-150 ease-in-out': true, 'hidden': !openItems
             }">
-                <li class="py-3 border-b" v-for="{ title, goTo } in other">
+                <li class="py-3 border-b" v-for="{ title, goTo } in other" :key="title">
                     <Link :href="goTo">
                     {{ title }}
                     </Link>

@@ -1,5 +1,5 @@
 <template>
-    <ol class="bg-white mt-2 rounded-lg flex">
+    <ol class="bg-white dark:bg-transparent mt-2 rounded-lg flex">
         <li class="flex w-full items-center text-blue-600 before:content-[''] before:w-full before:h-1 before:border-b before:border-4 before:inline-block"
             :class="{ 'before:border-blue-200': tabs >= 1 }">
             <span class="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full lg:h-12 lg:w-12 shrink-0"

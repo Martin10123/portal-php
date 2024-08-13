@@ -40,11 +40,6 @@ export const useReports = () => {
                 varRef: stageProjectRef,
                 label: "Fase",
             });
-            updateUniqueValues({
-                data: projectSelect.value,
-                varRef: SWBSPersonnel,
-                label: "SWBS",
-            });
 
             filterProjects();
         } catch (error) {
@@ -87,7 +82,7 @@ export const useReports = () => {
             selectedSwbs.value = "";
             selectedStage.value = "";
         } else if (value === 3) {
-            selectedStage.value = "";
+            selectedSwbs.value = "";
         }
     };
 
@@ -106,7 +101,28 @@ export const useReports = () => {
         }
     });
 
-    watch([selectedSwbs, selectedStage], () => {
+    watch(selectedStage, () => {
+        if (selectedStage.value === "") {
+            SWBSPersonnel.value = [];
+            selectedSwbs.value = "";
+        } else {
+            selectedSwbs.value = "";
+            
+            updateUniqueValues({
+                data: projectSelect.value.filter(
+                    (project) =>
+                        project.Fase.toLowerCase() ===
+                        selectedStage.value.toLowerCase()
+                ),
+                varRef: SWBSPersonnel,
+                label: "SWBS",
+            });
+        }
+
+        filterProjects();
+    });
+
+    watch(selectedSwbs, () => {
         filterProjects();
     });
 

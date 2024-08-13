@@ -14,8 +14,9 @@
         </svg>
     </button>
     <ul v-show="hasSubItems" :class="openSubItems ? 'py-2 space-y-2' : 'hidden'">
-        <li v-for="{ goTo, title } in subItems">
+        <li v-for="{ goTo, title, isOnlyAdmin } in subItems" :key="title">
             <Link :href="goTo"
+                v-if="!isOnlyAdmin || (isOnlyAdmin && props.auth.user.IsAdmin == '1')"
                 class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
             {{ title }}</Link>
         </li>
@@ -24,7 +25,9 @@
 
 <script setup>
 import { ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+
+const {props} = usePage()
 
 defineProps({
     icon: String,

@@ -61,8 +61,7 @@ class User extends Authenticatable implements LdapAuthenticatable
         'identificacion',
         'cargo',
         'IsAdmin',
-        'IdResponsable',
-        'IsPrivileged'
+        'IdResponsable'
     ];
 
     /**

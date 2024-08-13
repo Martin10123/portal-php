@@ -2,7 +2,7 @@
     <main class="">
         <Navbar :toggleOpenSidebar="toggleOpenSidebar" />
 
-        <section class="sm:flex">
+        <section class="sm:flex dark:bg-black">
             <SideBarMain :openSidebar="openSidebar" :toggleOpenSidebar="toggleOpenSidebar" />
 
             <section class="w-full flex justify-center">
@@ -13,12 +13,12 @@
                     </div>
 
                     <section class="w-full before:w-full before:h-screen rounded-lg shadow-lg md:rounded-e-lg before:bg-slate-200 before:fixed before:top-0 before:-z-10 p-2 before:left-0
-                 h-full bg-white overflow-auto">
+                 h-full bg-white dark:bg-gray-800 overflow-auto">
                         <h1 class="text-2xl text-center p-4 font-black">
                             REGISTRO SOLICITUD DE SERVICIO DE DISEÑO Y/O INGENIERIA
                         </h1>
 
-                        <select class="w-full border border-stone-300 cursor-pointer outline-0 p-4 rounded-lg"
+                        <select class="w-full border border-stone-300 cursor-pointer outline-0 p-4 rounded-lg dark:bg-gray-700 dark:text-white"
                             v-model="form.tipoRegistro" disabled>
                             <option value="Interno">Seleccionar uno</option>
                             <option value="Administrativo">Administrativo</option>
@@ -28,7 +28,7 @@
 
                         <TabsLine :tabs="tabs" />
 
-                        <div class="grid w-full bg-white mt-2 p-4 rounded-lg gap-2">
+                        <div class="grid w-full bg-white dark:bg-transparent mt-2 p-4 rounded-lg gap-2">
                             <div class="flex items-center justify-between">
                                 <h2 class="text-2xl font-medium">{{ form.tipoRegistro }}</h2>
 

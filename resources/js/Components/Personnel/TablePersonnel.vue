@@ -24,8 +24,8 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="paginatedProjects.length > 0" v-for="(project) in paginatedProjects" :key="project.Id"
-                    class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50">
+                <tr v-for="(project) in paginatedProjects" :key="project.Id"
+                    class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-transparent">
 
                     <FormOneSelect v-if="showOnlyOne && project.selected" :all-operation="allOperation"
                         :all-s-w-b-s="allSWBS" :all-stage="allStage" :selected-project="selectedProject"
@@ -33,7 +33,7 @@
 
                     <ItemsTable v-else :project="project" :on-check-project="onCheckProject" />
                 </tr>
-                <tr v-else>
+                <tr v-if="paginatedProjects.length == 0">
                     <td class="px-6 py-4 text-center" colspan="8">No hay registros</td>
                 </tr>
             </tbody>

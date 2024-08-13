@@ -24,11 +24,7 @@ export const optionsItemSidebar = [
         icon: reportsPayrof,
         subItems: [
             {
-                title: "Cargar",
-                goTo: "",
-            },
-            {
-                title: "Reportes",
+                title: "Gestion de grafos",
                 goTo: "/Sigedin/Personnel/Reports",
             },
         ],
@@ -41,6 +37,11 @@ export const optionsItemSidebar = [
             {
                 title: "Reservar el laboratorio",
                 goTo: "/Sigedin/CalendarPage/CalendarPage",
+            },
+            {
+                title: "Administrar el laboratorio",
+                goTo: "",
+                isOnlyAdmin: true,
             },
         ],
     },

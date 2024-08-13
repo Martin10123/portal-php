@@ -80,3 +80,19 @@ html {
     pointer-events: none;
     cursor: not-allowed;
 }
+
+.vs__selected {
+    @apply dark:bg-transparent dark:text-white !important;
+}
+
+.vs__clear, .vs__open-indicator {
+    @apply dark:bg-transparent dark:fill-white !important;
+}
+
+.vs__dropdown-menu {
+    @apply dark:bg-gray-700 dark:border-gray-700 dark:text-white !important;
+}
+
+.dp__input {
+    @apply dark:bg-gray-700 dark:border-gray-700 dark:text-white !important;
+}

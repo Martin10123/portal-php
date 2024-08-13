@@ -8,27 +8,27 @@
 
                 <div class="w-full grid grid-cols-4 gap-4">
                     <div class="w-full grid gap-2 col-span-1">
-                        <label class="block text-sm font-medium text-gray-700">Caso</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">Caso</label>
                         <TextInput type="number" class="w-full" placeholder="0000" v-model="form.case" />
                     </div>
 
                     <div class="w-full grid gap-2 col-span-3">
-                        <label class="block text-sm font-medium text-gray-700">Proyecto</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">Proyecto</label>
                         <TextInput class="w-full" placeholder="Proyecto..." v-model="form.project" />
                     </div>
                 </div>
 
                 <div class="w-full grid gap-2">
-                    <label class="block text-base font-medium text-gray-700">Operación proceso</label>
-                    <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer" v-model="form.operation">
+                    <label class="block text-base font-medium text-gray-700 dark:text-gray-400">Operación proceso</label>
+                    <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer dark:bg-gray-700 dark:text-white" v-model="form.operation">
                         <option value="">Seleccione</option>
-                        <option value="100" v-for="operation in allOperation" :key="operation.detalle"
+                        <option v-for="operation in allOperation" :key="operation.detalle"
                             :value="operation.detalle">{{ operation.detalle }}</option>
                     </select>
                 </div>
                 <div class="w-full grid gap-2">
-                    <label class="block text-sm font-medium text-gray-700">Fase</label>
-                    <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer" v-model="form.stage">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">Fase</label>
+                    <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer dark:bg-gray-700 dark:text-white" v-model="form.stage">
                         <option value="">Seleccione</option>
                         <option v-for="stage in allStage" :key="stage.fase" :value="stage.fase">{{ stage.fase }}
                         </option>
@@ -36,24 +36,24 @@
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="w-full grid gap-2">
-                        <label class="block text-sm font-medium text-gray-700">SWBS</label>
-                        <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer" v-model="form.swbs">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">SWBS</label>
+                        <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer dark:bg-gray-700 dark:text-white" v-model="form.swbs">
                             <option value="">Seleccione</option>
                             <option v-for="swbs in allSWBS" :key="swbs.swbs" :value="swbs.swbs">{{ swbs.swbs }}</option>
                         </select>
                     </div>
                     <div class="w-full grid gap-2">
-                        <label class="block text-sm font-medium text-gray-700">Bloque</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">Bloque</label>
                         <TextInput class="w-full" placeholder="0000" v-model="form.block" />
                     </div>
 
                     <div class="w-full grid gap-2">
-                        <label class="block text-sm font-medium text-gray-700">Codigo SAP</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">Codigo SAP</label>
                         <TextInput class="w-full" placeholder="C-00-0000" v-model="form.codeSap" />
                     </div>
 
                     <div class="w-full grid gap-2">
-                        <label class="block text-sm font-medium text-gray-700">Estado - {{ form.state ? 'Activo' :
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">Estado - {{ form.state ? 'Activo' :
                             'Inactivo'
                             }}</label>
                         <label class="w-fit inline-flex items-center cursor-pointer">

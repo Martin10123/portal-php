@@ -2,7 +2,7 @@
     <td class="px-4 py-2">
     </td>
     <td class="px-4 py-2">
-        <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer" v-model="form.operation">
+        <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer dark:bg-gray-700 dark:text-white" v-model="form.operation">
             <option value="">Seleccione</option>
             <option v-if="showOperationOption" :value="form.operation">{{ form.operation }}</option>
             <option v-for="operation in allOperation" :key="operation.detalle" :value="operation.detalle">
@@ -11,7 +11,7 @@
         </select>
     </td>
     <td class="px-4 py-2">
-        <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer" v-model="form.swbs">
+        <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer dark:bg-gray-700 dark:text-white" v-model="form.swbs">
             <option value="">Seleccione</option>
             <option v-if="showSWBSOption" :value="form.swbs">{{ form.swbs }}</option>
             <option v-for="swbs in allSWBS" :key="swbs.swbs" :value="swbs.swbs">
@@ -20,7 +20,7 @@
         </select>
     </td>
     <td class="px-4 py-2">
-        <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer" v-model="form.stage">
+        <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer dark:bg-gray-700 dark:text-white" v-model="form.stage">
             <option value="">Seleccione</option>
             <option v-if="showStageOption" :value="form.stage">{{ form.stage }}</option>
             <option v-for="stage in allStage" :key="stage.fase" :value="stage.fase">
