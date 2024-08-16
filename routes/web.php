@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ConsecutiveController;
+use App\Http\Controllers\ManagementController;
 use App\Http\Controllers\ProjectsController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\RequirementController;
@@ -75,6 +76,11 @@ Route::middleware([
     //TypeServices
     Route::prefix('typeServices')->name('typeServices.')->group(function () {
         Route::get('/', [TypeServicesCalendarController::class, 'index'])->name('index');
+    });
+
+    //Management
+    Route::prefix('management')->name('management.')->group(function () {
+        Route::get('/', [ManagementController::class, 'index'])->name('index');
     });
 
     // Vistas

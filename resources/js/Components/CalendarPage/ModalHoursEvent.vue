@@ -43,7 +43,7 @@
 <script setup>
 import Modal from '@/Components/Modal.vue';
 import { onMounted, ref, watch } from 'vue';
-import { format, setHours, addMinutes, startOfDay, isSameDay, isSameHour } from 'date-fns';
+import { format, setHours, addMinutes, startOfDay, isSameDay, parseISO, isBefore, isEqual, isAfter } from 'date-fns';
 
 const props = defineProps({
     openModalHours: Boolean,
@@ -54,21 +54,50 @@ const props = defineProps({
 
 const timeNecessary = ref(30);
 
-const generateHoursAvailable = (startHour = 7, endHour = 16.5, interval = 30) => {
+const generateHoursAvailable = (startHour = 7, endHour = 17, interval = 30) => {
     const hours = [];
-    const start = startOfDay(new Date());
+    const start = startOfDay(new Date(props.form.date));
     const end = setHours(start, endHour);
     let current = setHours(start, startHour);
+
+    const now = new Date();
+
+    if (isBefore(now, startOfDay(new Date(props.form.date)))) {
+        now.setHours(startHour, 0, 0, 0);
+    } else if (isEqual(now, startOfDay(new Date(props.form.date)))) {
+        current = now;
+    }
+
+    const eventsForTheDay = props.events.filter(event => isSameDay(new Date(event.start), start));
 
     while (current <= end) {
         const hourString = format(current, 'HH:mm');
         const minuteValue = current.getHours() + current.getMinutes() / 60;
-        const isAvailable = !(hourString === '12:30' || hourString === '13:00' || hourString === '16:30');
+        const isLunchTime = hourString === '12:30' || hourString === '13:00';
+        const isBlocked = isBefore(current, now) && !isEqual(current, now);
 
+        // Validación de tiempo necesario
+        const futureTime = addMinutes(current, timeNecessary.value);
+        const isOutOfBounds = isAfter(futureTime, setHours(start, endHour));
+        const isOccupied = eventsForTheDay.some(event => {
+            const eventStart = parseISO(event.start);
+            const eventEnd = parseISO(event.end);
+
+            return (current >= eventStart && current < eventEnd) ||
+                   (futureTime > eventStart && futureTime <= eventEnd) ||
+                   (current <= eventStart && futureTime > eventStart);
+        });
+
+        const crossesLunchTime = (hourString < '12:30' && format(futureTime, 'HH:mm') > '12:30') || 
+                                  (hourString < '13:00' && format(futureTime, 'HH:mm') > '13:00');
+
+        // Bloquear horas de cierre si no cabe el tiempo necesario
+        const isBlockedDueToEnd = isAfter(current, setHours(start, endHour - interval)) && futureTime > end;
+        
         hours.push({
             hour: hourString,
             minutes: minuteValue,
-            available: isAvailable,
+            available: !isLunchTime && !isBlocked && !isOutOfBounds && !isOccupied && !crossesLunchTime && !isBlockedDueToEnd,
             hourByNewDate: current,
         });
 
@@ -90,103 +119,24 @@ const handleSelectHour = (hour) => {
     }
 };
 
-const showHoursAvailable = () => {
-    const selectedDate = new Date(props.form.date);
-    const eventsDaySelected = props.events.filter(event => isSameDay(new Date(event.start), selectedDate));
-
-    const hoursAlreadySelected = eventsDaySelected.map(event => {
-        if (isSameHour(new Date(event.start), selectedDate)) {
-            return getSelectedHours(new Date(event.start), new Date(event.start));
-        } else {
-            return getSelectedHours(new Date(event.start), new Date(event.end))
-        }
-    });
-
-    hoursAvailable.value = hoursAvailable.value.map(hour => {
-        if (!hour.available) {
-            return hour;
-        }
-
-        const isTaken = hoursAlreadySelected.some(([start, end]) =>
-            (hour.minutes >= start && hour.minutes < end)
-        );
-
-        return { ...hour, available: !isTaken };
-    });
+const updateHours = () => {
+    hoursAvailable.value = generateHoursAvailable();
 };
 
 const formatDate = () => {
     return format(new Date(props.form.date), 'eeee d MMMM yyyy');
 };
 
-const getSelectedHours = (start, end) => {
-    const startMinutes = start.getMinutes();
-    const endMinutes = end.getMinutes();
-
-    const isHalfHourStart = startMinutes >= 30 && startMinutes < 40;
-    const isHalfHourEnd = endMinutes >= 30 && endMinutes < 40;
-
-    if (isHalfHourStart && isHalfHourEnd) {
-        return [start.getHours() + 0.5, end.getHours() + 0.5];
-    } else if (isHalfHourStart) {
-        return [start.getHours() + 0.5, end.getHours()];
-    } else if (isHalfHourEnd) {
-        return [start.getHours(), end.getHours() + 0.5];
-    } else {
-        return [start.getHours(), end.getHours()];
-    }
-};
-
-const resetHoursAvailability = () => {
-    hoursAvailable.value = generateHoursAvailable();
-};
-
-const disableHoursAccordingToValue = (value) => {
-    const duration = value / 60;
-
-    hoursAvailable.value = hoursAvailable.value.map((hour, index, array) => {
-        if (!hour.available) {
-            return hour;
-        }
-
-        const today = new Date();
-        const hourNow = today.getHours();
-        const isSameDay1 = isSameDay(today, new Date(props.form.date));
-
-        if (hourNow >= hour.hourByNewDate.getHours() && isSameDay1) {
-            return { ...hour, available: false };
-        }
-
-        let available = true;
-        for (let i = 0; i < duration * 2; i++) {
-            const nextIndex = index + i;
-            if (nextIndex >= array.length || !array[nextIndex].available) {
-                available = false;
-                break;
-            }
-        }
-
-        return { ...hour, available };
-    });
-};
-
-const updateHours = (value) => {
-    resetHoursAvailability();
-    showHoursAvailable();
-    disableHoursAccordingToValue(value);
-};
-
-watch(timeNecessary, (value) => {
-    updateHours(value);
+watch(timeNecessary, () => {
+    updateHours();
 });
 
 watch(() => props.form.date, () => {
-    updateHours(timeNecessary.value);
+    updateHours();
 });
 
 onMounted(() => {
-    showHoursAvailable();
-    disableHoursAccordingToValue(timeNecessary.value);
+    updateHours();
 });
 </script>
 

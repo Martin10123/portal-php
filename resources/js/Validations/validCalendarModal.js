@@ -1,6 +1,7 @@
 import Swal from "sweetalert2";
 
 export const validateFormCalendar = ({
+    floor,
     title,
     description,
     date,
@@ -8,8 +9,12 @@ export const validateFormCalendar = ({
     typeService,
     dateHours,
     participantsNecesary,
-    resource,
 }) => {
+    if (!floor) {
+        alertMessage("El lugar de reunión es requerido!");
+        return false;
+    }
+
     if (!title) {
         alertMessage("El titulo es requerido!");
         return false;
@@ -25,7 +30,7 @@ export const validateFormCalendar = ({
         return false;
     }
 
-    if (!division) {
+    if (!division || division === "***") {
         alertMessage("La división es requerido!");
         return false;
     }
@@ -40,15 +45,10 @@ export const validateFormCalendar = ({
         return false;
     }
 
-    if (participantsNecesary.length < 2) {
+    if (participantsNecesary.length < 1) {
         alertMessage(
             "Al menos 2 participantes son necesarios para hacer un evento!"
         );
-        return false;
-    }
-
-    if (resource.length === 0) {
-        alertMessage("Resource es requerido!");
         return false;
     }
 

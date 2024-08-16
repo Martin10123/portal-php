@@ -2,7 +2,7 @@
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             <HeaderTable :project-select="projectSelect" :start-editing="startEditing" :selected-stage="selectedStage"
-                :selected-swbs="selectedSwbs" :value-project="valueProject" :clear-values="clearValues" />
+                :selected-swbs="selectedSwbs" :value-project="valueProject" :clear-values="clearValues" :handle-modal-excel-d-b="handleModalExcelDB" />
 
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
@@ -44,6 +44,8 @@
         <FormSelects :show-modal-form="showModalForm" :handle-modal-form="handleModalForm"
             :selected-project="selectedProject" :all-operation="allOperation" :all-s-w-b-s="allSWBS"
             :all-stage="allStage" :on-update-project-selected="onUpdateProjectSelected" />
+
+        <LoadExcelToDB :show-add-excel-b-d="showAddExcelBD" :handle-modal-excel-d-b="handleModalExcelDB" />
     </div>
 </template>
 
@@ -54,6 +56,7 @@ import FormSelects from './FormSelects.vue';
 import { useTablePersonnel } from '@/Composables';
 import FormOneSelect from './FormOneSelect.vue';
 import ItemsTable from './ItemsTable.vue';
+import LoadExcelToDB from './LoadExcelToDB.vue';
 
 const props = defineProps({
     projectSelect: Array,
@@ -68,13 +71,14 @@ const {
     onCheckAllProjects,
     onCheckProject,
     selectedProject,
+    showAddExcelBD,
     showModalForm,
     startEditing,
     showOnlyOne,
     paginatedProjects,
     allOperation, allSWBS, allStage, checkAllProjects,
     onCancelEdit, onUpdateProjectSelected,
-    onChangePage, pagination
+    onChangePage, pagination, handleModalExcelDB
 } = useTablePersonnel({ props })
 
 </script>

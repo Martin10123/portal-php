@@ -31,6 +31,7 @@ class Calendar extends Model
         'type_service_ID',
         'uid_user',
         'calendar_status',
+        'sala'
     ];
 
     public function typeServices()

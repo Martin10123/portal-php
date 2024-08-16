@@ -85,6 +85,10 @@ html {
     @apply dark:bg-transparent dark:text-white !important;
 }
 
+.vs__deselect {
+    @apply dark:fill-white !important;
+}
+
 .vs__clear, .vs__open-indicator {
     @apply dark:bg-transparent dark:fill-white !important;
 }

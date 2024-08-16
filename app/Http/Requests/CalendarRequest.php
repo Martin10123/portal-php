@@ -24,13 +24,13 @@ class CalendarRequest extends FormRequest
             'starting_date' => 'required|date',
             'ending_date' => 'required|date',
             'participants_necesary' => 'required|string',
-            'resource' => 'required|string',
             'backgroundColor' => 'required|string',
             'division' => 'required|string',
             'isVRRequired' => 'required|boolean',
             'type_service_ID' => 'required|array',
             'uid_user' => 'required|string',
             'calendar_status' => 'required|boolean',
+            'floor' => 'required|string',
         ];
     }
 }

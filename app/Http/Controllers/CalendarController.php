@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Calendar;
 use App\Http\Requests\CalendarRequest;
 use App\Http\Controllers\TypeServicesCalendarController;
-use App\Mail\EventDetailsMail;
-use Illuminate\Support\Facades\Mail;
+use App\Notifications\EventCalendarMail;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class CalendarController extends Controller
 {
@@ -34,36 +35,120 @@ class CalendarController extends Controller
     public function create(CalendarRequest $request)
     {
         try {
-            $responseDB = Calendar::create([
-                'title' => $request->title,
-                'description' => $request->description,
-                'starting_date' => $request->starting_date,
-                'ending_date' => $request->ending_date,
-                'participants_necesary' => $request->participants_necesary,
-                'participants_optional' => $request->participants_optional,
-                'resource' => $request->resource,
-                'backgroundColor' => $request->backgroundColor,
-                'division' => $request->division,
-                'isVRRequired' => $request->isVRRequired,
-                'type_service_ID' => $request->type_service_ID["type_service_ID"],
-                'uid_user' => $request->uid_user,
-                'calendar_status' => $request->calendar_status,
-            ]);
 
-            $typeServicesController = new TypeServicesCalendarController();
-            $typeServicesController->exitsType($request->type_service_ID["description"]);
+            $typeServiceData = $request->type_service_ID;
+
+            if (!array_key_exists('type_service_ID', $typeServiceData)) {
+                try {
+                    $typeService = $this->checkTypeService($typeServiceData["description"]);
+                    $typeServiceData["type_service_ID"] = $typeService->type_service_ID;
+                    $typeServiceData["description"] = $typeService->description;
+
+                    // Asignar el array modificado de nuevo al objeto $request
+                    $request->merge(['type_service_ID' => $typeServiceData]);
+                } catch (\Throwable $th) {
+                    Log::error('Error al verificar el tipo de servicio: ' . $th->getMessage());
+                }
+            }
+
+            // Crea el evento en el calendario
+            $responseDB = $this->createCalendarEvent($request);
+            $responseDB->type_service_ID = $request->type_service_ID;
+
+            // Envía notificaciones a los participantes
+            $this->notifyParticipants($request->participants_necesary, $request->participants_optional, $responseDB);
 
             return response()->json([
                 'message' => 'Evento creado en el calendario correctamente',
-                'data' => $responseDB,
-                "ok" => true
+                'data' => $responseDB->all(),
+                'ok' => true
             ]);
-        } catch (\Throwable $th) {
+        } catch (\Exception $e) {
+            // Manejo de errores más específico
+            Log::error('Error en la creación del evento: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Error al guardar los datos de la base de datos',
-                "error" => $th,
-                "ok" => false
+                'error' => $e->getMessage(),
+                'ok' => false
             ], 500);
+        }
+    }
+
+    /**
+     * Crea un evento en el calendario.
+     *
+     * @param CalendarRequest $request
+     * @return Calendar
+     */
+    protected function createCalendarEvent(CalendarRequest $request)
+    {
+        return Calendar::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'starting_date' => $request->starting_date,
+            'ending_date' => $request->ending_date,
+            'participants_necesary' => $request->participants_necesary,
+            'participants_optional' => $request->participants_optional,
+            'resource' => $request->resource,
+            'backgroundColor' => $request->backgroundColor,
+            'division' => $request->division,
+            'isVRRequired' => $request->isVRRequired,
+            'type_service_ID' => $request->type_service_ID["type_service_ID"],
+            'uid_user' => $request->uid_user,
+            'calendar_status' => $request->calendar_status,
+            'sala' => $request->floor
+        ]);
+    }
+
+    /**
+     * Verifica si el tipo de servicio existe.
+     *
+     * @param string $description
+     * @return type_service
+     */
+    protected function checkTypeService($description)
+    {
+        $typeServicesController = new TypeServicesCalendarController();
+        return $typeServicesController->exitsType($description);
+    }
+
+    /**
+     * Envía notificaciones a los participantes.
+     *
+     * @param string $participantsNecesary
+     * @param string $participantsOptional
+     * @param Calendar $responseDB
+     * @return void
+     */
+    protected function notifyParticipants($participantsNecesary, $participantsOptional, $responseDB)
+    {
+        try {
+            // Obtener y unificar los correos de los participantes necesarios y opcionales
+            $emails = array_unique(array_merge(
+                explode(',', $participantsNecesary),
+                explode(',', $participantsOptional)
+            ));
+
+            // Agregar los correos de los usuarios especiales
+            $specialUsers = [
+                "msimarras@tecnocomfenalco.edu.co",
+                // "jtapia@cotecmar.com",
+                // "gbarros@cotecmar.com"
+            ];
+
+            $emails = array_unique(array_merge($emails, $specialUsers));
+
+            // Enviar notificaciones a todos los correos
+            foreach ($emails as $email) {
+                try {
+                    Log::info('Enviando notificación a: ' . $email);
+                    Notification::route('mail', trim($email))->notify(new EventCalendarMail($responseDB));
+                } catch (\Exception $e) {
+                    Log::error('Error al enviar el correo a ' . $email . ': ' . $e->getMessage());
+                }
+            }
+        } catch (\Throwable $th) {
+            Log::error('Error al enviar las notificaciones: ' . $th . $th->getMessage());
         }
     }
 
@@ -118,32 +203,6 @@ class CalendarController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => 'Error al eliminar los datos de la base de datos',
-                "error" => $th,
-                "ok" => false
-            ], 500);
-        }
-    }
-
-    public function sendEmailEvent() 
-    {
-        try {
-
-            $data = array('name'=>"Our Code World");
-            // Path or name to the blade template to be rendered
-            $template_path = 'emails.event-details';
-    
-            Mail::send($template_path, $data, function($message) {
-                // Set the receiver and subject of the mail.
-                $message->to('anyemail@emails.com', 'Receiver Name')->subject('Laravel HTML Mail');
-                // Set the sender
-                $message->from('mymail@mymailaccount.com','Our Code World');
-            });
-            
-            dd('Correo enviado correctamente');
-
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => 'Error al enviar el correo',
                 "error" => $th,
                 "ok" => false
             ], 500);

@@ -5,8 +5,8 @@
 
         <div class="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
             <ul class="space-y-2 font-medium">
-                <li v-for="{ icon, hasSubItems, subItems, title } in optionsItemSidebar" :key="title">
-                    <ItemSideBar :icon="icon" :hasSubItems="hasSubItems" :subItems="subItems" :title="title" />
+                <li v-for="{ icon, hasSubItems, subItems, title, isOnlyAdmin } in optionsItemSidebar" :key="title">
+                    <ItemSideBar :icon="icon" :hasSubItems="hasSubItems" :subItems="subItems" :title="title" :isOnlyAdmin="isOnlyAdmin" />
                 </li>
             </ul>
         </div>
@@ -19,7 +19,7 @@
 <script setup>
 
 import { optionsItemSidebar } from "../../Data/optionsSideBar"
-import ItemSideBar from "./ItemSideBar.vue";
+import ItemSideBar from "./ItemSideBar.vue"; 
 
 defineProps({
     openSidebar: Boolean,

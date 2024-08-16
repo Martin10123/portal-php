@@ -1,10 +1,11 @@
-import { createPopper } from "@popperjs/core";
-import axios from "axios";
-import { onMounted, ref, watch } from "vue";
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { createPopper } from '@popperjs/core';
 
-export const useModalCalendar = (form) => {
+export const useModalCalendar = () => {
     const usersEmails = ref([]);
     const listaTipoServicios = ref([]);
+    const listManagement = ref([]);
 
     const calcSpacing = (dropdownList, component, { width }) => {
         dropdownList.style.width = width;
@@ -34,32 +35,44 @@ export const useModalCalendar = (form) => {
         return () => popper.destroy();
     };
 
-    const getEmailsUsers = async () => {
+    // Handle API requests
+    const fetchData = async (url, setData) => {
         try {
-            const { data } = await axios.get(route("users.index"));
-            usersEmails.value = data;
+            const { data } = await axios.get(url);
+            setData(data);
         } catch (error) {
-            console.log("Error en getEmailsUsers: ", error);
+            handleError(error);
         }
     };
 
-    const getTypeServices = async () => {
-        try {
-            const { data } = await axios.get(route("typeServices.index"));
-            listaTipoServicios.value = data.data;
-        } catch (error) {
-            console.log("Error en getTypeServices: ", error);
-        }
+    const handleError = (error) => {
+        console.error("API error: ", error);
     };
 
-    onMounted(() => {
-        getEmailsUsers();
-        getTypeServices();
+    const getEmailsUsers = () => fetchData(route("users.index"), data => {
+        usersEmails.value = data;
+    });
+
+    const getTypeServices = () => fetchData(route("typeServices.index"), data => {
+        listaTipoServicios.value = data.data;
+    });
+
+    const getManagement = () => fetchData(route("management.index"), data => {
+        listManagement.value = data;
+    });
+
+    onMounted(async () => {
+        try {
+            await Promise.all([getEmailsUsers(), getTypeServices(), getManagement()]);
+        } catch (error) {
+            handleError(error);
+        }
     });
 
     return {
-        calcSpacing,
         usersEmails,
         listaTipoServicios,
+        listManagement,
+        calcSpacing
     };
 };

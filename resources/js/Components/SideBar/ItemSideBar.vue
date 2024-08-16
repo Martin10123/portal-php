@@ -1,5 +1,5 @@
 <template>
-    <button type="button" @click="onOpenSubItems"
+    <button v-if="!isOnlyAdmin || (isOnlyAdmin && (props.auth.user.IsAdmin == '1' || props.auth.user.IdResponsable === '20258'))" type="button" @click="onOpenSubItems"
         class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
         aria-controls="dropdown-example" data-collapse-toggle="dropdown-example">
 
@@ -14,9 +14,8 @@
         </svg>
     </button>
     <ul v-show="hasSubItems" :class="openSubItems ? 'py-2 space-y-2' : 'hidden'">
-        <li v-for="{ goTo, title, isOnlyAdmin } in subItems" :key="title">
+        <li v-for="{ goTo, title } in subItems" :key="title">
             <Link :href="goTo"
-                v-if="!isOnlyAdmin || (isOnlyAdmin && props.auth.user.IsAdmin == '1')"
                 class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
             {{ title }}</Link>
         </li>
@@ -32,6 +31,7 @@ const {props} = usePage()
 defineProps({
     icon: String,
     hasSubItems: Boolean,
+    isOnlyAdmin: Boolean,
     subItems: Array,
     title: String,
     isOpen: Boolean

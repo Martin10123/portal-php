@@ -8,6 +8,7 @@ import esLocale from "@fullcalendar/core/locales/es";
 import Swal from "sweetalert2";
 import { validateFormCalendar } from "@/Validations/validCalendarModal";
 import { getAllHolidays } from "@/Data/getHolidays";
+import { format, setHours, setMinutes } from "date-fns";
 
 export const useCalendarPage = () => {
     const openModal = ref(false);
@@ -16,6 +17,7 @@ export const useCalendarPage = () => {
     const infoSelectedEvent = ref({});
 
     const isLoadingData = ref(false);
+    const isLoadingSaveEvent = ref(false);
 
     const { props } = usePage();
 
@@ -33,8 +35,9 @@ export const useCalendarPage = () => {
     const form = useForm({
         title: "",
         description: "",
+        floor: "",
         date: "",
-        division: "",
+        division: "***",
         isArRequired: false,
         typeService: "",
         dateHours: [],
@@ -69,6 +72,7 @@ export const useCalendarPage = () => {
 
             infoSelectedEvent.value = {
                 id: info.event.id,
+                floor: info.event.extendedProps.floor,
                 title: info.event.title,
                 description: info.event.extendedProps.description,
                 start: info.event.start,
@@ -83,6 +87,7 @@ export const useCalendarPage = () => {
                 typeService: info.event.extendedProps.typeService,
                 uidUser: info.event.extendedProps.uidUser,
             };
+
         },
         select: function (info) {
             const start = new Date(info.startStr);
@@ -201,6 +206,7 @@ export const useCalendarPage = () => {
         onViewInfoEvent();
         openModal.value = !openModal.value;
 
+        form.floor = infoSelectedEvent.value.floor;
         form.title = infoSelectedEvent.value.title;
         form.description = infoSelectedEvent.value.description;
         form.date = new Date(infoSelectedEvent.value.start);
@@ -219,7 +225,9 @@ export const useCalendarPage = () => {
         form.resource = infoSelectedEvent.value.resource;
     };
 
-    const onSaveEvent = () => {
+    const onSaveEvent = (e) => {
+        e.preventDefault();
+        
         if (!validateFormCalendar({ ...form.data() })) {
             return;
         }
@@ -240,6 +248,7 @@ export const useCalendarPage = () => {
             const response = await axios.put(
                 route("calendarPage.update", infoSelectedEvent.value.id),
                 {
+                    floor: form.floor,
                     title: form.title,
                     description: form.description,
                     starting_date: formatDateSelect(
@@ -248,8 +257,8 @@ export const useCalendarPage = () => {
                     ),
                     ending_date: formatDateSelect(form.date, form.dateHours[1]),
                     participants_necesary: form.participantsNecesary.join(","),
-                    participants_optional: form.participantsOptional.join(","),
-                    resource: form.resource.join(","),
+                    participants_optional: form.participantsOptional?.join(","),
+                    resource: form.resource?.join(","),
                     division: form.division,
                     isVRRequired: form.isArRequired,
                     type_service_ID: form.typeService,
@@ -318,28 +327,25 @@ export const useCalendarPage = () => {
     };
 
     const formatDateSelect = (date, hours) => {
-        const dateSelect = new Date(date);
+        const [hour, minute] = hours.split(':').map(Number);
 
-        const hoursSplit = hours.split(":");
+        const updatedDate = setHours(setMinutes(date, minute), hour);
 
-        if (hoursSplit[1] === "30") {
-            dateSelect.setHours(Number(hoursSplit[0]), 30);
-        } else {
-            dateSelect.setHours(Number(hoursSplit[0]), 0);
-        }
+        const formattedDate = format(updatedDate, "yyyy-MM-dd HH:mm:ss");
 
-        return dateSelect;
+        return formattedDate
     };
 
     const prepareEventData = (form, props) => {
         return {
+            floor: form.floor,
             title: form.title,
             description: form.description,
             starting_date: formatDateSelect(form.date, form.dateHours[0]),
             ending_date: formatDateSelect(form.date, form.dateHours[1]),
             participants_necesary: form.participantsNecesary.join(","),
             participants_optional: form.participantsOptional.join(",") || "",
-            resource: form.resource.join(","),
+            resource: form.resource.join(",") || "",
             division: form.division,
             isVRRequired: form.isArRequired,
             type_service_ID: form.typeService,
@@ -354,6 +360,7 @@ export const useCalendarPage = () => {
             ...calendarOptions.value.events,
             {
                 id: eventData.ID,
+                floor: form.floor,
                 title: form.title,
                 description: form.description,
                 start: formatDateSelect(form.date, form.dateHours[0]),
@@ -371,14 +378,17 @@ export const useCalendarPage = () => {
 
     const onSaveCreateEvent = async () => {
         try {
+            isLoadingSaveEvent.value = true;
+
             const eventData = prepareEventData(form, props);
-            console.log(eventData);
 
             const response = await axios.post(
                 route("calendarPage.create"),
                 eventData
             );
 
+            console.log(response);
+            
             if (response.data.ok) {
                 addEventToCalendar(response.data.data, form);
 
@@ -398,6 +408,8 @@ export const useCalendarPage = () => {
                 title: "Error",
                 text: "Ha ocurrido un error al crear el evento",
             });
+        } finally {
+            isLoadingSaveEvent.value = false;
         }
     };
 
@@ -456,6 +468,7 @@ export const useCalendarPage = () => {
             events.value = response.data.data.map((event) => {
                 return {
                     id: event.ID,
+                    floor: event.floor,
                     title: event.title,
                     description: event.description,
                     start: event.starting_date,
@@ -464,14 +477,16 @@ export const useCalendarPage = () => {
                         event.participants_necesary.split(","),
                     participantsOptional:
                         event.participants_optional?.split(","),
-                    resource: event.resource.split(","),
+                    resource: event.resource?.split(","),
                     division: event.division,
                     isArRequired: event.isVRRequired,
                     typeService: event.type_services,
                     backgroundColor: event.backgroundColor,
                     uidUser: event.uid_user,
+                    floor: event.sala,
                 };
             });
+
         } catch (error) {
             console.log(error);
         } finally {
@@ -492,6 +507,7 @@ export const useCalendarPage = () => {
         openModalHours,
         events,
         isLoadingData,
+        isLoadingSaveEvent,
         onCreateEvent,
         onSaveEvent,
         onViewInfoEvent,

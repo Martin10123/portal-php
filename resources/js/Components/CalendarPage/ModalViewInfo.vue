@@ -31,7 +31,7 @@
             </div>
             <ItemModalInfo
                 svgd="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3"
-                title="Recursos cargados" :info="infoSelectedEvent.resource.length" />
+                title="Recursos cargados" :info="infoSelectedEvent.resource?.length || 0" />
         </ul>
 
         <div class="px-4 pb-4">
@@ -116,6 +116,8 @@ import { onMounted, watch, computed, ref } from 'vue';
 import ItemModalInfo from './ItemModalInfo.vue';
 import EditIcon from '@/Assets/EditIcon.vue';
 import { usePage } from '@inertiajs/vue3';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 const page = usePage()
 
@@ -127,7 +129,10 @@ const props = defineProps({
 })
 
 const isUserCreator = computed(() => {
-    return props.infoSelectedEvent.uidUser === page.props.auth.user.guid;
+    return props.infoSelectedEvent.uidUser === page.props.auth.user.guid 
+    || page.props.auth.user.IdResponsable === '20258' 
+    || page.props.auth.user.IdResponsable === '61' 
+    || page.props.auth.user.IdResponsable === '20187';
 })
 
 const disabledButton = ref(false);
@@ -139,13 +144,10 @@ const onCloseModal = () => {
 }
 
 const formatDate = (date) => {
-    const dateFormat = new Date(date).toLocaleDateString('es-MX', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-    return `${dateFormat} a las ${new Date(date).toLocaleTimeString()}`;
+  const dateFormat = format(new Date(date), "EEEE, d 'de' MMMM 'de' yyyy", { locale: es });
+  const timeFormat = format(new Date(date), "HH:mm:ss", { locale: es });
+
+  return `${dateFormat} a las ${timeFormat}`;
 };
 
 watch(() => openModalInfo.value, (value) => {

@@ -6,6 +6,7 @@ export const optionsItemSidebar = [
     {
         title: "Solicitudes",
         hasSubItems: true,
+        isOnlyAdmin: true,
         icon: requestIcon,
         subItems: [
             {
@@ -21,6 +22,7 @@ export const optionsItemSidebar = [
     {
         title: "Planillación",
         hasSubItems: true,
+        isOnlyAdmin: true,
         icon: reportsPayrof,
         subItems: [
             {
@@ -37,11 +39,6 @@ export const optionsItemSidebar = [
             {
                 title: "Reservar el laboratorio",
                 goTo: "/Sigedin/CalendarPage/CalendarPage",
-            },
-            {
-                title: "Administrar el laboratorio",
-                goTo: "",
-                isOnlyAdmin: true,
             },
         ],
     },

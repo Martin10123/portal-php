@@ -12,12 +12,16 @@
                     > {{ selectedSwbs }}</p>
             </div>
 
-            <EditIcon classE="w-5 h-5 cursor-pointer" @click="startEditing" />
+            <div class="flex items-center gap-2">
+                <AddIcon classE="w-5 h-5 cursor-pointer" @click="handleModalExcelDB" />
+                <EditIcon classE="w-5 h-5 cursor-pointer" @click="startEditing" />
+            </div>
         </div>
     </caption>
 </template>
 
 <script setup>
+import AddIcon from '@/Assets/AddIcon.vue';
 import EditIcon from '@/Assets/EditIcon.vue';
 
 const props = defineProps({
@@ -27,6 +31,7 @@ const props = defineProps({
     selectedSwbs: String,
     valueProject: Object,
     clearValues: Function,
+    handleModalExcelDB: Function,
 })
 
 </script>
