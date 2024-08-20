@@ -2,7 +2,7 @@
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             <HeaderTable :project-select="projectSelect" :start-editing="startEditing" :selected-stage="selectedStage"
-                :selected-swbs="selectedSwbs" :value-project="valueProject" :clear-values="clearValues" :handle-modal-excel-d-b="handleModalExcelDB" />
+                :selected-swbs="selectedSwbs" :value-project="valueProject" :clear-values="clearValues" />
 
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
@@ -44,8 +44,6 @@
         <FormSelects :show-modal-form="showModalForm" :handle-modal-form="handleModalForm"
             :selected-project="selectedProject" :all-operation="allOperation" :all-s-w-b-s="allSWBS"
             :all-stage="allStage" :on-update-project-selected="onUpdateProjectSelected" />
-
-        <LoadExcelToDB :show-add-excel-b-d="showAddExcelBD" :handle-modal-excel-d-b="handleModalExcelDB" />
     </div>
 </template>
 
@@ -71,14 +69,13 @@ const {
     onCheckAllProjects,
     onCheckProject,
     selectedProject,
-    showAddExcelBD,
     showModalForm,
     startEditing,
     showOnlyOne,
     paginatedProjects,
     allOperation, allSWBS, allStage, checkAllProjects,
     onCancelEdit, onUpdateProjectSelected,
-    onChangePage, pagination, handleModalExcelDB
+    onChangePage, pagination
 } = useTablePersonnel({ props })
 
 </script>

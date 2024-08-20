@@ -4,7 +4,6 @@ import axios from "axios"; // Ensure axios is imported
 
 export const useTablePersonnel = ({ props }) => {
     const showModalForm = ref(false);
-    const showAddExcelBD = ref(false);
     const projectsWithEditing = ref([]);
     const selectedProject = ref([]);
     const allOperation = ref([]);
@@ -131,10 +130,6 @@ export const useTablePersonnel = ({ props }) => {
         showModalForm.value = !showModalForm.value;
     };
 
-    const handleModalExcelDB = () => {
-        showAddExcelBD.value = !showAddExcelBD.value;
-    };
-
     const getAllInfoPersonnel = async () => {
         try {
             const response = await Promise.all([
@@ -157,7 +152,6 @@ export const useTablePersonnel = ({ props }) => {
 
     return {
         showModalForm,
-        showAddExcelBD,
         selectedProject,
         allOperation,
         allStage,
@@ -171,7 +165,6 @@ export const useTablePersonnel = ({ props }) => {
         onCheckProject,
         startEditing,
         handleModalForm,
-        handleModalExcelDB,
         onUpdateProjectSelected,
         onChangePage,
     };

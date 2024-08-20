@@ -104,5 +104,9 @@ Route::middleware([
         Route::get('CalendarPage/CalendarPage', function () {
             return Inertia::render('CalendarPage/CalendarPage');
         })->name('CalendarPage');
+
+        Route::get('Personnel/AddGraphoFromExcel', function () {
+            return Inertia::render('Personnel/AddGraphoFromExcel');
+        })->name('AddGraphoFromExcel');
     });
 });
