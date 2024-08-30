@@ -28,6 +28,7 @@ Route::middleware([
     // Usuarios
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/getGerencia', [UserController::class, 'getGerencia'])->name('getGerencia');
     });
 
     // Servicios

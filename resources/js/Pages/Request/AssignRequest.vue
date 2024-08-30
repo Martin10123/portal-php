@@ -36,7 +36,7 @@
     </main>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import Navbar from '@/Components/SideBar/Navbar.vue';
 import SideBarMain from '@/Components/SideBar/SideBarMain.vue';
 import TextInput from '@/Components/TextInput.vue';
