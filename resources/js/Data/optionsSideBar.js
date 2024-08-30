@@ -1,6 +1,7 @@
 import requestIcon from "@/Assets/requestIcon.svg";
 import reportsPayrof from "@/Assets/reportsPayrof.svg";
 import reserveIcon from "@/Assets/reserve.svg";
+import chartIcon from "@/Assets/charts.svg";
 
 export const optionsItemSidebar = [
     {
@@ -39,6 +40,17 @@ export const optionsItemSidebar = [
             {
                 title: "Reservar el laboratorio",
                 goTo: "/Sigedin/CalendarPage/CalendarPage",
+            },
+        ],
+    },
+    {
+        title: "Graficos",
+        hasSubItems: true,
+        icon: chartIcon,
+        subItems: [
+            {
+                title: "index",
+                goTo: "/Sigedin/Charts/ChartsMain",
             },
         ],
     },

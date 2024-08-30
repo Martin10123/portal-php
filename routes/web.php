@@ -110,5 +110,9 @@ Route::middleware([
         Route::get('Personnel/AddGraphoFromExcel', function () {
             return Inertia::render('Personnel/AddGraphoFromExcel');
         })->name('AddGraphoFromExcel');
+
+        Route::get('Charts/ChartsMain', function () {
+            return Inertia::render('Charts/ChartsMain');
+        })->name('ChartsMain');
     });
 });
