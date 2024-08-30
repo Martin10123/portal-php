@@ -5,19 +5,24 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 
 class EventCalendarMail extends Notification
 {
     use Queueable;
 
     protected $evento;
+    protected $isUpdate;
+    protected $userCreated;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($evento)
+    public function __construct($evento, $isUpdate, $userCreated)
     {
         $this->evento = $evento;
+        $this->isUpdate = $isUpdate;
+        $this->userCreated = $userCreated;
     }
 
     /**
@@ -33,14 +38,19 @@ class EventCalendarMail extends Notification
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(object $notifiable)
+    // public function toMail(object $notifiable): MailMessage
     {
 
         $icsContent = $this->generateICSContent($this->evento);
 
         return (new MailMessage)
             ->subject('[RESERVAS XRLAB] ' . $this->evento->title)
-            ->view('emails.eventDetails', ['evento' => $this->evento])
+            ->view('emails.eventDetails', [
+                'evento' => $this->evento, 
+                'userCreated' => $this->userCreated, 
+                'isUpdate' => $this->isUpdate
+                ])
             ->attachData($icsContent, str_replace(' ', '', $this->evento->title) . '.ics', [
                 'mime' => 'text/calendar'
             ]);
@@ -61,7 +71,7 @@ class EventCalendarMail extends Notification
         VERSION:2.0
         PRODID:-//Cotecmar//NONSGML v1.0//EN
         BEGIN:VEVENT
-        UID:{$evento->id}@cotecmar.com
+        UID:{$this->userCreated["username"]}@cotecmar.com
         DTSTAMP:{$start}Z
         DTSTART:{$start}
         DTEND:{$end}

@@ -1,9 +1,11 @@
+import { useDataGrafosStore } from "@/pinia/useDataStore";
 import { useForm } from "@inertiajs/vue3";
 import Swal from "sweetalert2";
 import { ref } from "vue";
 import { onMounted } from "vue";
 
 export const useFormOneSelect = ({ props }) => {
+    const { allOperation, allSWBS, allStage } = useDataGrafosStore();
     const showOperationOption = ref(false);
     const showSWBSOption = ref(false);
     const showStageOption = ref(false);
@@ -85,7 +87,7 @@ export const useFormOneSelect = ({ props }) => {
 
     onMounted(() => {
         if (
-            !props.allOperation.some(
+            !allOperation.some(
                 (operation) =>
                     operation.detalle ===
                     props.selectedProject[0].Operación_Proceso
@@ -95,15 +97,13 @@ export const useFormOneSelect = ({ props }) => {
         }
 
         if (
-            !props.allSWBS.some(
-                (swbs) => swbs.swbs === props.selectedProject[0].SWBS
-            )
+            !allSWBS.some((swbs) => swbs.swbs === props.selectedProject[0].SWBS)
         ) {
             showSWBSOption.value = true;
         }
 
         if (
-            !props.allStage.some(
+            !allStage.some(
                 (stage) => stage.fase === props.selectedProject[0].Fase
             )
         ) {
@@ -119,5 +119,8 @@ export const useFormOneSelect = ({ props }) => {
         form,
         onSaveProjectSelect,
         onCanceledProjectSelect,
+        allOperation,
+        allSWBS,
+        allStage,
     };
 };

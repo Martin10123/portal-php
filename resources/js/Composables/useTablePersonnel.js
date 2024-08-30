@@ -1,14 +1,12 @@
 import Swal from "sweetalert2";
 import { onMounted, ref, watch } from "vue";
-import axios from "axios"; // Ensure axios is imported
+import { useDataGrafosStore } from "@/pinia/useDataStore";
 
 export const useTablePersonnel = ({ props }) => {
+    const dataGrafos = useDataGrafosStore();
     const showModalForm = ref(false);
     const projectsWithEditing = ref([]);
     const selectedProject = ref([]);
-    const allOperation = ref([]);
-    const allStage = ref([]);
-    const allSWBS = ref([]);
     const showOnlyOne = ref(false);
     const checkAllProjects = ref(false);
 
@@ -132,15 +130,7 @@ export const useTablePersonnel = ({ props }) => {
 
     const getAllInfoPersonnel = async () => {
         try {
-            const response = await Promise.all([
-                axios.get(route("reports.stagePersonnel")),
-                axios.get(route("reports.swbsPersonnel")),
-                axios.get(route("reports.operationsPersonnel")),
-            ]);
-
-            allStage.value = response[0].data;
-            allSWBS.value = response[1].data;
-            allOperation.value = response[2].data;
+            dataGrafos.getAllInfoPersonnel();
         } catch (error) {
             console.error(error);
         }
@@ -153,9 +143,7 @@ export const useTablePersonnel = ({ props }) => {
     return {
         showModalForm,
         selectedProject,
-        allOperation,
-        allStage,
-        allSWBS,
+        dataGrafos,
         showOnlyOne,
         pagination,
         paginatedProjects,

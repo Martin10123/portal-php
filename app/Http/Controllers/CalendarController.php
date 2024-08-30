@@ -32,35 +32,46 @@ class CalendarController extends Controller
         }
     }
 
+    protected function handleTypeServiceID($typeServiceData)
+    {
+        try {
+            if (!array_key_exists('type_service_ID', $typeServiceData)) {
+                $typeService = $this->checkTypeService($typeServiceData["description"]);
+                $typeServiceData["type_service_ID"] = $typeService->type_service_ID;
+                $typeServiceData["description"] = $typeService->description;
+            }
+            return $typeServiceData;
+        } catch (\Throwable $th) {
+            Log::error('Error al verificar el tipo de servicio: ' . $th->getMessage());
+            throw $th;
+        }
+    }
+
     public function create(CalendarRequest $request)
     {
         try {
+            // Maneja el type_service_ID
+            $typeServiceData = $this->handleTypeServiceID($request->type_service_ID);
 
-            $typeServiceData = $request->type_service_ID;
-
-            if (!array_key_exists('type_service_ID', $typeServiceData)) {
-                try {
-                    $typeService = $this->checkTypeService($typeServiceData["description"]);
-                    $typeServiceData["type_service_ID"] = $typeService->type_service_ID;
-                    $typeServiceData["description"] = $typeService->description;
-
-                    // Asignar el array modificado de nuevo al objeto $request
-                    $request->merge(['type_service_ID' => $typeServiceData]);
-                } catch (\Throwable $th) {
-                    Log::error('Error al verificar el tipo de servicio: ' . $th->getMessage());
-                }
-            }
+            // Asignar el array modificado de nuevo al objeto $request
+            $request->merge(['type_service_ID' => $typeServiceData]);
 
             // Crea el evento en el calendario
             $responseDB = $this->createCalendarEvent($request);
             $responseDB->type_service_ID = $request->type_service_ID;
 
             // Envía notificaciones a los participantes
-            $this->notifyParticipants($request->participants_necesary, $request->participants_optional, $responseDB);
+            $this->notifyParticipants(
+                $request->userCreated,
+                $request->participants_necesary,
+                $request->participants_optional,
+                $responseDB,
+                false
+            );
 
             return response()->json([
                 'message' => 'Evento creado en el calendario correctamente',
-                'data' => $responseDB->all(),
+                'data' => $responseDB,
                 'ok' => true
             ]);
         } catch (\Exception $e) {
@@ -94,7 +105,7 @@ class CalendarController extends Controller
             'division' => $request->division,
             'isVRRequired' => $request->isVRRequired,
             'type_service_ID' => $request->type_service_ID["type_service_ID"],
-            'uid_user' => $request->uid_user,
+            'uid_user' => $request->userCreated["guid"],
             'calendar_status' => $request->calendar_status,
             'sala' => $request->floor
         ]);
@@ -120,7 +131,7 @@ class CalendarController extends Controller
      * @param Calendar $responseDB
      * @return void
      */
-    protected function notifyParticipants($participantsNecesary, $participantsOptional, $responseDB)
+    protected function notifyParticipants($userCreated, $participantsNecesary, $participantsOptional, $responseDB, $isUpdate)
     {
         try {
             // Obtener y unificar los correos de los participantes necesarios y opcionales
@@ -142,7 +153,7 @@ class CalendarController extends Controller
             foreach ($emails as $email) {
                 try {
                     Log::info('Enviando notificación a: ' . $email);
-                    Notification::route('mail', trim($email))->notify(new EventCalendarMail($responseDB));
+                    Notification::route('mail', trim($email))->notify(new EventCalendarMail($responseDB, $isUpdate, $userCreated));
                 } catch (\Exception $e) {
                     Log::error('Error al enviar el correo a ' . $email . ': ' . $e->getMessage());
                 }
@@ -157,6 +168,12 @@ class CalendarController extends Controller
         try {
             $calendar = Calendar::find($id);
 
+            // Maneja el type_service_ID
+            $typeServiceData = $this->handleTypeServiceID($request->type_service_ID);
+
+            // Asignar el array modificado de nuevo al objeto $request
+            $request->merge(['type_service_ID' => $typeServiceData]);
+
             $calendar->title = $request->title;
             $calendar->description = $request->description;
             $calendar->starting_date = $request->starting_date;
@@ -167,11 +184,21 @@ class CalendarController extends Controller
             $calendar->backgroundColor = $request->backgroundColor;
             $calendar->division = $request->division;
             $calendar->isVRRequired = $request->isVRRequired;
-            $calendar->type_service_ID = $request->type_service_ID["type_service_ID"];
-            $calendar->uid_user = $request->uid_user;
+            $calendar->type_service_ID = $typeServiceData["type_service_ID"];
+            $calendar->uid_user = $request->userCreated["guid"];
             $calendar->calendar_status = $request->calendar_status;
 
             $calendar->save();
+
+            $calendar->type_service_ID = $request->type_service_ID;
+
+            $this->notifyParticipants(
+                $request->userCreated,
+                $request->participants_necesary,
+                $request->participants_optional,
+                $calendar,
+                true
+            );
 
             return response()->json([
                 'message' => 'Evento actualizado en el calendario correctamente',
@@ -179,9 +206,11 @@ class CalendarController extends Controller
                 "ok" => true
             ]);
         } catch (\Throwable $th) {
+            Log::error("error" . $th->getMessage() . $th->getFile());
+
             return response()->json([
                 'message' => 'Error al actualizar los datos de la base de datos',
-                "error" => $th,
+                "error" => $th->getMessage(),
                 "ok" => false
             ], 500);
         }

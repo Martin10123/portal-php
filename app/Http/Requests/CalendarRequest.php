@@ -28,9 +28,9 @@ class CalendarRequest extends FormRequest
             'division' => 'required|string',
             'isVRRequired' => 'required|boolean',
             'type_service_ID' => 'required|array',
-            'uid_user' => 'required|string',
             'calendar_status' => 'required|boolean',
             'floor' => 'required|string',
+            'userCreated' => 'required|array',
         ];
     }
 }

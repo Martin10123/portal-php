@@ -87,7 +87,6 @@ export const useCalendarPage = () => {
                 typeService: info.event.extendedProps.typeService,
                 uidUser: info.event.extendedProps.uidUser,
             };
-
         },
         select: function (info) {
             const start = new Date(info.startStr);
@@ -227,7 +226,7 @@ export const useCalendarPage = () => {
 
     const onSaveEvent = (e) => {
         e.preventDefault();
-        
+
         if (!validateFormCalendar({ ...form.data() })) {
             return;
         }
@@ -264,7 +263,7 @@ export const useCalendarPage = () => {
                     type_service_ID: form.typeService,
                     backgroundColor: getRandomColor(),
                     calendar_status: true,
-                    uid_user: props.auth.user.guid,
+                    userCreated: props.auth.user,
                 }
             );
 
@@ -321,22 +320,22 @@ export const useCalendarPage = () => {
             Swal.fire({
                 icon: "error",
                 title: "Error",
-                text: "Ha ocurrido un error al actualizar el evento, intente de nuevo",
+                text: `Ha ocurrido un error al actualizar el evento, por favor intentelo nuevamente o contacte al administrador, ${error}`,
             });
         }
     };
 
     const formatDateSelect = (date, hours) => {
-        const [hour, minute] = hours.split(':').map(Number);
+        const [hour, minute] = hours.split(":").map(Number);
 
         const updatedDate = setHours(setMinutes(date, minute), hour);
 
         const formattedDate = format(updatedDate, "yyyy-MM-dd HH:mm:ss");
 
-        return formattedDate
+        return formattedDate;
     };
 
-    const prepareEventData = (form, props) => {
+    const prepareEventData = (form) => {
         return {
             floor: form.floor,
             title: form.title,
@@ -351,11 +350,13 @@ export const useCalendarPage = () => {
             type_service_ID: form.typeService,
             backgroundColor: getRandomColor(),
             calendar_status: true,
-            uid_user: props.auth.user.guid,
+            userCreated: props.auth.user,
         };
     };
 
     const addEventToCalendar = (eventData, form) => {
+        console.log({ eventData, form });
+
         calendarOptions.value.events = [
             ...calendarOptions.value.events,
             {
@@ -380,7 +381,7 @@ export const useCalendarPage = () => {
         try {
             isLoadingSaveEvent.value = true;
 
-            const eventData = prepareEventData(form, props);
+            const eventData = prepareEventData(form);
 
             const response = await axios.post(
                 route("calendarPage.create"),
@@ -388,7 +389,7 @@ export const useCalendarPage = () => {
             );
 
             console.log(response);
-            
+
             if (response.data.ok) {
                 addEventToCalendar(response.data.data, form);
 
@@ -406,7 +407,7 @@ export const useCalendarPage = () => {
             Swal.fire({
                 icon: "error",
                 title: "Error",
-                text: "Ha ocurrido un error al crear el evento",
+                text: `Ha ocurrido un error al crear el evento, por favor intentelo nuevamente o contacte al administrador, ${error}`,
             });
         } finally {
             isLoadingSaveEvent.value = false;
@@ -415,22 +416,37 @@ export const useCalendarPage = () => {
 
     const onDeleteEvent = async () => {
         try {
+            openShowInfo.value = false;
 
-            openShowInfo.value = false;            
-
-            const responseSwal = await Swal.fire({
-                title: "Estas seguro que quieres eliminar este evento?",
-                showDenyButton: true,
+            const { value: text, isConfirmed } = await Swal.fire({
+                input: "textarea",
+                inputLabel: "Estas seguro que quieres eliminar este evento?",
+                inputPlaceholder: "Escribe la razón...",
+                inputAttributes: {
+                    "aria-label": "Escribe la razón",
+                },
                 confirmButtonText: "Eliminar",
-                denyButtonText: `Cancelar`,
+                showCancelButton: true,
+                cancelButtonText: "Cancelar",
             });
 
-            if (responseSwal.isConfirmed) {
-                const response = await axios.delete(route("calendarPage.delete", infoSelectedEvent.value.id));
-                
+            if (text) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Evento eliminado",
+                    text: `El evento se ha eliminado correctamente, se ha registrado la razón. "${text}"`,
+                });
+            }
+
+            if (isConfirmed) {
+                const response = await axios.delete(
+                    route("calendarPage.delete", infoSelectedEvent.value.id)
+                );
+
                 if (response.data.ok) {
                     events.value = events.value.filter(
-                        (event) => event.id !== Number(infoSelectedEvent.value.id)
+                        (event) =>
+                            event.id !== Number(infoSelectedEvent.value.id)
                     );
 
                     Swal.fire({
@@ -447,14 +463,14 @@ export const useCalendarPage = () => {
                         text: "No se pudo eliminar el evento",
                     });
                 }
-            } 
+            }
         } catch (error) {
             console.log(error);
 
             Swal.fire({
                 icon: "error",
                 title: "Error",
-                text: "Ha ocurrido un error al eliminar el evento",
+                text: `Ha ocurrido un error al eliminar el evento, por favor intentelo nuevamente o contacte al administrador, ${error}`,
             });
         }
     };
@@ -486,7 +502,6 @@ export const useCalendarPage = () => {
                     floor: event.sala,
                 };
             });
-
         } catch (error) {
             console.log(error);
         } finally {
@@ -513,6 +528,6 @@ export const useCalendarPage = () => {
         onViewInfoEvent,
         onEditEvent,
         handleOpenModalHours,
-        onDeleteEvent
+        onDeleteEvent,
     };
 };

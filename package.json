@@ -35,10 +35,12 @@
         "date-fns": "^3.6.0",
         "fuse.js": "^7.0.0",
         "ics": "^3.7.6",
+        "pinia": "^2.2.2",
         "primeicons": "^7.0.0",
         "primevue": "^4.0.0",
         "read-excel-file": "^5.8.5",
         "sweetalert2": "^11.11.1",
-        "vue-select": "^4.0.0-beta.6"
+        "vue-select": "^4.0.0-beta.6",
+        "xlsx": "^0.18.5"
     }
 }

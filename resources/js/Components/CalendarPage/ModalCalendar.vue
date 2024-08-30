@@ -18,17 +18,11 @@
                 <form class="grid gap-4 pt-3" @submit.prevent="onSaveEvent">
                     <div class="grid gap-2">
                         <label class="font-medium">Lugar del evento</label>
-                        <select class="w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700" v-model="form.floor">
-                                <option value="">Seleccionar</option>
-                                <option value="Laboratorio XRLAB">Laboratorio XRLAB</option>
-                                <option value="Sala de juntas">Sala de juntas</option>
-                                <option value="Sala de capacitación">Sala de capacitación</option>
-                                <option value="Sala de conferencias">Sala de conferencias</option>
-                                <option value="Sala de reuniones">Sala de reuniones</option>
-                                <option value="Sala de videoconferencias">Sala de videoconferencias</option>
-                                <option value="Sala de espera">Sala de espera</option>
-                                <option value="Sala de descanso">Sala de descanso</option>
-                            </select>
+                        <select class="w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700"
+                            v-model="form.floor">
+                            <option value="">Seleccionar</option>
+                            <option value="Laboratorio XRLAB">Laboratorio XRLAB</option>
+                        </select>
                     </div>
                     <div class="grid gap-2">
                         <label class="font-medium">Título</label>
@@ -36,8 +30,8 @@
                     </div>
                     <div class="grid gap-2">
                         <label class="font-medium">Tipo de servicio</label>
-                        <v-select class="dark:bg-gray-700 rounded-md" :options="listaTipoServicios" label="description" placeholder="Tipo de servicios..."
-                            v-model="form.typeService" taggable />
+                        <v-select class="dark:bg-gray-700 rounded-md" :options="listaTipoServicios" label="description"
+                            placeholder="Tipo de servicios..." v-model="form.typeService" taggable />
                     </div>
                     <div class="grid gap-2">
                         <label class="font-medium">Descripción</label>
@@ -52,7 +46,8 @@
                                     <RealityIcon />
                                 </label>
                                 <label class="w-max inline-flex items-center cursor-pointer">
-                                    <input id="realityIcon" type="checkbox" value="" class="sr-only peer" v-model="form.isArRequired">
+                                    <input id="realityIcon" type="checkbox" value="" class="sr-only peer"
+                                        v-model="form.isArRequired">
                                     <div
                                         class="relative w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
                                     </div>
@@ -61,7 +56,8 @@
                         </div>
                         <div class="grid gap-2 col-span-4">
                             <label class="font-medium">Gerencia</label>
-                            <select class="w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700" v-model="form.division">
+                            <select class="w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700"
+                                v-model="form.division">
                                 <option v-for="management in listManagement" :key="management.Nombre"
                                     :value="management.Nombre">{{ management.Nombre }}
                                 </option>
@@ -91,9 +87,10 @@
 
                     <div class="grid gap-2">
                         <label class="font-medium">Participantes necesarios</label>
-                        <v-select class="dark:bg-gray-700 rounded-md" multiple :options="usersEmails" placeholder="Participantes..." append-to-body
-                            :calculate-position="calcSpacing" v-model="form.participantsNecesary" label="correo"
-                            :reduce="email => email.correo" :filter="customFilter">
+                        <v-select class="dark:bg-gray-700 rounded-md" multiple :options="usersEmails"
+                            placeholder="Participantes..." append-to-body :calculate-position="calcSpacing"
+                            v-model="form.participantsNecesary" label="correo" :reduce="email => email.correo"
+                            :filter="customFilter">
                             <template v-slot:option="option">
                                 <div>
                                     {{ option.correo }}
@@ -105,8 +102,9 @@
                     </div>
                     <div class="grid gap-2">
                         <label class="font-medium">Participantes opcionales</label>
-                        <v-select class="dark:bg-gray-700 rounded-md" multiple :options="usersEmails" placeholder="Participantes..." label="correo"
-                            append-to-body :calculate-position="calcSpacing" v-model="form.participantsOptional"
+                        <v-select class="dark:bg-gray-700 rounded-md" multiple :options="usersEmails"
+                            placeholder="Participantes..." label="correo" append-to-body
+                            :calculate-position="calcSpacing" v-model="form.participantsOptional"
                             :reduce="email => email.correo" :filter="customFilter">
                             <template v-slot:option="option">
                                 <div>
@@ -120,7 +118,8 @@
 
                     <div class="grid gap-2">
                         <label class="font-medium">recursos</label>
-                        <v-select class="dark:bg-gray-700 rounded-md" multiple placeholder="Recursos..." :options="[]" v-model="form.resource" taggable />
+                        <v-select class="dark:bg-gray-700 rounded-md" multiple placeholder="Recursos..." :options="[]"
+                            v-model="form.resource" taggable />
                     </div>
 
                     <button
@@ -157,16 +156,16 @@ const props = defineProps({
 const { calcSpacing, listaTipoServicios, usersEmails, listManagement } = useModalCalendar(props.form)
 
 function customFilter(options, search) {
-  const fuse = new Fuse(options, {
-    keys: ['nombre', 'correo'],
-    shouldSort: true,
-    threshold: 0,
-    distance: 100,
-  });
+    const fuse = new Fuse(options, {
+        keys: ['nombre', 'correo'],
+        shouldSort: true,
+        threshold: 0,
+        distance: 100,
+    });
 
-  return search.length
-    ? fuse.search(search).map(({ item }) => item)
-    : options;
+    return search.length
+        ? fuse.search(search).map(({ item }) => item)
+        : options;
 }
 
 </script>

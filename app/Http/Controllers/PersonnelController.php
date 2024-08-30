@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ReportsRequest;
+use App\Http\Requests\PersonnelRequest;
+use App\Imports\ExcelImportDB;
+use App\Models\Activities;
 use App\Models\OperationPersonnel;
 use App\Models\Reports;
 use App\Models\StagePersonnel;
 use App\Models\SWBSPersonnel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
-class ReportsController extends Controller
+class PersonnelController extends Controller
 {
     public function index()
     {
@@ -76,7 +80,28 @@ class ReportsController extends Controller
         }
     }
 
-    public function updateGraph(ReportsRequest $request)
+    public function getActivities()
+    {
+        try {
+
+            $activities = Activities::all()
+                ->where("Estado", "1");
+
+            return response()->json([
+                "data" => $activities,
+                "message" => "Actividades obtenidas correctamente",
+                "ok" => true
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                $th,
+                "message" => "Ocurrió un error al obtener las actividades",
+                "ok" => false
+            ]);
+        }
+    }
+
+    public function updateGraph(PersonnelRequest $request)
     {
         try {
             $report = Reports::find($request->id);
@@ -106,7 +131,7 @@ class ReportsController extends Controller
     }
 
 
-    public function updateMassaGraphs(ReportsRequest $request)
+    public function updateMassaGraphs(PersonnelRequest $request)
     {
         try {
 
@@ -139,6 +164,91 @@ class ReportsController extends Controller
             return response()->json($allReportsUpdated);
         } catch (\Throwable $th) {
             return response()->json($th);
+        }
+    }
+
+    public function loadExcelFile(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv',
+        ]);
+
+        $excelBD = new ExcelImportDB();
+
+        $file = $request->file('file');
+        Excel::import($excelBD, $file);
+
+        return response()->json([
+            'message' => 'Archivo cargado correctamente',
+            'success' => true,
+            'rowCount' => $excelBD->getRowCount(),
+            'rowsNotImported' => $excelBD->getRowsNotImported(),
+        ]);
+    }
+
+    public function addGraph(Request $request)
+    {
+        try {
+
+            $excelBD = new ExcelImportDB();
+            $allGraphs = $request->reports;
+            $allGraphsUpdated = [];
+            $graphNotSaved = 0;
+
+            foreach ($allGraphs as $graph) {
+
+                $graph['bloque'] = $graph['bloque'] === "-" ? "" : $graph['bloque'];
+                $exists = $excelBD->existsGraph($graph, true);
+
+                if (!$exists) {
+
+                    $idActivitie = null;
+                    $activitieSelect = Activities::where('Actividad', $graph['operacion_proceso'])->first();
+
+                    // Valida que la actividad exista, si no la crea
+                    if ($activitieSelect) {
+                        $idActivitie = $activitieSelect->Id;
+                    } else {
+                        $activitie = Activities::create([
+                            'Actividad' => $graph['operacion_proceso'],
+                            'Estado' => 1
+                        ]);
+
+                        $idActivitie = $activitie->Id;
+                    }
+
+                    $report = Reports::create([
+                        'Grafo_OP' => $graph['grafo_op'],
+                        'Fase' => $graph['fase'],
+                        'SWBS' => $graph['swbs'],
+                        'Operación_Proceso' => $graph['operacion_proceso'],
+                        'Estado' => $graph['estado'],
+                        'Bloque' => $graph['bloque'],
+                        "Proyecto" => $graph['proyecto'],
+                        "Id_Actividad" => $idActivitie,
+                        "Caso" => $graph['caso'],
+                        "Codigo_SAP" => $graph['codigo_sap'],
+                    ]);
+
+                    array_push($allGraphsUpdated, $report);
+                } else {
+                    $graphNotSaved++;
+                    Log::info("El grafo ya existe");
+                }
+            }
+
+            return response()->json([
+                'message' => 'Reportes agregados correctamente',
+                'success' => true,
+                'graphNotSaved' => $graphNotSaved,
+                'allGraphsUpdated' => $allGraphsUpdated
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al agregar el reporte',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

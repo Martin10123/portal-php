@@ -100,3 +100,7 @@ html {
 .dp__input {
     @apply dark:bg-gray-700 dark:border-gray-700 dark:text-white !important;
 }
+
+.fc-direction-ltr .fc-list-day-text, .fc-direction-rtl .fc-list-day-side-text, .fc-direction-ltr .fc-list-day-side-text, .fc-direction-rtl .fc-list-day-text {
+    color: #000;
+}

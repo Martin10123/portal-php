@@ -14,7 +14,7 @@
                 <div class="flex items-center gap-4">
                     <label>Tiempo necesario</label>
 
-                    <select class="w-max border-gray-300 rounded-md shadow-sm" v-model="timeNecessary">
+                    <select class="w-max border-gray-300 rounded-md shadow-sm dark:bg-black" v-model="timeNecessary">
                         <option value="30">30 minutos</option>
                         <option value="60">1 hora</option>
                         <option value="90">1:30 horas</option>

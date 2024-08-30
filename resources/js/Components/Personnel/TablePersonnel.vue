@@ -27,8 +27,7 @@
                 <tr v-for="(project) in paginatedProjects" :key="project.Id"
                     class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-transparent">
 
-                    <FormOneSelect v-if="showOnlyOne && project.selected" :all-operation="allOperation"
-                        :all-s-w-b-s="allSWBS" :all-stage="allStage" :selected-project="selectedProject"
+                    <FormOneSelect v-if="showOnlyOne && project.selected" :selected-project="selectedProject"
                         :on-cancel-edit="onCancelEdit" :on-update-project-selected="onUpdateProjectSelected" />
 
                     <ItemsTable v-else :project="project" :on-check-project="onCheckProject" />
@@ -42,8 +41,7 @@
         <PaginationPersonnel :project-select="projectSelect" :pagination="pagination" @change-page="onChangePage" />
 
         <FormSelects :show-modal-form="showModalForm" :handle-modal-form="handleModalForm"
-            :selected-project="selectedProject" :all-operation="allOperation" :all-s-w-b-s="allSWBS"
-            :all-stage="allStage" :on-update-project-selected="onUpdateProjectSelected" />
+            :selected-project="selectedProject" :on-update-project-selected="onUpdateProjectSelected" />
     </div>
 </template>
 
@@ -54,7 +52,6 @@ import FormSelects from './FormSelects.vue';
 import { useTablePersonnel } from '@/Composables';
 import FormOneSelect from './FormOneSelect.vue';
 import ItemsTable from './ItemsTable.vue';
-import LoadExcelToDB from './LoadExcelToDB.vue';
 
 const props = defineProps({
     projectSelect: Array,
@@ -73,7 +70,7 @@ const {
     startEditing,
     showOnlyOne,
     paginatedProjects,
-    allOperation, allSWBS, allStage, checkAllProjects,
+    checkAllProjects,
     onCancelEdit, onUpdateProjectSelected,
     onChangePage, pagination
 } = useTablePersonnel({ props })

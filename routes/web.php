@@ -4,12 +4,11 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ConsecutiveController;
 use App\Http\Controllers\ManagementController;
 use App\Http\Controllers\ProjectsController;
-use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\PersonnelController;
 use App\Http\Controllers\RequirementController;
 use App\Http\Controllers\TipoServicioController;
 use App\Http\Controllers\TypeServicesCalendarController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -55,13 +54,16 @@ Route::middleware([
 
     // Reportes
     Route::prefix('reports')->name('reports.')->group(function () {
-        Route::get('/', [ReportsController::class, 'index'])->name('index');
-        Route::post('/searchReport', [ReportsController::class, 'searchReport'])->name('searchReport');
-        Route::get('/stagePersonnel', [ReportsController::class, 'getStagePersonnel'])->name('stagePersonnel');
-        Route::get('/swbsPersonnel', [ReportsController::class, 'getSWBSPersonnel'])->name('swbsPersonnel');
-        Route::get('/operationsPersonnel', [ReportsController::class, 'getOperationPersonnel'])->name('operationsPersonnel');
-        Route::post('/updateGraph', [ReportsController::class, 'updateGraph'])->name('updateGraph');
-        Route::post('/updateMassaGraphs', [ReportsController::class, 'updateMassaGraphs'])->name('updateMassaGraphs');
+        Route::get('/', [PersonnelController::class, 'index'])->name('index');
+        Route::post('/searchReport', [PersonnelController::class, 'searchReport'])->name('searchReport');
+        Route::get('/stagePersonnel', [PersonnelController::class, 'getStagePersonnel'])->name('stagePersonnel');
+        Route::get('/swbsPersonnel', [PersonnelController::class, 'getSWBSPersonnel'])->name('swbsPersonnel');
+        Route::get('/operationsPersonnel', [PersonnelController::class, 'getOperationPersonnel'])->name('operationsPersonnel');
+        Route::post('/updateGraph', [PersonnelController::class, 'updateGraph'])->name('updateGraph');
+        Route::post('/updateMassaGraphs', [PersonnelController::class, 'updateMassaGraphs'])->name('updateMassaGraphs');
+        Route::post('/importExcel', [PersonnelController::class, 'loadExcelFile'])->name('importExcel');
+        Route::post('/addGraph', [PersonnelController::class, 'addGraph'])->name('addGraph');
+        Route::get('/getActivities', [PersonnelController::class, 'getActivities'])->name('getActivities');
     });
 
     // Calendar

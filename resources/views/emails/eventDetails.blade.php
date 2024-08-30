@@ -72,10 +72,10 @@
     <main class="main">
         <section>
             <h2 class="titulo">Cordial saludo</h2>
-            <p class="descripcion">Se ha agendado un espacio en {{ $evento->sala }} y fuiste citado a esta reunión.</p>
+            <p class="descripcion">{{ $userCreated["name"] }} {{ $isUpdate ? 'ha actualizado un evento en' : 'ha agendado un espacio en' }} {{ $evento->sala }} y fuiste citado a esta reunión.</p>
 
             <div class="detalle">
-                <h3 class="titulo_detalle">Detalles del evento</h3>
+                <h3 class="titulo_detalle">{{ $isUpdate ? 'Actualización' : 'Detalles' }} del evento</h3>
 
                 <table>
                     <tr>
