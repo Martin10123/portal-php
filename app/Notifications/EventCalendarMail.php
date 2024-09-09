@@ -5,7 +5,6 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Log;
 
 class EventCalendarMail extends Notification
 {
@@ -47,10 +46,10 @@ class EventCalendarMail extends Notification
         return (new MailMessage)
             ->subject('[RESERVAS XRLAB] ' . $this->evento->title)
             ->view('emails.eventDetails', [
-                'evento' => $this->evento, 
-                'userCreated' => $this->userCreated, 
+                'evento' => $this->evento,
+                'userCreated' => $this->userCreated,
                 'isUpdate' => $this->isUpdate
-                ])
+            ])
             ->attachData($icsContent, str_replace(' ', '', $this->evento->title) . '.ics', [
                 'mime' => 'text/calendar'
             ]);

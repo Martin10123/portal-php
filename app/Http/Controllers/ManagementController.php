@@ -19,4 +19,24 @@ class ManagementController extends Controller
             return response()->json($th->getMessage());
         }
     }
+
+    public function getDivision()
+    {
+        try {
+            $division = DB::table('sigedin.guest.Division')
+                ->select('DivisionID', 'DivisionName')
+                ->get();
+
+            return response()->json([
+                'data' => $division,
+                'message' => 'Divisiones obtenidas correctamente',
+                'ok' => true,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+                'ok' => false,
+            ]);
+        }
+    }
 }

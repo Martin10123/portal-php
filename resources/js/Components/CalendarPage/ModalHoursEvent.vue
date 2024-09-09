@@ -50,6 +50,7 @@ const props = defineProps({
     handleOpenModalHours: Function,
     events: Array,
     form: Object,
+    infoSelectedEvent: Object,
 });
 
 const timeNecessary = ref(30);
@@ -80,20 +81,25 @@ const generateHoursAvailable = (startHour = 7, endHour = 17, interval = 30) => {
         const futureTime = addMinutes(current, timeNecessary.value);
         const isOutOfBounds = isAfter(futureTime, setHours(start, endHour));
         const isOccupied = eventsForTheDay.some(event => {
+
+            if (Number(props.infoSelectedEvent.id) === event.id) {
+                return false;
+            }
+
             const eventStart = parseISO(event.start);
             const eventEnd = parseISO(event.end);
 
             return (current >= eventStart && current < eventEnd) ||
-                   (futureTime > eventStart && futureTime <= eventEnd) ||
-                   (current <= eventStart && futureTime > eventStart);
+                (futureTime > eventStart && futureTime <= eventEnd) ||
+                (current <= eventStart && futureTime > eventStart);
         });
 
-        const crossesLunchTime = (hourString < '12:30' && format(futureTime, 'HH:mm') > '12:30') || 
-                                  (hourString < '13:00' && format(futureTime, 'HH:mm') > '13:00');
+        const crossesLunchTime = (hourString < '12:30' && format(futureTime, 'HH:mm') > '12:30') ||
+            (hourString < '13:00' && format(futureTime, 'HH:mm') > '13:00');
 
         // Bloquear horas de cierre si no cabe el tiempo necesario
         const isBlockedDueToEnd = isAfter(current, setHours(start, endHour - interval)) && futureTime > end;
-        
+
         hours.push({
             hour: hourString,
             minutes: minuteValue,

@@ -1,54 +1,3 @@
-<script setup>
-import Navbar from '@/Components/SideBar/Navbar.vue';
-import SideBarMain from '@/Components/SideBar/SideBarMain.vue';
-import { useReports } from '@/Composables';
-import { onMounted } from 'vue';
-
-const { openSidebar, toggleOpenSidebar } = useReports();
-
-const getGerenciaUsuarioActivo = async () => {
-    try {
-        const response = await axios.get(route("users.getGerencia"));
-        console.log(response.data);
-    } catch (error) {
-        console.log(error);
-
-    }
-};
-
-onMounted(() => {
-
-    getGerenciaUsuarioActivo()
-
-    google.charts.load('current', { 'packages': ['orgchart'] });
-    google.charts.setOnLoadCallback(drawChart);
-
-    function drawChart() {
-        var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Name');
-        data.addColumn('string', 'Manager');
-        data.addColumn('string', 'ToolTip');
-
-        // For each orgchart box, provide the name, manager, and tooltip to show.
-        data.addRows([
-            [{ 'v': 'Adolfo Silva', 'f': 'Adolfo Silva<div style="color:red; font-style:italic">Jefe de outfiting</div>' }, '', 'Jefe de outfiting'],
-            [{ 'v': 'Jaime Tapia', 'f': 'Jaime Tapia<div style="color:red; font-style:italic">Supervisor</div>' }, 'Adolfo Silva', 'Supervisor'],
-            ['Gissell', 'Jaime Tapia', ''],
-            ['Martin Elias', 'Jaime Tapia', 'Martin Elias'],
-            ['John Baena', 'Adolfo Silva', ''],
-            ['Luis', 'Adolfo Silva', ''],
-            ['Wendy Carolina', 'Adolfo Silva', ''],
-        ]);
-
-        // Create the chart.
-        var chart = new google.visualization.OrgChart(document.getElementById('chart_div'));
-        // Draw the chart, setting the allowHtml option to true for the tooltips.
-        chart.draw(data, { 'allowHtml': true });
-    }
-});
-
-</script>
-
 <template>
     <Navbar :toggleOpenSidebar="toggleOpenSidebar" />
 
@@ -57,7 +6,7 @@ onMounted(() => {
             :toggleOpenSidebar="toggleOpenSidebar" />
 
         <section class="p-4 grid h-max gap-5">
-            <h1 class="text-3xl">Charts</h1>
+            <ModalListCharts />
 
             <article class="grid grid-cols-3 gap-6">
                 <div class="shadow-md p-4 rounded-lg bg-slate-50">
@@ -86,7 +35,7 @@ onMounted(() => {
                 </div>
             </article>
 
-            <article class="bg-stale-">
+            <article class="overflow-x-auto">
                 <h2>Grafico organizacional</h2>
 
                 <div id="chart_div"></div>
@@ -94,3 +43,65 @@ onMounted(() => {
         </section>
     </main>
 </template>
+
+<script setup>
+import ModalListCharts from '@/Components/Charts/ModalListCharts.vue';
+import Navbar from '@/Components/SideBar/Navbar.vue';
+import SideBarMain from '@/Components/SideBar/SideBarMain.vue';
+import { useReports } from '@/Composables';
+import { onMounted, ref } from 'vue';
+
+const { openSidebar, toggleOpenSidebar } = useReports();
+const getUsuariosGerencia = ref([]);
+const showListCharts = ref(false);
+
+const onOpenModal = () => {
+    showListCharts.value = !showListCharts.value;
+};
+
+const getGerenciaUsuarioActivo = async () => {
+    try {
+        const response = await axios.get(route("users.getUsuariosGerencia"));
+        getUsuariosGerencia.value = response.data;
+        drawChart();  // Call drawChart after data is fetched
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+function drawChart() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'Name');
+    data.addColumn('string', 'Manager');
+    data.addColumn('string', 'ToolTip');
+
+    // Check if getUsuariosGerencia.value has data
+    if (getUsuariosGerencia.value.length > 0) {
+        // Transform API data into Google Charts data format
+        const rows = getUsuariosGerencia.value.map(user => {
+
+            const nombreJefe = getUsuariosGerencia.value.find(jefe => jefe.EsJefe)?.Nombre;
+
+            return [
+                {
+                    v: user.Nombre,
+                    f: `${user.Nombre}<div style="color:red; font-style:italic">${user.Cargo}</div>`
+                }
+                , nombreJefe, user.Nombre
+            ];
+        });
+
+        data.addRows(rows);
+    }
+
+    var chart = new google.visualization.OrgChart(document.getElementById('chart_div'));
+    chart.draw(data, { 'allowHtml': true });
+}
+
+onMounted(() => {
+    getGerenciaUsuarioActivo();
+    google.charts.load('current', { 'packages': ['orgchart'] });
+    google.charts.setOnLoadCallback(drawChart);
+});
+
+</script>

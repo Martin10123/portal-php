@@ -244,6 +244,34 @@ export const useCalendarPage = () => {
                 return;
             }
 
+            const { value: text, isConfirmed } = await Swal.fire({
+                input: "textarea",
+                inputLabel: "Estas seguro que quieres actualizar este evento?",
+                inputPlaceholder: "Escribe la razón...",
+                inputAttributes: {
+                    "aria-label": "Escribe la razón",
+                },
+                confirmButtonText: "Actualizar",
+                showCancelButton: true,
+                cancelButtonText: "Cancelar",
+            });
+
+            if (!isConfirmed) {
+                return;
+            }
+
+            if (text.length <= 10) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Error",
+                    text: "Por favor escriba una razón más detallada",
+                });
+
+                return;
+            }
+
+            isLoadingSaveEvent.value = true;
+
             const response = await axios.put(
                 route("calendarPage.update", infoSelectedEvent.value.id),
                 {
@@ -255,15 +283,17 @@ export const useCalendarPage = () => {
                         form.dateHours[0]
                     ),
                     ending_date: formatDateSelect(form.date, form.dateHours[1]),
-                    participants_necesary: form.participantsNecesary.join(","),
-                    participants_optional: form.participantsOptional?.join(","),
-                    resource: form.resource?.join(","),
+                    participants_necesary: form.participantsNecesary.join("; "),
+                    participants_optional:
+                        form.participantsOptional?.join("; "),
+                    resource: form.resource?.join("; "),
                     division: form.division,
                     isVRRequired: form.isArRequired,
                     type_service_ID: form.typeService,
                     backgroundColor: getRandomColor(),
                     calendar_status: true,
                     userCreated: props.auth.user,
+                    reason: text,
                 }
             );
 
@@ -307,8 +337,6 @@ export const useCalendarPage = () => {
                     text: "El evento se ha actualizado correctamente",
                 });
             } else {
-                console.log(response);
-
                 Swal.fire({
                     icon: "error",
                     title: "Error",
@@ -322,6 +350,8 @@ export const useCalendarPage = () => {
                 title: "Error",
                 text: `Ha ocurrido un error al actualizar el evento, por favor intentelo nuevamente o contacte al administrador, ${error}`,
             });
+        } finally {
+            isLoadingSaveEvent.value = false;
         }
     };
 
@@ -342,9 +372,9 @@ export const useCalendarPage = () => {
             description: form.description,
             starting_date: formatDateSelect(form.date, form.dateHours[0]),
             ending_date: formatDateSelect(form.date, form.dateHours[1]),
-            participants_necesary: form.participantsNecesary.join(","),
-            participants_optional: form.participantsOptional.join(",") || "",
-            resource: form.resource.join(",") || "",
+            participants_necesary: form.participantsNecesary.join("; "),
+            participants_optional: form.participantsOptional.join("; ") || "",
+            resource: form.resource.join("; ") || "",
             division: form.division,
             isVRRequired: form.isArRequired,
             type_service_ID: form.typeService,
@@ -355,8 +385,6 @@ export const useCalendarPage = () => {
     };
 
     const addEventToCalendar = (eventData, form) => {
-        console.log({ eventData, form });
-
         calendarOptions.value.events = [
             ...calendarOptions.value.events,
             {
@@ -387,8 +415,6 @@ export const useCalendarPage = () => {
                 route("calendarPage.create"),
                 eventData
             );
-
-            console.log(response);
 
             if (response.data.ok) {
                 addEventToCalendar(response.data.data, form);
@@ -430,39 +456,45 @@ export const useCalendarPage = () => {
                 cancelButtonText: "Cancelar",
             });
 
-            if (text) {
+            if (!isConfirmed) {
+                return;
+            }
+
+            if (text.length <= 10) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Error",
+                    text: "Por favor escriba una razón más detallada",
+                });
+
+                return;
+            }
+
+            const response = await axios.delete(
+                route("calendarPage.delete", {
+                    id: infoSelectedEvent.value.id,
+                    reason: text,
+                })
+            );
+
+            if (response.data.ok) {
+                events.value = events.value.filter(
+                    (event) => event.id !== Number(infoSelectedEvent.value.id)
+                );
+
                 Swal.fire({
                     icon: "success",
                     title: "Evento eliminado",
-                    text: `El evento se ha eliminado correctamente, se ha registrado la razón. "${text}"`,
+                    text: "El evento se ha eliminado correctamente",
                 });
-            }
 
-            if (isConfirmed) {
-                const response = await axios.delete(
-                    route("calendarPage.delete", infoSelectedEvent.value.id)
-                );
-
-                if (response.data.ok) {
-                    events.value = events.value.filter(
-                        (event) =>
-                            event.id !== Number(infoSelectedEvent.value.id)
-                    );
-
-                    Swal.fire({
-                        icon: "success",
-                        title: "Evento eliminado",
-                        text: "El evento se ha eliminado correctamente",
-                    });
-
-                    infoSelectedEvent.value = {};
-                } else {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: "No se pudo eliminar el evento",
-                    });
-                }
+                infoSelectedEvent.value = {};
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "No se pudo eliminar el evento",
+                });
             }
         } catch (error) {
             console.log(error);
@@ -490,10 +522,10 @@ export const useCalendarPage = () => {
                     start: event.starting_date,
                     end: event.ending_date,
                     participantsNecesary:
-                        event.participants_necesary.split(","),
+                        event.participants_necesary.split("; "),
                     participantsOptional:
-                        event.participants_optional?.split(","),
-                    resource: event.resource?.split(","),
+                        event.participants_optional?.split("; "),
+                    resource: event.resource?.split("; "),
                     division: event.division,
                     isArRequired: event.isVRRequired,
                     typeService: event.type_services,

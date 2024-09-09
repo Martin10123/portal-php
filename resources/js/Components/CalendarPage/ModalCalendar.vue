@@ -131,7 +131,7 @@
     </transition>
 
     <ModalHoursEvent v-if="form.date" :events="events" :open-modal-hours="openModalHours"
-        :handle-open-modal-hours="handleOpenModalHours" :form="form" />
+        :handle-open-modal-hours="handleOpenModalHours" :form="form" :info-selected-event="infoSelectedEvent" />
 </template>
 
 <script setup>
@@ -151,6 +151,7 @@ const props = defineProps({
     handleOpenModalHours: Function,
     events: Array,
     isLoadingSaveEvent: Boolean,
+    infoSelectedEvent: Object,
 });
 
 const { calcSpacing, listaTipoServicios, usersEmails, listManagement } = useModalCalendar(props.form)

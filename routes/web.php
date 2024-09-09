@@ -1,14 +1,16 @@
 <?php
 
-use App\Http\Controllers\CalendarController;
-use App\Http\Controllers\ConsecutiveController;
-use App\Http\Controllers\ManagementController;
-use App\Http\Controllers\ProjectsController;
-use App\Http\Controllers\PersonnelController;
-use App\Http\Controllers\RequirementController;
-use App\Http\Controllers\TipoServicioController;
-use App\Http\Controllers\TypeServicesCalendarController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\{
+    CalendarController,
+    ConsecutiveController,
+    ManagementController,
+    ProjectsController,
+    PersonnelController,
+    RequirementController,
+    TipoServicioController,
+    TypeServicesCalendarController,
+    UserController
+};
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -28,7 +30,10 @@ Route::middleware([
     // Usuarios
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
-        Route::get('/getGerencia', [UserController::class, 'getGerencia'])->name('getGerencia');
+        Route::get('/getUsuariosGerencia', [UserController::class, 'getUsuariosGerencia'])->name('getUsuariosGerencia');
+        Route::get('/consultaUsuariosXGerencia/{id}', [UserController::class, 'consultaUsuariosXGerencia'])->name('consultaUsuariosXGerencia');
+        Route::get('/consultaCasoBuqueDePersonaSeleccionada/{id}', [UserController::class, 'consultaCasoBuqueDePersonaSeleccionada'])->name('consultaCasoBuqueDePersonaSeleccionada');
+        Route::get('/consultaDatosSegunPersonaSeleccionada', [UserController::class, 'consultaDatosSegunPersonaSeleccionada'])->name('consultaDatosSegunPersonaSeleccionada');
     });
 
     // Servicios
@@ -70,11 +75,11 @@ Route::middleware([
     // Calendar
     Route::prefix('calendarPage')->name('calendarPage.')->group(function () {
         Route::get('/', [CalendarController::class, 'index'])->name('index');
+        Route::get('/getReason/{id}', [CalendarController::class, 'getReason'])->name('getReason');
         Route::post('/create', [CalendarController::class, 'create'])->name('create');
         Route::put('/update/{id}', [CalendarController::class, 'update'])->name('update');
-        Route::delete('/delete/{id}', [CalendarController::class, 'destroy'])->name('delete');
+        Route::delete('/delete/{id}/{reason}', [CalendarController::class, 'destroy'])->name('delete');
     });
-    Route::get('/sendEmailEvent', [CalendarController::class, 'sendEmailEvent'])->name('sendEmail');
 
     //TypeServices
     Route::prefix('typeServices')->name('typeServices.')->group(function () {
@@ -84,36 +89,24 @@ Route::middleware([
     //Management
     Route::prefix('management')->name('management.')->group(function () {
         Route::get('/', [ManagementController::class, 'index'])->name('index');
+        Route::get('/getDivision', [ManagementController::class, 'getDivision'])->name('getDivision');
     });
 
     // Vistas
     Route::prefix('Sigedin')->group(function () {
-        Route::get('Request/AddRequest', function () {
-            return Inertia::render('Request/AddRequest');
-        })->name('AddRequest');
+        $routes = [
+            'Request/AddRequest' => 'AddRequest',
+            'Request/AssignRequest' => 'AssignRequest',
+            'Personnel/Reports' => 'Reports',
+            'Profile/ProfileUser' => 'Profile',
+            'CalendarPage/CalendarPage' => 'CalendarPage',
+            'Personnel/AddGraphoFromExcel' => 'AddGraphoFromExcel',
+            'Charts/ChartsMain' => 'ChartsMain',
+            'Charts/BarChart' => 'BarChart',
+        ];
 
-        Route::get('Request/AssignRequest', function () {
-            return Inertia::render('Request/AssignRequest');
-        })->name('AssignRequest');
-
-        Route::get('Personnel/Reports', function () {
-            return Inertia::render('Personnel/Reports');
-        })->name('Reports');
-
-        Route::get('Profile/ProfileUser', function () {
-            return Inertia::render('Profile/ProfileUser');
-        })->name('Profile');
-
-        Route::get('CalendarPage/CalendarPage', function () {
-            return Inertia::render('CalendarPage/CalendarPage');
-        })->name('CalendarPage');
-
-        Route::get('Personnel/AddGraphoFromExcel', function () {
-            return Inertia::render('Personnel/AddGraphoFromExcel');
-        })->name('AddGraphoFromExcel');
-
-        Route::get('Charts/ChartsMain', function () {
-            return Inertia::render('Charts/ChartsMain');
-        })->name('ChartsMain');
+        foreach ($routes as $url => $name) {
+            Route::get($url, fn() => Inertia::render($url))->name($name);
+        }
     });
 });

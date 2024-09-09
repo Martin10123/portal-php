@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Calendar;
 use App\Http\Requests\CalendarRequest;
 use App\Http\Controllers\TypeServicesCalendarController;
+use App\Models\CalendarLog;
 use App\Notifications\EventCalendarMail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
@@ -22,6 +23,25 @@ class CalendarController extends Controller
                 'message' => 'Datos obtenidos correctamente',
                 'data' => $calendar,
                 "ok" => true,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al obtener los datos',
+                'error' => $e,
+                "ok" => false
+            ]);
+        }
+    }
+
+    public function getReason($id)
+    {
+        try {
+            $reasons = CalendarLog::where('Calendar_ID', $id)->first();
+
+            return response()->json([
+                'message' => 'Datos obtenidos correctamente',
+                'data' => $reasons,
+                "ok" => $reasons ? true : false,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -115,7 +135,6 @@ class CalendarController extends Controller
      * Verifica si el tipo de servicio existe.
      *
      * @param string $description
-     * @return type_service
      */
     protected function checkTypeService($description)
     {
@@ -136,13 +155,13 @@ class CalendarController extends Controller
         try {
             // Obtener y unificar los correos de los participantes necesarios y opcionales
             $emails = array_unique(array_merge(
-                explode(',', $participantsNecesary),
-                explode(',', $participantsOptional)
+                explode('; ', $participantsNecesary),
+                explode('; ', $participantsOptional)
             ));
 
             // Agregar los correos de los usuarios especiales
             $specialUsers = [
-                "msimarras@tecnocomfenalco.edu.co",
+                // "msimarra@cotecmar.com",
                 // "jtapia@cotecmar.com",
                 // "gbarros@cotecmar.com"
             ];
@@ -152,7 +171,6 @@ class CalendarController extends Controller
             // Enviar notificaciones a todos los correos
             foreach ($emails as $email) {
                 try {
-                    Log::info('Enviando notificación a: ' . $email);
                     Notification::route('mail', trim($email))->notify(new EventCalendarMail($responseDB, $isUpdate, $userCreated));
                 } catch (\Exception $e) {
                     Log::error('Error al enviar el correo a ' . $email . ': ' . $e->getMessage());
@@ -192,6 +210,8 @@ class CalendarController extends Controller
 
             $calendar->type_service_ID = $request->type_service_ID;
 
+            $respReason = $this->reasonCancelOrUpdateEvent($request->reason, $id, true);
+
             $this->notifyParticipants(
                 $request->userCreated,
                 $request->participants_necesary,
@@ -203,6 +223,7 @@ class CalendarController extends Controller
             return response()->json([
                 'message' => 'Evento actualizado en el calendario correctamente',
                 'data' => $calendar,
+                'motivo' => $respReason,
                 "ok" => true
             ]);
         } catch (\Throwable $th) {
@@ -216,7 +237,7 @@ class CalendarController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy($id, $reason)
     {
         try {
 
@@ -224,9 +245,12 @@ class CalendarController extends Controller
             $calendar->calendar_status = 0;
             $calendar->save();
 
+            $respReason = $this->reasonCancelOrUpdateEvent($reason, $id, false);
+
             return response()->json([
                 'message' => 'Evento eliminado en el calendario correctamente',
                 'data' => $calendar,
+                'motivo' => json_decode($respReason->content())->data,
                 "ok" => true
             ]);
         } catch (\Throwable $th) {
@@ -235,6 +259,43 @@ class CalendarController extends Controller
                 "error" => $th,
                 "ok" => false
             ], 500);
+        }
+    }
+
+    public function reasonCancelOrUpdateEvent($reason, $idCalendar, $isUpdate)
+    {
+        try {
+            $exitsCalendar = CalendarLog::where('Calendar_ID', $idCalendar)->first();
+
+            if ($exitsCalendar) {
+                $exitsCalendar->Log_Test = $reason;
+                $exitsCalendar->Calendar_Estado = $isUpdate ? 'Editado' : 'Eliminado';
+                $exitsCalendar->save();
+
+                return response()->json([
+                    'message' => 'Motivo actualizado correctamente',
+                    'data' => $exitsCalendar,
+                    "ok" => true
+                ]);
+            }
+
+            $infoCalendar = CalendarLog::create([
+                'Calendar_ID' => $idCalendar,
+                'Calendar_Estado' => $isUpdate ? 'Editado' : 'Eliminado',
+                'Log_Test' => $reason
+            ]);
+
+            return response()->json([
+                'message' => 'Motivo guardado correctamente',
+                'data' => $infoCalendar,
+                "ok" => true
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Error al obtener los datos',
+                'error' => $th,
+                "ok" => false
+            ]);
         }
     }
 }

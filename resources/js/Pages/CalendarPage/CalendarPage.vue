@@ -20,7 +20,8 @@
 
         <ModalCalendar :open-modal="openModal" :on-create-event="onCreateEvent" :form="form"
             :on-save-event="onSaveEvent" :handle-open-modal-hours="handleOpenModalHours"
-            :open-modal-hours="openModalHours" :events="events" :is-loading-save-event="isLoadingSaveEvent" />
+            :open-modal-hours="openModalHours" :events="events" :is-loading-save-event="isLoadingSaveEvent"
+            :info-selected-event="infoSelectedEvent" />
 
         <ModalViewInfo v-if="openShowInfo" :on-view-info-event="onViewInfoEvent"
             :info-selected-event="infoSelectedEvent" :on-edit-event="onEditEvent" :on-delete-event="onDeleteEvent" />
