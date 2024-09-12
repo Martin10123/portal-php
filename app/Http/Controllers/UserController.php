@@ -44,14 +44,20 @@ class UserController extends Controller
         }
     }
 
-    public function consultaUsuariosXGerencia($gerencia)
+    public function consultaUsuariosXGerencia(Request $request)
     {
         try {
-            $usuarios = $this->consultaABD($gerencia);
+
+            $usuarios = DB::table('sigedin.guest.responsable')
+                ->join('sigedin.guest.division', 'sigedin.guest.responsable.IdDivision', '=', 'sigedin.guest.division.DivisionID')
+                ->select('sigedin.guest.responsable.IdResponsable', 'sigedin.guest.division.DivisionID', 'sigedin.guest.division.DivisionName', 'sigedin.guest.responsable.Correo', 'sigedin.guest.responsable.Nombre', 'sigedin.guest.responsable.Cargo', 'sigedin.guest.responsable.EsJefe', 'sigedin.guest.responsable.IsAdmin', 'sigedin.guest.responsable.Estado', 'sigedin.guest.responsable.Usuario')
+                ->whereIn('sigedin.guest.division.DivisionName', $request->divisiones)
+                ->where('sigedin.guest.responsable.Estado', 'Activo')
+                ->get();
 
             return response()->json([
                 'usuarios' => $usuarios,
-                'gerencia' => $gerencia,
+                'divisiones' => $request->divisiones,
                 'ok' => true
             ]);
         } catch (\Throwable $th) {
@@ -64,81 +70,93 @@ class UserController extends Controller
         }
     }
 
-    public function consultaCasoBuqueDePersonaSeleccionada($idResponsable)
-    {
-        try {
-            $datosDeXUsuarioCasoBuque = PlanillaReporte::where('Trabajador', $idResponsable)
-                ->distinct('Caso')
-                ->select('Caso', 'Proyecto')
-                ->get();
-
-            return response()->json([
-                'datos' => $datosDeXUsuarioCasoBuque,
-                'ok' => true
-            ]);
-        } catch (\Throwable $th) {
-            Log::error('Error al obtener caso según persona: ' . $th->getMessage());
-            return response()->json([
-                'error' => 'Error al obtener caso según persona.',
-                'message' => $th->getMessage(),
-                'ok' => false
-            ], 500);
-        }
-    }
-
     public function consultaDatosSegunPersonaSeleccionada(Request $request)
     {
         try {
-
-            $horasAcumuladas = 0;
-            $semanasData = [];
             $concurrenciaFase = [];
+            $horasAcumuladas = 0;
+            $resultado = [];
+            $rangosFechas = [];
+            $concurrenciaAct = [];
 
-            $fechaCarbon = $request->fecha ? Carbon::parse($request->fecha) : null;
-            $month_end = $fechaCarbon ? $fechaCarbon->endOfMonth() : null;
+            // Recorrer el array de años y meses para generar los rangos de fechas
+            foreach ($request->anios as $anio) {
+                foreach ($request->meses as $mes) {
+                    $inicioMes = Carbon::create($anio, $mes, 1)->startOfMonth(); // Primer día del mes
+                    $finMes = Carbon::create($anio, $mes, 1)->endOfMonth();      // Último día del mes
 
-            $datosDeXUsuarios = PlanillaReporte::whereIn('Trabajador', $request->personas);
-
-            if ($fechaCarbon) {
-                $datosDeXUsuarios = $datosDeXUsuarios->whereDate('Fecha', '>=', $request->fecha)
-                    ->whereDate('Fecha', '<=', $month_end);
+                    $rangosFechas[] = [$inicioMes, $finMes]; // Guardar los rangos
+                }
             }
 
-            $datosDeXUsuarios = $datosDeXUsuarios->orderBy('Fecha', 'asc')
-                ->chunk(1000, function ($datosDeXUsuarios) use (&$semanasData, &$horasAcumuladas, &$concurrenciaFase) {
-                    foreach ($datosDeXUsuarios as $dato) {
-                        // Procesamiento de las semanas
-                        $fecha = Carbon::parse($dato->Fecha);
-                        $isoWeek = $fecha->isoWeek();
-                        $weekYear = $fecha->year;
+            // Consulta optimizada: Agrupar por semanas y sumar las horas de cada semana
+            PlanillaReporte::select(
+                DB::raw('YEAR(Fecha) as anio'),  // Obtener el año de la fecha
+                DB::raw('DATEPART(WEEK, Fecha) as semana'),  // Obtener la semana del año
+                DB::raw('SUM(Horas) as horasDeLaSemana')      // Sumar las horas de cada semana
+            )
+                ->whereIn('Trabajador', $request->personas)
+                ->where(function ($query) use ($rangosFechas) {
+                    // Usar whereBetween con or para múltiples rangos de fechas
+                    foreach ($rangosFechas as $rango) {
+                        $query->whereBetween('Fecha', $rango, 'or');
+                    }
+                })
+                ->groupBy(DB::raw('YEAR(Fecha)'), DB::raw('DATEPART(WEEK, Fecha)'))  // Agrupar por año y semana
+                ->orderBy(DB::raw('YEAR(Fecha)'), 'asc')  // Ordenar por año
+                ->orderBy(DB::raw('DATEPART(WEEK, Fecha)'), 'asc')  // Ordenar por semana dentro del año
+                ->chunk(2000, function ($datosHorasUsuarios) use (&$horasAcumuladas, &$resultado) {
+                    foreach ($datosHorasUsuarios as $dato) {
+                        $horasAcumuladas += $dato->horasDeLaSemana; // Sumar las horas acumuladas
 
-                        if (!isset($semanasData[$isoWeek])) {
-                            $semanasData[$isoWeek] = [
-                                'horasSemanales' => 0,
-                                'horasAcumuladas' => 0,
-                                'detalles' => []
-                            ];
-                        }
-
-                        $horas = (float) $dato->Horas;
-                        $semanasData[$isoWeek]['horasSemanales'] += $horas;
-                        $horasAcumuladas += $horas;
-                        $semanasData[$isoWeek]['horasAcumuladas'] = $horasAcumuladas;
-                        $semanasData[$isoWeek]['detalles'][] = ["w{$isoWeek}-{$weekYear}", $semanasData[$isoWeek]['horasSemanales'], $horasAcumuladas, '22'];
-
-                        // Cálculo de la concurrencia por fase
-                        if (!isset($concurrenciaFase[$dato->Fase])) {
-                            $concurrenciaFase[$dato->Fase] = 1;
-                        } else {
-                            $concurrenciaFase[$dato->Fase] += 1;
-                        }
+                        // Concatenar 'w' con el número de la semana y el año
+                        $resultado[] = [
+                            'semana' => 'w' . $dato->semana . '-' . $dato->anio,  // Semana y año
+                            'horasDeLaSemana' => $dato->horasDeLaSemana,
+                            'horasAcumuladas' => $horasAcumuladas
+                        ];
                     }
                 });
 
+
+            // Consulta para obtener la concurrencia de fases
+
+            $concurrenciaFase = PlanillaReporte::select(
+                'Fase',
+                DB::raw('COUNT(Fase) as concurrencia')
+            )
+                ->whereIn('Trabajador', $request->personas)
+                ->where(function ($query) use ($rangosFechas) {
+                    // Usar whereBetween con or para múltiples rangos de fechas
+                    foreach ($rangosFechas as $rango) {
+                        $query->whereBetween('Fecha', $rango, 'or');
+                    }
+                })
+                ->groupBy('Fase')
+                ->get();
+
+            // Consulta para obtener la concurrencia de act
+
+            $concurrenciaAct = PlanillaReporte::select(
+                'Actividad',
+                DB::raw('COUNT(Actividad) as concurrencia')
+            )
+                ->whereIn('Trabajador', $request->personas)
+                ->where(function ($query) use ($rangosFechas) {
+                    // Usar whereBetween con or para múltiples rangos de fechas
+                    foreach ($rangosFechas as $rango) {
+                        $query->whereBetween('Fecha', $rango, 'or');
+                    }
+                })
+                ->groupBy('Actividad')
+                ->get();
+
+
             return response()->json([
-                'semanasData' => $semanasData,
+                'semanasData' => $resultado,
                 'concurrenciaFase' => $concurrenciaFase,
-                'ok' => true
+                'ok' => true,
+                'concurrenciaAct' => $concurrenciaAct
             ]);
         } catch (\Throwable $th) {
             Log::error('Error al obtener datos: ' . $th->getMessage());
@@ -149,6 +167,7 @@ class UserController extends Controller
             ], 500);
         }
     }
+
 
     public function consultaABD($oficina)
     {

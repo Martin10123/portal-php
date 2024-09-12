@@ -61,7 +61,8 @@ class User extends Authenticatable implements LdapAuthenticatable
         'identificacion',
         'cargo',
         'IsAdmin',
-        'IdResponsable'
+        'IdResponsable',
+        "IsJefe",
     ];
 
     /**
@@ -140,5 +141,10 @@ class User extends Authenticatable implements LdapAuthenticatable
     public function getIsPrivilegedAttribute()
     {
         return session("IsPrivileged") ?? null;
+    }
+
+    public function getIsJefeAttribute()
+    {
+        return session("IsJefe") ?? null;
     }
 }

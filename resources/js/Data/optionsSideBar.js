@@ -46,6 +46,7 @@ export const optionsItemSidebar = [
     {
         title: "Graficos",
         hasSubItems: true,
+        isOnlyAdmin: true,
         icon: chartIcon,
         subItems: [
             {

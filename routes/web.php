@@ -31,8 +31,7 @@ Route::middleware([
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
         Route::get('/getUsuariosGerencia', [UserController::class, 'getUsuariosGerencia'])->name('getUsuariosGerencia');
-        Route::get('/consultaUsuariosXGerencia/{id}', [UserController::class, 'consultaUsuariosXGerencia'])->name('consultaUsuariosXGerencia');
-        Route::get('/consultaCasoBuqueDePersonaSeleccionada/{id}', [UserController::class, 'consultaCasoBuqueDePersonaSeleccionada'])->name('consultaCasoBuqueDePersonaSeleccionada');
+        Route::get('/consultaUsuariosXGerencia', [UserController::class, 'consultaUsuariosXGerencia'])->name('consultaUsuariosXGerencia');
         Route::get('/consultaDatosSegunPersonaSeleccionada', [UserController::class, 'consultaDatosSegunPersonaSeleccionada'])->name('consultaDatosSegunPersonaSeleccionada');
     });
 

@@ -53,6 +53,11 @@ class User extends Model
         return $this->idresponsable[0] ?? null;
     }
 
+    public function getIsJefe()
+    {
+        return $this->isJefe[0] ?? null;
+    }
+
     public function getCedula()
     {
         return $this->employeeid[0] ?? null;

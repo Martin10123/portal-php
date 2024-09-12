@@ -121,13 +121,14 @@ class CalendarController extends Controller
             'participants_necesary' => $request->participants_necesary,
             'participants_optional' => $request->participants_optional,
             'resource' => $request->resource,
-            'backgroundColor' => $request->backgroundColor,
+            'backgroundColor' => "#0099ff",
             'division' => $request->division,
             'isVRRequired' => $request->isVRRequired,
             'type_service_ID' => $request->type_service_ID["type_service_ID"],
             'uid_user' => $request->userCreated["guid"],
             'calendar_status' => $request->calendar_status,
-            'sala' => $request->floor
+            'sala' => $request->floor,
+            'IsSerial' => $request->isRepeatPeriod
         ]);
     }
 
@@ -161,7 +162,7 @@ class CalendarController extends Controller
 
             // Agregar los correos de los usuarios especiales
             $specialUsers = [
-                // "msimarra@cotecmar.com",
+                "msimarra@cotecmar.com",
                 // "jtapia@cotecmar.com",
                 // "gbarros@cotecmar.com"
             ];

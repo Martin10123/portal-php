@@ -9,7 +9,7 @@
             <ModalListCharts />
 
             <article class="grid grid-cols-3 gap-6">
-                <div class="shadow-md p-4 rounded-lg bg-slate-50">
+                <div class="shadow-md p-4 rounded-lg bg-slate-50 dark:bg-slate-950">
                     <div class="flex justify-between">
                         <h4>Hola mundo</h4>
                         <img class="w-6 h-6 cursor-pointer" src="../../Assets/infoIcon.svg" alt="infoIcon">
@@ -17,7 +17,7 @@
 
                     <p class="text-xl pt-2">30,000</p>
                 </div>
-                <div class="shadow-md p-4 rounded-lg bg-slate-50">
+                <div class="shadow-md p-4 rounded-lg bg-slate-50 dark:bg-slate-950">
                     <div class="flex justify-between">
                         <h4>Hola mundo</h4>
                         <img class="w-6 h-6 cursor-pointer" src="../../Assets/infoIcon.svg" alt="infoIcon">
@@ -25,7 +25,7 @@
 
                     <p class="text-xl pt-2">30,000</p>
                 </div>
-                <div class="shadow-md p-4 rounded-lg bg-slate-50">
+                <div class="shadow-md p-4 rounded-lg bg-slate-50 dark:bg-slate-950">
                     <div class="flex justify-between">
                         <h4>Hola mundo</h4>
                         <img class="w-6 h-6 cursor-pointer" src="../../Assets/infoIcon.svg" alt="infoIcon">

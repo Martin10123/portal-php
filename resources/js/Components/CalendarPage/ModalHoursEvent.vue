@@ -11,17 +11,31 @@
 
             <div class="py-4 grid gap-2">
                 <h3>¿Cuanto tiempo necesitas el laboratorio?</h3>
-                <div class="flex items-center gap-4">
-                    <label>Tiempo necesario</label>
+                <div class="grid grid-cols-2 align-middle">
+                    <div class="flex items-center gap-4">
+                        <label for="select-hour">Tiempo necesario</label>
 
-                    <select class="w-max border-gray-300 rounded-md shadow-sm dark:bg-black" v-model="timeNecessary">
-                        <option value="30">30 minutos</option>
-                        <option value="60">1 hora</option>
-                        <option value="90">1:30 horas</option>
-                        <option value="120">2 horas</option>
-                        <option value="150">2:30 horas</option>
-                        <option value="180">3 horas</option>
-                    </select>
+                        <select class="w-max border-gray-300 rounded-md shadow-sm dark:bg-black" id="select-hour"
+                            v-model="timeNecessary">
+                            <option value="30">30 minutos</option>
+                            <option value="60">1 hora</option>
+                            <option value="90">1:30 horas</option>
+                            <option value="120">2 horas</option>
+                            <option value="150">2:30 horas</option>
+                            <option value="180">3 horas</option>
+                        </select>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <div class="flex w-max items-center px-5 border border-gray-200 rounded dark:border-gray-700">
+                            <input checked id="bordered-checkbox-2" type="checkbox" name="bordered-checkbox"
+                                v-model="form.repeatPeriodically"
+                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                            <label for="bordered-checkbox-2"
+                                class="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Repetir
+                                periodicamente</label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -44,6 +58,7 @@
 import Modal from '@/Components/Modal.vue';
 import { onMounted, ref, watch } from 'vue';
 import { format, setHours, addMinutes, startOfDay, isSameDay, parseISO, isBefore, isEqual, isAfter } from 'date-fns';
+import { usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
     openModalHours: Boolean,
@@ -53,9 +68,13 @@ const props = defineProps({
     infoSelectedEvent: Object,
 });
 
+const { props: { auth } } = usePage()
+
 const timeNecessary = ref(30);
 
 const generateHoursAvailable = (startHour = 7, endHour = 17, interval = 30) => {
+    const isAdminOrBoss = auth.user.IsAdmin === "1" || auth.user.IsJefe === "1" || auth.user.IdResponsable === "20258";
+
     const hours = [];
     const start = startOfDay(new Date(props.form.date));
     const end = setHours(start, endHour);
@@ -75,7 +94,7 @@ const generateHoursAvailable = (startHour = 7, endHour = 17, interval = 30) => {
         const hourString = format(current, 'HH:mm');
         const minuteValue = current.getHours() + current.getMinutes() / 60;
         const isLunchTime = hourString === '12:30' || hourString === '13:00';
-        const isBlocked = isBefore(current, now) && !isEqual(current, now);
+        const isBlocked = !isAdminOrBoss && isBefore(current, now) && !isEqual(current, now);
 
         // Validación de tiempo necesario
         const futureTime = addMinutes(current, timeNecessary.value);
