@@ -80,28 +80,11 @@
                         Gráfico de barras
                     </h2>
                     <div style="overflow: auto; white-space: nowrap;">
-                        <div id="chartColumn" style="width: 100%; height: 500px"></div>
+                        <v-chart :option="optionsColumnGraph" autoresize class="chart"
+                            style="width: 100%; height: 400px;" />
                     </div>
-                </div>
 
-                <div class="w-full col-span-2 grid gap-3 bg-white p-2 rounded-md shadow-md dark:bg-slate-800">
-                    <h2 class="text-xl font-medium pb-2 border-b border-stone-100">
-                        Gráfico de pastel fases
-                    </h2>
-                    <div class="">
-                        <div id="piechart" style="width: 100%; height: 500px"></div>
-                    </div>
                 </div>
-
-                <div class="w-full col-span-2 grid gap-3 bg-white p-2 rounded-md shadow-md dark:bg-slate-800">
-                    <h2 class="text-xl font-medium pb-2 border-b border-stone-100">
-                        Gráfico de pastel act
-                    </h2>
-                    <div class="">
-                        <div id="piechartAct" style="width: 100%; height: 500px"></div>
-                    </div>
-                </div>
-
                 <LoadingStatus v-if="loadingCharts" />
             </article>
         </section>
@@ -128,6 +111,7 @@ const {
     onViewReport,
     openSidebar,
     toggleOpenSidebar,
-    onGetPersonasXGerencia
+    onGetPersonasXGerencia,
+    optionsColumnGraph
 } = useBarChart();
 </script>

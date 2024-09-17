@@ -9,14 +9,21 @@
 
     <section v-else class="h-[calc(100vh-4.1rem)]">
         <article class="relative h-full">
-
             <FullCalendar class="w-full" :options="calendarOptions" />
 
+            <button
+                class="absolute bottom-5 right-20 p-2 shadow-md rounded-full bg-primary-cotecmar cursor-pointer z-50"
+                @click="handleOpenFilterByPlaces">
+                <img class="w-8 object-cover" :src="officeFloor" alt="Create icon">
+            </button>
             <button class="absolute bottom-5 right-5 p-2 shadow-md rounded-full bg-primary-cotecmar cursor-pointer z-50"
                 @click="onCreateEvent">
-                <img class="w-10 object-cover" :src="createIcon" alt="Create icon">
+                <img class="w-8 object-cover" :src="createIcon" alt="Create icon">
             </button>
         </article>
+
+        <ModalFilterByPlace :open-filter-by-places="openFilterByPlaces"
+            :handle-open-filter-by-places="handleOpenFilterByPlaces" />
 
         <ModalCalendar :open-modal="openModal" :on-create-event="onCreateEvent" :form="form"
             :on-save-event="onSaveEvent" :handle-open-modal-hours="handleOpenModalHours"
@@ -31,26 +38,30 @@
 <script setup>
 import Navbar from '@/Components/SideBar/Navbar.vue';
 import createIcon from "@/Assets/createIcon.svg"
+import officeFloor from "@/Assets/officeFloor.svg"
 import ModalCalendar from '@/Components/CalendarPage/ModalCalendar.vue';
 import ModalViewInfo from '@/Components/CalendarPage/ModalViewInfo.vue';
 import { useCalendarPage } from '@/Composables';
+import ModalFilterByPlace from '@/Components/CalendarPage/ModalFilterByPlace.vue';
 
 const {
-    calendarOptions,
-    form,
-    infoSelectedEvent,
-    openModalHours,
     openModal,
     openShowInfo,
+    infoSelectedEvent,
+    form,
+    calendarOptions,
+    openModalHours,
     events,
     isLoadingData,
     isLoadingSaveEvent,
-    onSaveEvent,
+    openFilterByPlaces,
     onCreateEvent,
+    onSaveEvent,
     onViewInfoEvent,
     onEditEvent,
     handleOpenModalHours,
-    onDeleteEvent
+    onDeleteEvent,
+    handleOpenFilterByPlaces,
 } = useCalendarPage()
 
 </script>

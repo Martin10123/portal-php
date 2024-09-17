@@ -75,6 +75,7 @@ Route::middleware([
     Route::prefix('calendarPage')->name('calendarPage.')->group(function () {
         Route::get('/', [CalendarController::class, 'index'])->name('index');
         Route::get('/getReason/{id}', [CalendarController::class, 'getReason'])->name('getReason');
+        Route::get('getEventsFiltersByFloor', [CalendarController::class, "getFiltersEventsByFloor"])->name('getEventsFiltersByFloor');
         Route::post('/create', [CalendarController::class, 'create'])->name('create');
         Route::put('/update/{id}', [CalendarController::class, 'update'])->name('update');
         Route::delete('/delete/{id}/{reason}', [CalendarController::class, 'destroy'])->name('delete');

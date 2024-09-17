@@ -7,6 +7,7 @@ use App\Http\Requests\CalendarRequest;
 use App\Http\Controllers\TypeServicesCalendarController;
 use App\Models\CalendarLog;
 use App\Notifications\EventCalendarMail;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
@@ -26,8 +27,30 @@ class CalendarController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Error al obtener los datos',
+                'message' => 'Error al obtener los datos de la base de datos',
                 'error' => $e,
+                "ok" => false
+            ]);
+        }
+    }
+
+    public function getFiltersEventsByFloor(Request $request)
+    {
+        try {
+
+            $eventsCalendar = Calendar::whereIn('sala', $request->floors)
+                ->where('calendar_status', 1)
+                ->get();
+
+            return response()->json([
+                'message' => 'Datos obtenidos correctamente',
+                'data' => $eventsCalendar,
+                "ok" => true,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Error al obtener los datos filtrados de la base de datos',
+                'error' => $th,
                 "ok" => false
             ]);
         }
@@ -80,7 +103,7 @@ class CalendarController extends Controller
             $responseDB = $this->createCalendarEvent($request);
             $responseDB->type_service_ID = $request->type_service_ID;
 
-            // Envía notificaciones a los participantes
+            // // Envía notificaciones a los participantes
             $this->notifyParticipants(
                 $request->userCreated,
                 $request->participants_necesary,
@@ -121,7 +144,7 @@ class CalendarController extends Controller
             'participants_necesary' => $request->participants_necesary,
             'participants_optional' => $request->participants_optional,
             'resource' => $request->resource,
-            'backgroundColor' => "#0099ff",
+            'backgroundColor' => $request->floor === "Laboratorio XRLAB" ? "#0099ff" : "#808080",
             'division' => $request->division,
             'isVRRequired' => $request->isVRRequired,
             'type_service_ID' => $request->type_service_ID["type_service_ID"],
@@ -154,18 +177,18 @@ class CalendarController extends Controller
     protected function notifyParticipants($userCreated, $participantsNecesary, $participantsOptional, $responseDB, $isUpdate)
     {
         try {
-            // Obtener y unificar los correos de los participantes necesarios y opcionales
+            // // Obtener y unificar los correos de los participantes necesarios y opcionales
             $emails = array_unique(array_merge(
                 explode('; ', $participantsNecesary),
                 explode('; ', $participantsOptional)
             ));
 
             // Agregar los correos de los usuarios especiales
-            $specialUsers = [
+            $specialUsers = $responseDB->sala === "Laboratorio XRLAB" ? [
                 "msimarra@cotecmar.com",
-                // "jtapia@cotecmar.com",
-                // "gbarros@cotecmar.com"
-            ];
+                "jtapia@cotecmar.com",
+                "gbarros@cotecmar.com"
+            ] : ["aalvis@cotecmar.com"];
 
             $emails = array_unique(array_merge($emails, $specialUsers));
 
@@ -194,18 +217,19 @@ class CalendarController extends Controller
             $request->merge(['type_service_ID' => $typeServiceData]);
 
             $calendar->title = $request->title;
+            $calendar->sala = $request->floor;
             $calendar->description = $request->description;
             $calendar->starting_date = $request->starting_date;
             $calendar->ending_date = $request->ending_date;
             $calendar->participants_necesary = $request->participants_necesary;
             $calendar->participants_optional = $request->participants_optional;
             $calendar->resource = $request->resource;
-            $calendar->backgroundColor = $request->backgroundColor;
             $calendar->division = $request->division;
             $calendar->isVRRequired = $request->isVRRequired;
             $calendar->type_service_ID = $typeServiceData["type_service_ID"];
             $calendar->uid_user = $request->userCreated["guid"];
             $calendar->calendar_status = $request->calendar_status;
+            $calendar->IsSerial = $request->isRepeatPeriod;
 
             $calendar->save();
 

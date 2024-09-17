@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import axios, { Axios } from "axios";
+import axios from "axios";
 import Swal from "sweetalert2";
 
 export const useDataGrafosStore = defineStore("dataGrafos", {

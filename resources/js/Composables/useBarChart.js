@@ -2,6 +2,14 @@ import { useForm } from "@inertiajs/vue3";
 import { onMounted, ref, watch } from "vue";
 import Swal from "sweetalert2";
 import { useReports } from "./useReports";
+import {
+    getListMouth,
+    getXAtributoArray,
+    getYearsFrom2000,
+} from "@/helpers/BarChartHelper";
+import { initECharts } from "@/echartsConfig";
+
+initECharts();
 
 export const useBarChart = () => {
     const { openSidebar, toggleOpenSidebar } = useReports();
@@ -23,80 +31,6 @@ export const useBarChart = () => {
         mes: "",
         anio: "",
     });
-
-    function drawChart() {
-        const data = google.visualization.arrayToDataTable([
-            [
-                "Semana - Año",
-                "HH semanal",
-                "HH acumulada",
-                { role: "annotation" },
-            ],
-            ["w31-2024", 0, 0, 0],
-            ["w32-2024", 0, 0, 0],
-            ["w33-2024", 0, 0, 0],
-            ["w34-2024", 0, 0, 0],
-            ["w35-2024", 0, 0, 0],
-        ]);
-
-        const options = {
-            chart: {
-                title: "hh semana, hh acumulada",
-                subtitle: "Horas semanales y acumuladas",
-            },
-            backgroundColor: {
-                fill: "transparent",
-            },
-        };
-
-        const chart = new google.charts.Bar(
-            document.getElementById("chartColumn")
-        );
-
-        chart.draw(data, google.charts.Bar.convertOptions(options));
-    }
-
-    function drawChart1() {
-        const data = google.visualization.arrayToDataTable([
-            ["Task", "Hours per Day"],
-            ["", 1],
-        ]);
-
-        const options = {
-            title: "Fase",
-            backgroundColor: {
-                fill: "transparent",
-            },
-            is3D: true,
-        };
-
-        const chart = new google.visualization.PieChart(
-            document.getElementById("piechart")
-        );
-
-        chart.draw(data, options);
-    }
-
-    function drawChart2() {
-        const data = google.visualization.arrayToDataTable([
-            ["Task", ""],
-            ["", 1],
-        ]);
-
-        const options = {
-            title: "Act",
-            backgroundColor: {
-                fill: "transparent",
-            },
-            is3D: true,
-        };
-
-        const chart = new google.visualization.PieChart(
-            document.getElementById("piechartAct")
-        );
-
-        chart.draw(data, options);
-    }
 
     const getDivision = async () => {
         try {
@@ -127,14 +61,6 @@ export const useBarChart = () => {
             isLoadingNames.value = false;
             isSearchDivision.value = false;
         }
-    };
-
-    const getXAtributoArray = (array, atributte) => {
-        if (array.length === 0) {
-            return [];
-        }
-
-        return array.map((p) => p[atributte]);
     };
 
     const onViewReport = async () => {
@@ -233,112 +159,6 @@ export const useBarChart = () => {
         );
     };
 
-    const renderCharts = (data) => {
-        const { semanasData, concurrenciaFase, concurrenciaAct } = data;
-
-        renderBarChart(semanasData);
-        renderPieChart(concurrenciaFase, "Fase", "piechart");
-        renderPieChart(concurrenciaAct, "Act", "piechartAct");
-    };
-
-    const renderBarChart = (semanasData) => {
-        const filasSemanas = semanasData.map((semana) => [
-            semana.semana,
-            Math.round(Number(semana.horasDeLaSemana)),
-            Math.round(Number(semana.horasAcumuladas)),
-        ]);
-
-        const data = google.visualization.arrayToDataTable([
-            ["Semana - Año", "HH semanal", "HH acumulada"],
-            ...filasSemanas,
-        ]);
-
-        // Número de semanas (columnas) que tienes
-        const numColumns = data.getNumberOfRows();
-
-        // Calcula el ancho dinámico: 100px por cada columna
-        const chartWidth = numColumns * 100;
-
-        // Aplica el nuevo ancho dinámico al div del gráfico
-        document.getElementById("chartColumn").style.width = chartWidth + "px";
-
-        const options = {
-            chart: {
-                title: "HH semanal, HH acumulada",
-                subtitle: "Horas semanales y acumuladas",
-            },
-            backgroundColor: { fill: "transparent" },
-            hAxis: {
-                textStyle: {
-                    fontSize: 10, // Ajusta el tamaño de las etiquetas
-                },
-                slantedText: true, // Inclina el texto para mayor legibilidad
-            },
-            vAxis: {
-                viewWindow: {
-                    min: 0,
-                    max: Math.max(...data.getDistinctValues(1)) * 1.2, // Ajustar el máximo del eje para dar espacio
-                },
-                title: "Horas",
-            },
-        };
-
-        const chart = new google.charts.Bar(
-            document.getElementById("chartColumn")
-        );
-        chart.draw(data, google.charts.Bar.convertOptions(options));
-    };
-
-    const renderPieChart = (data, title, elementId) => {
-        const filas = data.map((item) => [
-            item.Fase || item.Actividad,
-            Math.round(Number(item.concurrencia)),
-        ]);
-
-        const dataTable = google.visualization.arrayToDataTable([
-            [title, "Concurrencia"],
-            ...filas,
-        ]);
-
-        const options = {
-            title: title,
-            backgroundColor: { fill: "transparent" },
-            is3D: true,
-        };
-
-        const chart = new google.visualization.PieChart(
-            document.getElementById(elementId)
-        );
-        chart.draw(dataTable, options);
-    };
-
-    function getYearsFrom2000() {
-        const currentYear = new Date().getFullYear();
-        const years = [];
-
-        for (let year = currentYear; year >= 2019; year--) {
-            years.push(year);
-        }
-        return years;
-    }
-
-    function getListMouth() {
-        return [
-            { value: "1", name: "Enero" },
-            { value: "2", name: "Febrero" },
-            { value: "3", name: "Marzo" },
-            { value: "4", name: "Abril" },
-            { value: "5", name: "Mayo" },
-            { value: "6", name: "Junio" },
-            { value: "7", name: "Julio" },
-            { value: "8", name: "Agosto" },
-            { value: "9", name: "Septiembre" },
-            { value: "10", name: "Octubre" },
-            { value: "11", name: "Noviembre" },
-            { value: "12", name: "Diciembre" },
-        ];
-    }
-
     watch(
         () => form.division,
         async (newValue) => {
@@ -350,15 +170,30 @@ export const useBarChart = () => {
         }
     );
 
-    onMounted(() => {
-        google.charts.load("current", { packages: ["bar"] });
-        google.charts.setOnLoadCallback(drawChart);
-
-        google.charts.load("current", { packages: ["corechart"] });
-        google.charts.setOnLoadCallback(drawChart1);
-
-        google.charts.load("current", { packages: ["corechart"] });
-        google.charts.setOnLoadCallback(drawChart2);
+    const optionsColumnGraph = ref({
+        legend: {},
+        tooltip: {},
+        dataset: {
+            dimensions: ["product", "2015", "2016", "2017"], // Define las dimensiones
+            source: [
+                { product: "Matcha Latte", 2015: 43.3, 2016: 85.8, 2017: 93.7 },
+                { product: "Milk Tea", 2015: 83.1, 2016: 73.4, 2017: 55.1 },
+                { product: "Cheese Cocoa", 2015: 86.4, 2016: 65.2, 2017: 82.5 },
+                {
+                    product: "Walnut Brownie",
+                    2015: 72.4,
+                    2016: 53.9,
+                    2017: 39.1,
+                },
+            ],
+        },
+        xAxis: { type: "category" },
+        yAxis: {},
+        series: [
+            { type: "bar", name: "2015", encode: { x: "product", y: "2015" } },
+            { type: "bar", name: "2016", encode: { x: "product", y: "2016" } },
+            { type: "bar", name: "2017", encode: { x: "product", y: "2017" } },
+        ],
     });
 
     onMounted(() => {
@@ -378,9 +213,10 @@ export const useBarChart = () => {
         isSearchDivision,
         loadingCharts,
         isLoadingNames,
-        onViewReport,
         openSidebar,
-        toggleOpenSidebar,
+        optionsColumnGraph,
         onGetPersonasXGerencia,
+        onViewReport,
+        toggleOpenSidebar,
     };
 };

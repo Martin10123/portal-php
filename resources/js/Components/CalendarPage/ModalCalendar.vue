@@ -18,11 +18,16 @@
                 <form class="grid gap-4 pt-3" @submit.prevent="onSaveEvent">
                     <div class="grid gap-2">
                         <label class="font-medium">Lugar del evento</label>
-                        <select class="w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700"
-                            v-model="form.floor">
-                            <option value="">Seleccionar</option>
-                            <option value="Laboratorio XRLAB">Laboratorio XRLAB</option>
-                        </select>
+                        <Select :options="dataFloorsAvaibleCalendar" optionLabel="name"
+                            placeholder="Selecciona un lugar" class="w-full" v-model="form.floor">
+                            <template #option="slotProps">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded" :style="{ background: slotProps.option.bgColor }">
+                                    </div>
+                                    <div>{{ slotProps.option.name }}</div>
+                                </div>
+                            </template>
+                        </Select>
                     </div>
                     <div class="grid gap-2">
                         <label class="font-medium">Título</label>
@@ -59,7 +64,8 @@
                             <select class="w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700"
                                 v-model="form.division">
                                 <option v-for="management in listManagement" :key="management.Nombre"
-                                    :value="management.Nombre">{{ management.Nombre }}
+                                    :value="management.Nombre">{{
+                                        management.Nombre }}
                                 </option>
                             </select>
                         </div>
@@ -85,39 +91,32 @@
                         </div>
                     </div>
 
-                    <div class="grid gap-2">
-                        <label class="font-medium">Participantes necesarios</label>
-                        <v-select class="dark:bg-gray-700 rounded-md" multiple :options="usersEmails"
-                            placeholder="Participantes..." append-to-body :calculate-position="calcSpacing"
-                            v-model="form.participantsNecesary" label="correo" :reduce="email => email.correo"
-                            :filter="customFilter">
-                            <template v-slot:option="option">
-                                <div>
-                                    {{ option.correo }}
-                                    <br>
-                                    <cite class="text-sm">{{ option.nombre }}</cite>
-                                </div>
-                            </template>
-                        </v-select>
-                    </div>
-                    <div class="grid gap-2">
-                        <label class="font-medium">Participantes opcionales</label>
-                        <v-select class="dark:bg-gray-700 rounded-md" multiple :options="usersEmails"
-                            placeholder="Participantes..." label="correo" append-to-body
-                            :calculate-position="calcSpacing" v-model="form.participantsOptional"
-                            :reduce="email => email.correo" :filter="customFilter">
-                            <template v-slot:option="option">
-                                <div>
-                                    {{ option.correo }}
-                                    <br>
-                                    <cite class="text-sm">{{ option.nombre }}</cite>
-                                </div>
-                            </template>
-                        </v-select>
-                    </div>
+                    <ParticipantSelect label="Participantes necesarios" :options="usersEmails"
+                        :calcSpacing="calcSpacing" v-model="form.participantsNecesary" />
+
+                    <ParticipantSelect label="Participantes opcionales" :options="usersEmails"
+                        :calcSpacing="calcSpacing" v-model="form.participantsOptional" />
 
                     <div class="grid gap-2">
-                        <label class="font-medium">recursos</label>
+                        <div class="flex justify-between">
+                            <label class="font-medium">recursos</label>
+
+                            <div class="group flex relative">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-6 cursor-pointer">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                                </svg>
+
+                                <span
+                                    class="group-hover:opacity-100 transition-opacity bg-gray-800 px-1 text-sm text-gray-100 rounded-md opacity-0 m-4 mx-auto p-2 w-40 absolute right-0 bottom-4 -z-10 group-hover:z-30">
+                                    Los recursos son enlaces a documentos, videos, descargas, entre otros que son
+                                    necesarios para llevar a
+                                    cabo la reunión.
+                                </span>
+                            </div>
+
+                        </div>
                         <v-select class="dark:bg-gray-700 rounded-md" multiple placeholder="Recursos..." :options="[]"
                             v-model="form.resource" taggable />
                     </div>
@@ -140,7 +139,9 @@ import ModalHoursEvent from './ModalHoursEvent.vue';
 import { getAllHolidays } from '@/Data/getHolidays';
 import { useModalCalendar } from '@/Composables';
 import RealityIcon from '@/Assets/RealityIcon.vue';
-import Fuse from 'fuse.js';
+import { dataFloorsAvaibleCalendar } from '@/Data/dataFloorsAvaibleCalendar';
+import Select from 'primevue/select';
+import ParticipantSelect from '../ParticipantSelect.vue';
 
 const props = defineProps({
     openModal: Boolean,
@@ -155,19 +156,6 @@ const props = defineProps({
 });
 
 const { calcSpacing, listaTipoServicios, usersEmails, listManagement } = useModalCalendar(props.form)
-
-function customFilter(options, search) {
-    const fuse = new Fuse(options, {
-        keys: ['nombre', 'correo'],
-        shouldSort: true,
-        threshold: 0,
-        distance: 100,
-    });
-
-    return search.length
-        ? fuse.search(search).map(({ item }) => item)
-        : options;
-}
 
 </script>
 
