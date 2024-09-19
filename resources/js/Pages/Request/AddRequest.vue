@@ -1,4 +1,7 @@
 <template>
+
+    <Head title="Registro de solicitudes" />
+
     <main class="">
         <Navbar :toggleOpenSidebar="toggleOpenSidebar" />
 
@@ -18,7 +21,8 @@
                             REGISTRO SOLICITUD DE SERVICIO DE DISEÑO Y/O INGENIERIA
                         </h1>
 
-                        <select class="w-full border border-stone-300 cursor-pointer outline-0 p-4 rounded-lg dark:bg-gray-700 dark:text-white"
+                        <select
+                            class="w-full border border-stone-300 cursor-pointer outline-0 p-4 rounded-lg dark:bg-gray-700 dark:text-white"
                             v-model="form.tipoRegistro" disabled>
                             <option value="Interno">Seleccionar uno</option>
                             <option value="Administrativo">Administrativo</option>
@@ -68,6 +72,7 @@ import Navbar from "@/Components/SideBar/Navbar.vue";
 import { useAddRequest, useNavSidebar } from "@/Composables";
 import Swal from "sweetalert2";
 import { watch } from "vue";
+import { Head } from "@inertiajs/vue3";
 
 const { form, nextTab, prevTab, submitForm, tabs, isLoadingRequest } = useAddRequest();
 const { openSidebar, toggleOpenSidebar } = useNavSidebar()

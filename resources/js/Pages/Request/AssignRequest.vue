@@ -1,5 +1,7 @@
 <template>
 
+    <Head title="Asignación de solicitudes" />
+
     <Navbar :toggleOpenSidebar="toggleOpenSidebar" />
 
     <main class="sm:grid sm:grid-cols-01">
@@ -44,6 +46,7 @@ import { useNavSidebar } from '@/Composables';
 import FormEdit from "@/Components/AssignRequest/FormEdit.vue"
 import { ref } from 'vue';
 import TableRequeriment from '@/Components/AssignRequest/TableRequeriment.vue';
+import { Head } from '@inertiajs/vue3';
 
 const { openSidebar, toggleOpenSidebar } = useNavSidebar()
 

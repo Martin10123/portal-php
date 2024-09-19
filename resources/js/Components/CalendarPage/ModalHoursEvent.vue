@@ -108,9 +108,17 @@ const generateHoursAvailable = (startHour = 7, endHour = 17, interval = 30) => {
             const eventStart = parseISO(event.start);
             const eventEnd = parseISO(event.end);
 
-            return (current >= eventStart && current < eventEnd) ||
-                (futureTime > eventStart && futureTime <= eventEnd) ||
-                (current <= eventStart && futureTime > eventStart);
+            if (props.form.floor.length === 0) {
+                return (current >= eventStart && current < eventEnd) ||
+                    (futureTime > eventStart && futureTime <= eventEnd) ||
+                    (current <= eventStart && futureTime > eventStart)
+            }
+
+            return (current >= eventStart && current < eventEnd) && props.form.floor.name === event.floor
+                ||
+                (futureTime > eventStart && futureTime <= eventEnd) && props.form.floor.name === event.floor
+                ||
+                (current <= eventStart && futureTime > eventStart) && props.form.floor.name === event.floor
         });
 
         const crossesLunchTime = (hourString < '12:30' && format(futureTime, 'HH:mm') > '12:30') ||
@@ -157,6 +165,10 @@ watch(timeNecessary, () => {
 });
 
 watch(() => props.form.date, () => {
+    updateHours();
+});
+
+watch(() => props.form.floor, () => {
     updateHours();
 });
 

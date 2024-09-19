@@ -1,4 +1,7 @@
 <template>
+
+    <Head title="Grafico de pastel" />
+
     <Navbar :toggleOpenSidebar="toggleOpenSidebar" />
 
     <main class="sm:grid sm:grid-cols-01">
@@ -97,6 +100,7 @@ import SideBarMain from "@/Components/SideBar/SideBarMain.vue";
 import MultiSelect from "primevue/multiselect";
 import LoadingStatus from "@/Components/LoadingStatus.vue";
 import { useBarChart } from "@/Composables";
+import { Head } from "@inertiajs/vue3";
 
 const {
     form,

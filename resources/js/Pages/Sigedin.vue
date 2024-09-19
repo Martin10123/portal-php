@@ -1,4 +1,7 @@
 <template>
+
+  <Head title="Sigedin" />
+
   <Navbar :toggle-open-sidebar="toggleOpenSidebar" />
   <main class="w-full bg-slate-200 dark:bg-transparent flex items-center">
     <SideBarMain :openSidebar="openSidebar" :toggleOpenSidebar="toggleOpenSidebar" />
@@ -14,7 +17,7 @@
 import Navbar from '@/Components/SideBar/Navbar.vue';
 import SideBarMain from '@/Components/SideBar/SideBarMain.vue';
 import { useNavSidebar } from '@/Composables';
-import { usePage } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const { props } = usePage();

@@ -1,4 +1,7 @@
 <template>
+
+    <Head title="Reservas XRLAB" />
+
     <Navbar />
 
     <div v-if="isLoadingData">
@@ -11,11 +14,11 @@
         <article class="relative h-full">
             <FullCalendar class="w-full" :options="calendarOptions" />
 
-            <button
+            <!-- <button
                 class="absolute bottom-5 right-20 p-2 shadow-md rounded-full bg-primary-cotecmar cursor-pointer z-50"
                 @click="handleOpenFilterByPlaces">
                 <img class="w-8 object-cover" :src="officeFloor" alt="Create icon">
-            </button>
+            </button> -->
             <button class="absolute bottom-5 right-5 p-2 shadow-md rounded-full bg-primary-cotecmar cursor-pointer z-50"
                 @click="onCreateEvent">
                 <img class="w-8 object-cover" :src="createIcon" alt="Create icon">
@@ -38,11 +41,11 @@
 <script setup>
 import Navbar from '@/Components/SideBar/Navbar.vue';
 import createIcon from "@/Assets/createIcon.svg"
-import officeFloor from "@/Assets/officeFloor.svg"
 import ModalCalendar from '@/Components/CalendarPage/ModalCalendar.vue';
 import ModalViewInfo from '@/Components/CalendarPage/ModalViewInfo.vue';
 import { useCalendarPage } from '@/Composables';
 import ModalFilterByPlace from '@/Components/CalendarPage/ModalFilterByPlace.vue';
+import { Head } from '@inertiajs/vue3';
 
 const {
     openModal,
@@ -59,8 +62,8 @@ const {
     onSaveEvent,
     onViewInfoEvent,
     onEditEvent,
-    handleOpenModalHours,
     onDeleteEvent,
+    handleOpenModalHours,
     handleOpenFilterByPlaces,
 } = useCalendarPage()
 

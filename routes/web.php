@@ -75,7 +75,8 @@ Route::middleware([
     Route::prefix('calendarPage')->name('calendarPage.')->group(function () {
         Route::get('/', [CalendarController::class, 'index'])->name('index');
         Route::get('/getReason/{id}', [CalendarController::class, 'getReason'])->name('getReason');
-        Route::get('getEventsFiltersByFloor', [CalendarController::class, "getFiltersEventsByFloor"])->name('getEventsFiltersByFloor');
+        Route::get('/getEventsFiltersByFloor', [CalendarController::class, "getFiltersEventsByFloor"])->name('getEventsFiltersByFloor');
+        Route::get('/getAllFloors', [CalendarController::class, 'getAllFloors'])->name('getAllFloors');
         Route::post('/create', [CalendarController::class, 'create'])->name('create');
         Route::put('/update/{id}', [CalendarController::class, 'update'])->name('update');
         Route::delete('/delete/{id}/{reason}', [CalendarController::class, 'destroy'])->name('delete');
@@ -100,6 +101,7 @@ Route::middleware([
             'Personnel/Reports' => 'Reports',
             'Profile/ProfileUser' => 'Profile',
             'CalendarPage/CalendarPage' => 'CalendarPage',
+            'CalendarPage/AdminFloor' => 'AdminFloor',
             'Personnel/AddGraphoFromExcel' => 'AddGraphoFromExcel',
             'Charts/ChartsMain' => 'ChartsMain',
             'Charts/BarChart' => 'BarChart',

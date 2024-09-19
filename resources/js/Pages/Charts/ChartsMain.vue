@@ -1,4 +1,7 @@
 <template>
+
+    <Head title="Graficos" />
+
     <Navbar :toggleOpenSidebar="toggleOpenSidebar" />
 
     <main class="sm:grid sm:grid-cols-01">
@@ -49,6 +52,7 @@ import ModalListCharts from '@/Components/Charts/ModalListCharts.vue';
 import Navbar from '@/Components/SideBar/Navbar.vue';
 import SideBarMain from '@/Components/SideBar/SideBarMain.vue';
 import { useReports } from '@/Composables';
+import { Head } from '@inertiajs/vue3';
 import { onMounted, ref } from 'vue';
 
 const { openSidebar, toggleOpenSidebar } = useReports();

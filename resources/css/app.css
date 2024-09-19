@@ -112,3 +112,7 @@ html {
 .google-visualization-orgchart-node-medium {
     @apply dark:bg-gray-700 dark:border-gray-700 dark:text-black !important;
 }
+
+.fc-direction-ltr .fc-timegrid-col-events {
+    width: 100%;
+}

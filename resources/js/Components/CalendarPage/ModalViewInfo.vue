@@ -142,6 +142,12 @@ const isUserCreator = computed(() => {
         || page.props.auth.user.IdResponsable === '20187';
 })
 
+const isAdmin = computed(() => {
+    return page.props.auth.user.IdResponsable === '20258'
+        || page.props.auth.user.IdResponsable === '61'
+        || page.props.auth.user.IdResponsable === '20187';
+})
+
 const disabledButton = ref(false);
 const openModalInfo = ref(false);
 const reasonUpdate = ref(null);
@@ -198,7 +204,11 @@ onMounted(() => {
             (currentDate.getDate() === eventDate.getDate() && currentHour > eventHour) ||
             (currentDate.getDate() === eventDate.getDate() && currentHour === eventHour && currentMinutes > eventMinutes)
         ) {
-            disabledButton.value = true;
+
+            if (!isAdmin) {
+                disabledButton.value = true;
+            }
+
         }
     }
 

@@ -1,4 +1,7 @@
 <template>
+
+    <Head title="Agregar grafos" />
+
     <Navbar :toggleOpenSidebar="toggleOpenSidebar" />
 
     <main class="sm:grid sm:grid-cols-01">
@@ -56,6 +59,7 @@ import HeaderTableExcel from "@/Components/Personnel/HeaderTableExcel.vue";
 import ItemsTableExcel from "@/Components/Personnel/ItemsTableExcel.vue";
 import { useAddExcelFile } from "@/Composables/useAddExcelFile";
 import FormOneSelectExcel from "@/Components/Personnel/FormOneSelectExcel.vue";
+import { Head } from "@inertiajs/vue3";
 
 const {
     currentPage,

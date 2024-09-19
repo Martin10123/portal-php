@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Calendar;
 use App\Http\Requests\CalendarRequest;
 use App\Http\Controllers\TypeServicesCalendarController;
+use App\Models\CalendarFloor;
 use App\Models\CalendarLog;
 use App\Notifications\EventCalendarMail;
 use Illuminate\Http\Request;
@@ -93,6 +94,21 @@ class CalendarController extends Controller
     public function create(CalendarRequest $request)
     {
         try {
+
+            $conflictingEvent = Calendar::where('sala', $request->floor)
+                ->where(function ($query) use ($request) {
+                    $query->whereBetween('starting_date', [$request->starting_date, $request->ending_date])
+                        ->orWhereBetween('ending_date', [$request->starting_date, $request->ending_date]);
+                })
+                ->first();
+
+            if ($conflictingEvent) {
+                return response()->json([
+                    'message' => 'Hay un conflicto con otro evento en el mismo horario y sala.',
+                    'ok' => false
+                ], 409);
+            }
+
             // Maneja el type_service_ID
             $typeServiceData = $this->handleTypeServiceID($request->type_service_ID);
 
@@ -177,25 +193,26 @@ class CalendarController extends Controller
     protected function notifyParticipants($userCreated, $participantsNecesary, $participantsOptional, $responseDB, $isUpdate)
     {
         try {
-            // // Obtener y unificar los correos de los participantes necesarios y opcionales
+            // Obtener y unificar los correos de los participantes necesarios y opcionales
             $emails = array_unique(array_merge(
                 explode('; ', $participantsNecesary),
                 explode('; ', $participantsOptional)
             ));
 
             // Agregar los correos de los usuarios especiales
-            $specialUsers = $responseDB->sala === "Laboratorio XRLAB" ? [
-                "msimarra@cotecmar.com",
-                "jtapia@cotecmar.com",
-                "gbarros@cotecmar.com"
-            ] : ["aalvis@cotecmar.com"];
+            $specialUsers = [""];
+            // $responseDB->sala === "Laboratorio XRLAB" ? [
+            //     "msimarra@cotecmar.com",
+            //     "jtapia@cotecmar.com",
+            //     "gbarros@cotecmar.com"
+            // ] : [""];
 
             $emails = array_unique(array_merge($emails, $specialUsers));
 
             // Enviar notificaciones a todos los correos
             foreach ($emails as $email) {
                 try {
-                    Notification::route('mail', trim($email))->notify(new EventCalendarMail($responseDB, $isUpdate, $userCreated));
+                    Notification::route('mail', trim(string: $email))->notify(new EventCalendarMail($responseDB, $isUpdate, $userCreated));
                 } catch (\Exception $e) {
                     Log::error('Error al enviar el correo a ' . $email . ': ' . $e->getMessage());
                 }
@@ -318,6 +335,30 @@ class CalendarController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => 'Error al obtener los datos',
+                'error' => $th,
+                "ok" => false
+            ]);
+        }
+    }
+
+    // Calendar_Sala
+
+    public function getAllFloors()
+    {
+        try {
+
+            $floors = CalendarFloor::with(['respFloor.user'])->get();
+
+            Log::info($floors);
+
+            return response()->json([
+                "message" => "Datos obtenidos correctamente",
+                "data" => $floors,
+                "ok" => true
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Error al obtener los datos de la base de datos de las salas',
                 'error' => $th,
                 "ok" => false
             ]);

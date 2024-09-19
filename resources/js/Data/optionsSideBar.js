@@ -41,6 +41,11 @@ export const optionsItemSidebar = [
                 title: "Reservar el laboratorio",
                 goTo: "/Sigedin/CalendarPage/CalendarPage",
             },
+            // {
+            //     title: "Gestión de salas",
+            //     goTo: "/Sigedin/CalendarPage/AdminFloor",
+            //     isOnlyAdmin: true,
+            // },
         ],
     },
     {

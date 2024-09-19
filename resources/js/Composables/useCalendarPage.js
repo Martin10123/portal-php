@@ -1,5 +1,5 @@
 import { useForm, usePage } from "@inertiajs/vue3";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -10,11 +10,9 @@ import Swal from "sweetalert2";
 
 import { validateFormCalendar } from "@/Validations/validCalendarModal";
 import { getAllHolidays } from "@/Data/getHolidays";
-import { format, setHours, setMinutes } from "date-fns";
-import { useDataCalendarStore } from "@/pinia/useDataCalendarStore";
+import { add, format, parse, setHours, setMinutes } from "date-fns";
 
 export const useCalendarPage = () => {
-    const store = useDataCalendarStore();
     const openModal = ref(false);
     const openShowInfo = ref(false);
     const openModalHours = ref(false);
@@ -23,6 +21,7 @@ export const useCalendarPage = () => {
 
     const isLoadingData = ref(false);
     const isLoadingSaveEvent = ref(false);
+    const events = ref([]);
 
     const { props } = usePage();
 
@@ -79,7 +78,7 @@ export const useCalendarPage = () => {
 
         return {
             html: `
-                <div class="fc-event-main-frame overflow-hidden">
+                <div class="fc-event-main-frame overflow-hidden" title="${title}">
                     <div class="fc-event-time">
                         ${getHourTime(start)} - ${getHourTime(end)}
                     </div>
@@ -88,7 +87,7 @@ export const useCalendarPage = () => {
                             ${title}
                         </div>
                     </div>
-                    <div class="flex gap-1 justify-end px-1">
+                    <div class="flex gap-1 justify-end px-1 absolute bottom-0 right-0">
                         ${getIcons()}
                     </div>
                 </div>
@@ -112,6 +111,7 @@ export const useCalendarPage = () => {
         },
         selectable: true,
         slotEventOverlap: false,
+        events: events,
         weekends: false,
         height: "100%",
         locale: esLocale,
@@ -135,7 +135,7 @@ export const useCalendarPage = () => {
 
     // Función para manejar la visualización de la información de un evento
     function handleEventClick(info) {
-        onViewInfoEvent();
+        onViewInfoEvent(false);
 
         infoSelectedEvent.value = extractEventDetails(info);
     }
@@ -162,7 +162,10 @@ export const useCalendarPage = () => {
 
     // Función para manejar la selección de un evento
     function handleSelectEvent(info) {
-        if (!isValidTimeRange(info.startStr, info.endStr)) {
+        if (
+            !isValidTimeRange(info.startStr, info.endStr) &&
+            info.view.type !== "dayGridMonth"
+        ) {
             Swal.fire({
                 icon: "error",
                 title: "Error",
@@ -239,8 +242,12 @@ export const useCalendarPage = () => {
         openFilterByPlaces.value = !openFilterByPlaces.value;
     };
 
-    const onViewInfoEvent = () => {
+    const onViewInfoEvent = (isEdit) => {
         openShowInfo.value = !openShowInfo.value;
+
+        if (!openShowInfo.value && !isEdit) {
+            infoSelectedEvent.value = {};
+        }
     };
 
     const onCreateEvent = (eventSelect) => {
@@ -267,7 +274,7 @@ export const useCalendarPage = () => {
     };
 
     const onEditEvent = () => {
-        onViewInfoEvent();
+        onViewInfoEvent(true);
         openModal.value = !openModal.value;
 
         const {
@@ -329,7 +336,7 @@ export const useCalendarPage = () => {
 
             const { value: text, isConfirmed } = await Swal.fire({
                 input: "textarea",
-                inputLabel: "Estas seguro que quieres actualizar este evento?",
+                inputLabel: "Razón de la modificación",
                 inputPlaceholder: "Escribe la razón...",
                 inputAttributes: {
                     "aria-label": "Escribe la razón",
@@ -517,6 +524,16 @@ export const useCalendarPage = () => {
             }
         } catch (error) {
             console.log(error);
+
+            if (error.response.status === 409) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: error.response.data.message,
+                });
+                return;
+            }
+
             Swal.fire({
                 icon: "error",
                 title: "Error",
@@ -533,7 +550,7 @@ export const useCalendarPage = () => {
 
             const { value: text, isConfirmed } = await Swal.fire({
                 input: "textarea",
-                inputLabel: "Estas seguro que quieres eliminar este evento?",
+                inputLabel: "Razón de la eliminación",
                 inputPlaceholder: "Escribe la razón...",
                 inputAttributes: {
                     "aria-label": "Escribe la razón",
@@ -596,13 +613,89 @@ export const useCalendarPage = () => {
         }
     };
 
+    const getDayInEnglishAndUntilDate = (date, isSerial) => {
+        if (isSerial === "0") {
+            return;
+        }
+
+        const dayAbbreviation = format(date, "EE").toLowerCase();
+
+        const oneMonthLater = add(date, { months: 1 });
+
+        return [dayAbbreviation, oneMonthLater];
+    };
+
+    const getEventDuration = (start, end) => {
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+
+        const duration = (endDate - startDate) / 1000 / 60 / 60;
+
+        if (duration < 1) {
+            return "00:30";
+        } else if (duration < 1.5) {
+            return "01:00";
+        } else if (duration < 2) {
+            return "01:30";
+        } else if (duration < 2.5) {
+            return "02:00";
+        } else if (duration < 3) {
+            return "02:30";
+        } else if (duration < 3.5) {
+            return "03:00";
+        }
+    };
+
+    const getDataEvent = (event) => {
+        const repeatEventWeekly = getDayInEnglishAndUntilDate(
+            new Date(event.starting_date),
+            event.IsSerial
+        );
+
+        const durationEvent = getEventDuration(
+            event.starting_date,
+            event.ending_date
+        );
+
+        return {
+            id: event.ID,
+            title: event.title,
+            description: event.description,
+            start: event.starting_date,
+            end: event.ending_date,
+            participantsNecesary: event.participants_necesary.split("; "),
+            participantsOptional: event.participants_optional?.split("; "),
+            resource: event.resource?.split("; "),
+            division: event.division,
+            isArRequired: event.isVRRequired,
+            typeService: event.type_services,
+            backgroundColor: event.backgroundColor,
+            uidUser: event.uid_user,
+            floor: event.sala,
+            isRepeatPeriod: event.IsSerial,
+            rrule:
+                event.IsSerial === "1"
+                    ? {
+                          freq: "weekly",
+                          interval: 1,
+                          byweekday: repeatEventWeekly[0],
+                          until: repeatEventWeekly[1],
+                          dtstart: event.starting_date,
+                      }
+                    : null,
+            duration: event.IsSerial === "1" ? durationEvent : null,
+        };
+    };
+
     const getAllEventsCalendar = async () => {
+        isLoadingData.value = true;
+
         try {
-            isLoadingData.value = true;
+            const response = await axios.get(route("calendarPage.index"));
 
-            await store.getAllEvents();
-
-            calendarOptions.value.events = store.eventsCalendar;
+            events.value = response.data.data.map((event) => {
+                return getDataEvent(event);
+            });
         } catch (error) {
             console.log(error);
         } finally {
@@ -621,7 +714,7 @@ export const useCalendarPage = () => {
         form,
         calendarOptions,
         openModalHours,
-        events: store.eventsCalendar,
+        events,
         isLoadingData,
         isLoadingSaveEvent,
         openFilterByPlaces,
