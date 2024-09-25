@@ -18,13 +18,13 @@
                 <form class="grid gap-4 pt-3" @submit.prevent="onSaveEvent">
                     <div class="grid gap-2">
                         <label class="font-medium">Lugar del evento</label>
-                        <Select :options="dataFloorsAvaibleCalendar" optionLabel="name"
-                            placeholder="Selecciona un lugar" class="w-full" v-model="form.floor">
+                        <Select :options="listFloors" optionLabel="Sala_Name" placeholder="Selecciona un lugar"
+                            class="w-full" v-model="form.floor" disabled>
                             <template #option="slotProps">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-6 h-6 rounded" :style="{ background: slotProps.option.bgColor }">
+                                    <div class="w-6 h-6 rounded" :style="{ background: slotProps.option.Sala_Color }">
                                     </div>
-                                    <div>{{ slotProps.option.name }}</div>
+                                    <div>{{ slotProps.option.Sala_Name }}</div>
                                 </div>
                             </template>
                         </Select>
@@ -139,7 +139,6 @@ import ModalHoursEvent from './ModalHoursEvent.vue';
 import { getAllHolidays } from '@/Data/getHolidays';
 import { useModalCalendar } from '@/Composables';
 import RealityIcon from '@/Assets/RealityIcon.vue';
-import { dataFloorsAvaibleCalendar } from '@/Data/dataFloorsAvaibleCalendar';
 import Select from 'primevue/select';
 import ParticipantSelect from '../ParticipantSelect.vue';
 
@@ -155,7 +154,7 @@ const props = defineProps({
     infoSelectedEvent: Object,
 });
 
-const { calcSpacing, listaTipoServicios, usersEmails, listManagement } = useModalCalendar(props.form)
+const { calcSpacing, listaTipoServicios, usersEmails, listManagement, listFloors } = useModalCalendar(props.form)
 
 </script>
 

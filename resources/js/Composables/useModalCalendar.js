@@ -1,11 +1,16 @@
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import { createPopper } from '@popperjs/core';
+import { ref, onMounted } from "vue";
+import axios from "axios";
+import { createPopper } from "@popperjs/core";
+import { useDataCalendarStore } from "@/pinia/useDataCalendarStore";
+import { usePage } from "@inertiajs/vue3";
 
-export const useModalCalendar = () => {
+export const useModalCalendar = (form) => {
+    const storeCalendar = useDataCalendarStore();
     const usersEmails = ref([]);
     const listaTipoServicios = ref([]);
     const listManagement = ref([]);
+    const listFloors = ref([]);
+    const { url } = usePage();
 
     const calcSpacing = (dropdownList, component, { width }) => {
         dropdownList.style.width = width;
@@ -49,21 +54,38 @@ export const useModalCalendar = () => {
         console.error("API error: ", error);
     };
 
-    const getEmailsUsers = () => fetchData(route("users.index"), data => {
-        usersEmails.value = data;
-    });
+    const getEmailsUsers = () =>
+        fetchData(route("users.index"), (data) => {
+            usersEmails.value = data;
+        });
 
-    const getTypeServices = () => fetchData(route("typeServices.index"), data => {
-        listaTipoServicios.value = data.data;
-    });
+    const getTypeServices = () =>
+        fetchData(route("typeServices.index"), (data) => {
+            listaTipoServicios.value = data.data;
+        });
 
-    const getManagement = () => fetchData(route("management.index"), data => {
-        listManagement.value = data;
-    });
+    const getManagement = () =>
+        fetchData(route("management.index"), (data) => {
+            listManagement.value = data;
+        });
 
     onMounted(async () => {
         try {
-            await Promise.all([getEmailsUsers(), getTypeServices(), getManagement()]);
+            await Promise.all([
+                getEmailsUsers(),
+                getTypeServices(),
+                getManagement(),
+            ]);
+
+            await storeCalendar.getFloors();
+
+            const floorSelect = url.split("floor=")[1];
+
+            listFloors.value = storeCalendar.allFloorsCalendar.data.filter(
+                (floor) => floor.ID === Number(floorSelect)
+            );
+
+            form.floor = listFloors.value[0];
         } catch (error) {
             handleError(error);
         }
@@ -73,6 +95,7 @@ export const useModalCalendar = () => {
         usersEmails,
         listaTipoServicios,
         listManagement,
-        calcSpacing
+        listFloors,
+        calcSpacing,
     };
 };

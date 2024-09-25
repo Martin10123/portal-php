@@ -5,24 +5,28 @@ namespace App\Http\Controllers;
 use App\Models\Calendar;
 use App\Http\Requests\CalendarRequest;
 use App\Http\Controllers\TypeServicesCalendarController;
+use App\Mail\EmailEvents;
 use App\Models\CalendarFloor;
 use App\Models\CalendarLog;
-use App\Notifications\EventCalendarMail;
+use App\Models\CalendarRespFloor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Mail;
 
 class CalendarController extends Controller
 {
-    public function index()
+    public function index($floor)
     {
         try {
-            $calendar = Calendar::with('typeServices')
+
+            $calendar = Calendar::with(['typeServices', 'floor'])
+                ->where('sala', $floor)
                 ->where('calendar_status', 1)
                 ->get();
 
             return response()->json([
-                'message' => 'Datos obtenidos correctamente',
+                'message' => 'Se obtuvieron los datos de los eventos correctamente',
                 'data' => $calendar,
                 "ok" => true,
             ]);
@@ -30,28 +34,6 @@ class CalendarController extends Controller
             return response()->json([
                 'message' => 'Error al obtener los datos de la base de datos',
                 'error' => $e,
-                "ok" => false
-            ]);
-        }
-    }
-
-    public function getFiltersEventsByFloor(Request $request)
-    {
-        try {
-
-            $eventsCalendar = Calendar::whereIn('sala', $request->floors)
-                ->where('calendar_status', 1)
-                ->get();
-
-            return response()->json([
-                'message' => 'Datos obtenidos correctamente',
-                'data' => $eventsCalendar,
-                "ok" => true,
-            ]);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => 'Error al obtener los datos filtrados de la base de datos',
-                'error' => $th,
                 "ok" => false
             ]);
         }
@@ -94,8 +76,8 @@ class CalendarController extends Controller
     public function create(CalendarRequest $request)
     {
         try {
-
             $conflictingEvent = Calendar::where('sala', $request->floor)
+                ->where('calendar_status', 1)
                 ->where(function ($query) use ($request) {
                     $query->whereBetween('starting_date', [$request->starting_date, $request->ending_date])
                         ->orWhereBetween('ending_date', [$request->starting_date, $request->ending_date]);
@@ -118,14 +100,15 @@ class CalendarController extends Controller
             // Crea el evento en el calendario
             $responseDB = $this->createCalendarEvent($request);
             $responseDB->type_service_ID = $request->type_service_ID;
+            $responseDB->floor = $request->floor;
 
-            // // Envía notificaciones a los participantes
+            // Envía notificaciones a los participantes
             $this->notifyParticipants(
                 $request->userCreated,
                 $request->participants_necesary,
                 $request->participants_optional,
                 $responseDB,
-                false
+                false,
             );
 
             return response()->json([
@@ -160,13 +143,13 @@ class CalendarController extends Controller
             'participants_necesary' => $request->participants_necesary,
             'participants_optional' => $request->participants_optional,
             'resource' => $request->resource,
-            'backgroundColor' => $request->floor === "Laboratorio XRLAB" ? "#0099ff" : "#808080",
+            'backgroundColor' => $request->backgroundColor,
             'division' => $request->division,
             'isVRRequired' => $request->isVRRequired,
             'type_service_ID' => $request->type_service_ID["type_service_ID"],
             'uid_user' => $request->userCreated["guid"],
             'calendar_status' => $request->calendar_status,
-            'sala' => $request->floor,
+            'sala' => $request->floor["ID"],
             'IsSerial' => $request->isRepeatPeriod
         ]);
     }
@@ -193,33 +176,34 @@ class CalendarController extends Controller
     protected function notifyParticipants($userCreated, $participantsNecesary, $participantsOptional, $responseDB, $isUpdate)
     {
         try {
-            // Obtener y unificar los correos de los participantes necesarios y opcionales
-            $emails = array_unique(array_merge(
+            $emails = array_filter(array_unique(array_merge(
                 explode('; ', $participantsNecesary),
                 explode('; ', $participantsOptional)
-            ));
+            )));
 
-            // Agregar los correos de los usuarios especiales
-            $specialUsers = [""];
-            // $responseDB->sala === "Laboratorio XRLAB" ? [
-            //     "msimarra@cotecmar.com",
-            //     "jtapia@cotecmar.com",
-            //     "gbarros@cotecmar.com"
-            // ] : [""];
+            // Obtén correos especiales basados en la sala
+            $emails = array_merge($emails, $this->getSpecialUsers($responseDB));
 
-            $emails = array_unique(array_merge($emails, $specialUsers));
+            // Filtra cualquier correo vacío
+            $emails = array_filter(array_unique($emails));
 
-            // Enviar notificaciones a todos los correos
-            foreach ($emails as $email) {
-                try {
-                    Notification::route('mail', trim(string: $email))->notify(new EventCalendarMail($responseDB, $isUpdate, $userCreated));
-                } catch (\Exception $e) {
-                    Log::error('Error al enviar el correo a ' . $email . ': ' . $e->getMessage());
-                }
-            }
+            $emails = array_values($emails);
+
+            Mail::to($emails)->send(new EmailEvents($responseDB, $isUpdate, $userCreated));
         } catch (\Throwable $th) {
-            Log::error('Error al enviar las notificaciones: ' . $th . $th->getMessage());
+            Log::error('Error al enviar las notificaciones: ' . $th->getMessage());
         }
+    }
+
+    protected function getSpecialUsers($responseDB)
+    {
+        $emails = [];
+
+        foreach ($responseDB->floor["responsables"] as $responsable) {
+            $emails[] = $responsable["Correo"];
+        }
+
+        return $emails;
     }
 
     public function update(CalendarRequest $request, $id)
@@ -234,7 +218,7 @@ class CalendarController extends Controller
             $request->merge(['type_service_ID' => $typeServiceData]);
 
             $calendar->title = $request->title;
-            $calendar->sala = $request->floor;
+            $calendar->sala = $request->floor["ID"];
             $calendar->description = $request->description;
             $calendar->starting_date = $request->starting_date;
             $calendar->ending_date = $request->ending_date;
@@ -347,13 +331,76 @@ class CalendarController extends Controller
     {
         try {
 
-            $floors = CalendarFloor::with(['respFloor.user'])->get();
+            $floors = CalendarFloor::with(['responsables' => function ($query) {
+                $query->select('idResponsable', 'Nombre', 'Correo', 'Cargo');
+            }])
+                ->where('estado', 1)
+                ->get();
 
-            Log::info($floors);
+            $options = [
+                [
+                    'label' => 'Solicitudes',
+                    'icon' => 'pi pi-folder-plus',
+                    'isOnlyAdmin' => true,
+                    'items' => [
+                        [
+                            'label' => 'Agregar solicitud',
+                            'icon' => 'pi pi-file-plus',
+                            'route' => '/Sigedin/Request/AddRequest',
+                        ],
+                    ],
+                ],
+                [
+                    'label' => "Planillación",
+                    'icon' => "pi pi-file-check",
+                    'isOnlyAdmin' => true,
+                    'items' => [
+                        [
+                            'label' => "Gestion de grafos",
+                            'icon' => "pi pi-list-check",
+                            'route' => "/Sigedin/Personnel/Reports",
+                        ],
+                    ],
+                ],
+                [
+                    'label' => 'Reservar sala',
+                    'icon' => 'pi pi-bell',
+                    'items' => array_merge(
+                        $floors->map(function ($floor) {
+                            return [
+                                'label' => $floor->Sala_Name,
+                                'icon' => 'pi pi-calendar',
+                                'route' => '/Sigedin/CalendarPage/CalendarPage?floor=' . urlencode($floor->ID),
+                            ];
+                        })->toArray(),
+                        [
+                            [
+                                'label' => 'Gestionar salas',
+                                'icon' => 'pi pi-clipboard',
+                                'isOnlyAdmin' => true,
+                                'route' => '/Sigedin/CalendarPage/AdminFloor',
+                            ]
+                        ]
+                    ),
+                ],
+                [
+                    'label' => 'Graficos',
+                    'icon' => 'pi pi-chart-bar',
+                    'isOnlyAdmin' => true,
+                    'items' => [
+                        [
+                            'label' => 'Index',
+                            'icon' => 'pi pi-chart-pie',
+                            'route' => '/Sigedin/Charts/ChartsMain',
+                        ],
+                    ],
+                ],
+            ];
 
             return response()->json([
-                "message" => "Datos obtenidos correctamente",
+                "message" => "Datos obtenidos correctamente de las salas",
                 "data" => $floors,
+                "options" => $options,
                 "ok" => true
             ]);
         } catch (\Throwable $th) {
@@ -362,6 +409,147 @@ class CalendarController extends Controller
                 'error' => $th,
                 "ok" => false
             ]);
+        }
+    }
+
+    // Validar existencia de color
+    private function validateExistsColor($Sala_Color)
+    {
+        try {
+            return CalendarFloor::where('Sala_Color', $Sala_Color)->exists();
+        } catch (\Throwable $th) {
+            Log::error('Error al verificar si el color de la sala existe: ' . $th->getMessage());
+            throw $th; // Es mejor relanzar la excepción para manejarla externamente
+        }
+    }
+
+    // Guardar responsables
+    private function saveResponsables($floorId, $responsables)
+    {
+        foreach ($responsables as $responsable) {
+            CalendarRespFloor::create([
+                'sala_id' => $floorId,
+                'id_resp' => $responsable["idResponsable"],
+                'estado' => 1
+            ]);
+        }
+    }
+
+    public function addFloor(Request $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            if ($this->validateExistsColor($request->Sala_Color["valueC"])) {
+                return response()->json([
+                    'message' => 'El color de la sala ya está en uso. Por favor, elige otro color.',
+                    'ok' => false
+                ], 400);
+            }
+
+            // Crear la sala
+            $floor = CalendarFloor::create([
+                'Sala_Name' => $request->Sala_Name,
+                'Sala_Alias' => $request->Sala_Alias,
+                'Sala_Color' => $request->Sala_Color["valueC"],
+                'estado' => 1
+            ]);
+
+            // Guardar responsables
+            $this->saveResponsables($floor->ID, $request->Responsables);
+            $floor->Sala_Color = $request->Sala_Color;
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Sala guardada correctamente',
+                'data' => $floor,
+                'ok' => true
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Error al guardar la sala o responsables: ' . $th->getMessage());
+
+            return response()->json([
+                'message' => 'Error al guardar la sala o los responsables en la base de datos',
+                'error' => $th,
+                'ok' => false
+            ]);
+        }
+    }
+
+    public function updateFloor(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $floor = CalendarFloor::find($id);
+
+            if ($floor->Sala_Color !== $request->Sala_Color["valueC"]) {
+
+                if ($this->validateExistsColor($request->Sala_Color["valueC"])) {
+                    return response()->json([
+                        'message' => 'El color de la sala ya está en uso. Por favor, elige otro color.',
+                        'ok' => false
+                    ], 400);
+                }
+            }
+
+            // Actualizar la sala
+            $floor->update([
+                'Sala_Name' => $request->Sala_Name,
+                'Sala_Alias' => $request->Sala_Alias,
+                'Sala_Color' => $request->Sala_Color["valueC"],
+                'estado' => $request->Sala_Estado
+            ]);
+
+            $floor->Sala_Color = $request->Sala_Color;
+
+            // Eliminar responsables anteriores y guardar los nuevos
+            CalendarRespFloor::where('sala_id', $id)->delete();
+            $this->saveResponsables($id, $request->Responsables);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Sala actualizada correctamente',
+                'data' => $floor,
+                'ok' => true
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Error al actualizar la sala o responsables: ' . $th->getMessage());
+
+            return response()->json([
+                'message' => 'Error al actualizar la sala o los responsables en la base de datos',
+                'error' => $th->getMessage(),
+                'ok' => false
+            ], 500);
+        }
+    }
+
+    public function deleteFloor($id)
+    {
+        try {
+
+            $floor = CalendarFloor::find($id);
+            $floor->estado = 0;
+            $floor->save();
+
+            return response()->json([
+                'message' => 'Sala eliminada correctamente',
+                'data' => $floor,
+                'ok' => true
+            ]);
+        } catch (\Throwable $th) {
+
+            Log::error('Error al eliminar la sala: ' . $th->getMessage());
+
+            return response()->json([
+                'message' => 'Error al eliminar la sala en la base de datos',
+                'error' => $th->getMessage(),
+                'ok' => false
+            ], 500);
         }
     }
 }

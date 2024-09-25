@@ -22,8 +22,8 @@ class CalendarRespFloor extends Model
         "estado",
     ];
 
-    public function user()
+    public function responsable()
     {
-        return $this->belongsTo(User::class, 'id_resp', 'id');
+        return $this->belongsTo(Responsable::class, 'id_resp', 'idResponsable');
     }
 }

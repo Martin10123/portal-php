@@ -1,7 +1,6 @@
 import { useForm } from "@inertiajs/vue3";
 import { onMounted, ref, watch } from "vue";
 import Swal from "sweetalert2";
-import { useReports } from "./useReports";
 import {
     getListMouth,
     getXAtributoArray,
@@ -12,7 +11,6 @@ import { initECharts } from "@/echartsConfig";
 initECharts();
 
 export const useBarChart = () => {
-    const { openSidebar, toggleOpenSidebar } = useReports();
     const listDivision = ref([]);
     const listYears = ref([]);
     const listMouth = ref([]);
@@ -213,10 +211,8 @@ export const useBarChart = () => {
         isSearchDivision,
         loadingCharts,
         isLoadingNames,
-        openSidebar,
         optionsColumnGraph,
         onGetPersonasXGerencia,
         onViewReport,
-        toggleOpenSidebar,
     };
 };

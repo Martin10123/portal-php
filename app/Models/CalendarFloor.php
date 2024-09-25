@@ -27,4 +27,16 @@ class CalendarFloor extends Model
     {
         return $this->hasMany(CalendarRespFloor::class, 'sala_id');
     }
+
+    public function responsables()
+    {
+        return $this->hasManyThrough(
+            Responsable::class,
+            CalendarRespFloor::class,
+            'sala_id',
+            'idResponsable',
+            'ID',
+            'id_resp'
+        );
+    }
 }

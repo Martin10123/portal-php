@@ -1,14 +1,7 @@
 <template>
-    <Navbar :toggleOpenSidebar="toggleOpenSidebar" />
-
-    <main class="sm:grid sm:grid-cols-01">
-        <SideBarMain class-name="sm:w-full lg:w-full" :openSidebar="openSidebar"
-            :toggleOpenSidebar="toggleOpenSidebar" />
-
+    <AppLayout title="Gestionar salas">
         <section>
-            <h1 class="text-4xl p-4">
-                Administrar salas de reuniones
-            </h1>
+            <h1 class="text-4xl p-4">Administrar salas de reuniones</h1>
 
             <div>
                 <div class="flex justify-between items-center p-4">
@@ -18,51 +11,34 @@
                             @click="toggleAddFloorModal">
                             Agregar sala
                         </button>
-                        <button class="bg-stone-500 text-white px-4 py-2 rounded hover:bg-stone-600 duration-200">
-                            Salas habilitadas
-                        </button>
                     </div>
                 </div>
 
-                <TableFloors :list-floors="listFloors" />
+                <TableFloors :list-floors="listFloors" :toggle-edit-floor-modal="toggleEditFloorModal" />
             </div>
         </section>
-    </main>
+    </AppLayout>
 
-    <AddFloor :open-add-floor-modal="openAddFloorModal" :toggle-add-floor-modal="toggleAddFloorModal" />
+    <ModalFloor :open-modal="openAddFloorModal" :toggle-modal="toggleAddFloorModal" @addFloor="onSaveFloor"
+        :sala="currentFloor" :is-editing="isEditing" @updateFloor="onUpdateFloor" />
+    />
 </template>
 
 <script setup>
-import AddFloor from '@/Components/CalendarPage/AddFloor.vue';
-import TableFloors from '@/Components/CalendarPage/TableFloors.vue';
-import Navbar from '@/Components/SideBar/Navbar.vue';
-import SideBarMain from '@/Components/SideBar/SideBarMain.vue';
-import { useNavSidebar } from '@/Composables';
-import { onMounted, ref } from 'vue';
+import ModalFloor from "@/Components/CalendarPage/ModalFloor.vue";
+import TableFloors from "@/Components/CalendarPage/TableFloors.vue";
+import { useAdminFloor } from "@/Composables";
+import AppLayout from "@/Layouts/AppLayout.vue";
 
-const { openSidebar, toggleOpenSidebar } = useNavSidebar()
-
-const openAddFloorModal = ref(false);
-const listFloors = ref([]);
-
-const toggleAddFloorModal = () => {
-    openAddFloorModal.value = !openAddFloorModal.value;
-}
-
-const getFloors = async () => {
-    try {
-        const response = await axios.get(route("calendarPage.getAllFloors"));
-
-        console.log(response.data.data);
-
-        listFloors.value = response.data.data;
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-onMounted(() => {
-    getFloors();
-});
+const {
+    openAddFloorModal,
+    toggleAddFloorModal,
+    onSaveFloor,
+    listFloors,
+    currentFloor,
+    isEditing,
+    toggleEditFloorModal,
+    onUpdateFloor,
+} = useAdminFloor()
 
 </script>

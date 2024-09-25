@@ -19,6 +19,7 @@ class CalendarRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'backgroundColor' => 'required|string',
             'title' => 'required|string',
             'description' => 'required|string',
             'starting_date' => 'required|date',
@@ -28,7 +29,7 @@ class CalendarRequest extends FormRequest
             'isVRRequired' => 'required|boolean',
             'type_service_ID' => 'required|array',
             'calendar_status' => 'required|boolean',
-            'floor' => 'required|string',
+            'floor' => 'required|array',
             'userCreated' => 'required|array',
             'isRepeatPeriod' => 'required|boolean',
         ];

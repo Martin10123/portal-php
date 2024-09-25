@@ -39,4 +39,9 @@ class Calendar extends Model
     {
         return $this->belongsTo(TypeServices::class, 'type_service_ID');
     }
+
+    public function floor()
+    {
+        return $this->belongsTo(CalendarFloor::class, 'sala');
+    }
 }

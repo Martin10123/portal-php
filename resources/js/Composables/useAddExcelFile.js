@@ -1,11 +1,9 @@
-import { useReports } from "./useReports";
 import { ref, computed, onMounted } from "vue";
 import Swal from "sweetalert2";
 import readXlsxFile from "read-excel-file";
 import { useDataGrafosStore } from "@/pinia/useDataStore";
 
 export const useAddExcelFile = () => {
-    const { openSidebar, toggleOpenSidebar } = useReports();
     const dataGrafos = useDataGrafosStore();
 
     const file = ref(null);
@@ -306,7 +304,6 @@ export const useAddExcelFile = () => {
         currentPage,
         itemsPerPage,
         paginatedData,
-        openSidebar,
         dataGrafos,
         showModalForm,
         projectSelectToEdit,
@@ -314,7 +311,6 @@ export const useAddExcelFile = () => {
         handleFileChange,
         changePage,
         onLoadSaveExcel,
-        toggleOpenSidebar,
         startEditing,
         onUpdateGraphSelect,
         onDeleteGraphSelect,

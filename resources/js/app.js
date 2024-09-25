@@ -35,6 +35,11 @@ createInertiaApp({
                 theme: {
                     preset: Aura,
                 },
+                options: {
+                    prefix: "p",
+                    darkModeSelector: "system",
+                    cssLayer: false,
+                },
             })
             .component("v-select", VueSelect)
             .component("VueDatePicker", VueDatePicker)

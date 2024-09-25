@@ -14,12 +14,13 @@ class UserController extends Controller
     public function index()
     {
         $users = DB::table('sigedin.guest.responsable')
-            ->select('Correo', 'Nombre', 'Usuario')
+            ->select('Correo', 'Nombre', 'Usuario', 'IdResponsable')
             ->where('Estado', 'Activo')
             ->get();
 
         $usersSet = $users->map(function ($user) {
             return [
+                'idResponsable' => $user->IdResponsable,
                 'correo' => $user->Correo,
                 'nombre' => $user->Nombre,
                 'usuario' => $user->Usuario ? (strpos($user->Usuario, '\\') !== false ? explode('\\', $user->Usuario)[1] : $user->Usuario) : ""

@@ -1,13 +1,6 @@
 <template>
 
-    <Head title="Gestión de grafos" />
-
-    <Navbar :toggleOpenSidebar="toggleOpenSidebar" />
-
-    <main class="sm:grid sm:grid-cols-01">
-        <SideBarMain class-name="sm:w-full lg:w-full" :openSidebar="openSidebar"
-            :toggleOpenSidebar="toggleOpenSidebar" />
-
+    <AppLayout title="Gestión de grafos">
         <section>
             <header class="bg-slate-100 dark:bg-transparent pb-10">
                 <div class="py-6">
@@ -46,25 +39,21 @@
                     :selected-swbs="selectedSwbs" :value-project="valueProject" :clear-values="clearValues" />
             </div>
         </section>
-    </main>
+    </AppLayout>
 </template>
 
 <script setup>
-import Navbar from '@/Components/SideBar/Navbar.vue';
-import SideBarMain from '@/Components/SideBar/SideBarMain.vue';
 import TablePersonnel from '@/Components/Personnel/TablePersonnel.vue';
 import { useReports } from '@/Composables';
-import { Head } from '@inertiajs/vue3';
+import AppLayout from '@/Layouts/AppLayout.vue';
 
 const {
     SWBSPersonnel,
     filteredProjects,
-    openSidebar,
     projectsReport,
     selectedStage,
     selectedSwbs,
     stageProjectRef,
-    toggleOpenSidebar,
     valueProject,
     clearValues
 } = useReports()

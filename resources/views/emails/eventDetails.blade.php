@@ -49,7 +49,8 @@
         <section>
             <h2>Cordial saludo</h2>
             <p>{{ $userCreated["name"] }}
-                {{ $isUpdate ? 'ha actualizado la reserva en' : 'ha agendado un espacio en' }} {{ $evento->sala }} y
+                {{ $isUpdate ? 'ha actualizado la reserva en' : 'ha agendado un espacio en' }}
+                {{ $evento->floor["Sala_Name"] }} y
                 te ha incluido como participante. A continuación, encontrarás los detalles del evento.
             </p>
 
@@ -70,7 +71,7 @@
                         </tr>
                         <tr>
                             <th>Sala</th>
-                            <td>{{ $evento->sala }}</td>
+                            <td>{{ $evento->floor["Sala_Name"] }}</td>
                         </tr>
                         <tr>
                             <th>Descripción</th>

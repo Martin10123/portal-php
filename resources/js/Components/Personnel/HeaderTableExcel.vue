@@ -1,6 +1,16 @@
 <template>
     <div class="p-4 col-span-2">
-        <h1 class="text-xl pb-4">Subir grafos desde un archivo excel</h1>
+        <div class="flex items-center gap-2 pb-4">
+            <Link href="/Sigedin/Personnel/Reports">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="size-6 cursor-pointer">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
+            </svg>
+            </Link>
+
+            <h1 class="text-xl">Subir grafos desde un archivo excel</h1>
+        </div>
 
         <div class="w-full">
             <label for="dropzone-file"
@@ -49,6 +59,8 @@
 </template>
 
 <script setup>
+import { Link } from '@inertiajs/vue3';
+
 
 const props = defineProps({
     somebodyExcelEdit: Boolean,

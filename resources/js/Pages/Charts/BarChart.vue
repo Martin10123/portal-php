@@ -1,12 +1,6 @@
 <template>
 
-    <Head title="Grafico de pastel" />
-
-    <Navbar :toggleOpenSidebar="toggleOpenSidebar" />
-
-    <main class="sm:grid sm:grid-cols-01">
-        <SideBarMain class-name="sm:w-full lg:w-full" :openSidebar="openSidebar"
-            :toggleOpenSidebar="toggleOpenSidebar" />
+    <AppLayout title="Grafico de pastel">
 
         <section class="p-4 bg-slate-50 border-l dark:bg-black">
             <div class="grid gap-6">
@@ -91,16 +85,14 @@
                 <LoadingStatus v-if="loadingCharts" />
             </article>
         </section>
-    </main>
+    </AppLayout>
 </template>
 
 <script setup>
-import Navbar from "@/Components/SideBar/Navbar.vue";
-import SideBarMain from "@/Components/SideBar/SideBarMain.vue";
 import MultiSelect from "primevue/multiselect";
 import LoadingStatus from "@/Components/LoadingStatus.vue";
 import { useBarChart } from "@/Composables";
-import { Head } from "@inertiajs/vue3";
+import AppLayout from "@/Layouts/AppLayout.vue";
 
 const {
     form,
@@ -113,8 +105,6 @@ const {
     listYears,
     loadingCharts,
     onViewReport,
-    openSidebar,
-    toggleOpenSidebar,
     onGetPersonasXGerencia,
     optionsColumnGraph
 } = useBarChart();

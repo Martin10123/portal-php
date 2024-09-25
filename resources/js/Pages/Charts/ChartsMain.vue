@@ -1,13 +1,6 @@
 <template>
 
-    <Head title="Graficos" />
-
-    <Navbar :toggleOpenSidebar="toggleOpenSidebar" />
-
-    <main class="sm:grid sm:grid-cols-01">
-        <SideBarMain class-name="sm:w-full lg:w-full" :openSidebar="openSidebar"
-            :toggleOpenSidebar="toggleOpenSidebar" />
-
+    <AppLayout title="Graficos">
         <section class="p-4 grid h-max gap-5">
             <ModalListCharts />
 
@@ -44,24 +37,16 @@
                 <div id="chart_div"></div>
             </article>
         </section>
-    </main>
+    </AppLayout>
 </template>
 
 <script setup>
 import ModalListCharts from '@/Components/Charts/ModalListCharts.vue';
-import Navbar from '@/Components/SideBar/Navbar.vue';
-import SideBarMain from '@/Components/SideBar/SideBarMain.vue';
-import { useReports } from '@/Composables';
-import { Head } from '@inertiajs/vue3';
+import AppLayout from '@/Layouts/AppLayout.vue';
 import { onMounted, ref } from 'vue';
 
-const { openSidebar, toggleOpenSidebar } = useReports();
 const getUsuariosGerencia = ref([]);
 const showListCharts = ref(false);
-
-const onOpenModal = () => {
-    showListCharts.value = !showListCharts.value;
-};
 
 const getGerenciaUsuarioActivo = async () => {
     try {

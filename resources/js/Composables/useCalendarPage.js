@@ -10,7 +10,7 @@ import Swal from "sweetalert2";
 
 import { validateFormCalendar } from "@/Validations/validCalendarModal";
 import { getAllHolidays } from "@/Data/getHolidays";
-import { add, format, parse, setHours, setMinutes } from "date-fns";
+import { add, format, setHours, setMinutes } from "date-fns";
 
 export const useCalendarPage = () => {
     const openModal = ref(false);
@@ -23,7 +23,7 @@ export const useCalendarPage = () => {
     const isLoadingSaveEvent = ref(false);
     const events = ref([]);
 
-    const { props } = usePage();
+    const { props, url } = usePage();
 
     const form = useForm({
         title: "",
@@ -294,12 +294,7 @@ export const useCalendarPage = () => {
 
         const formatTime = (date) => new Date(date).toLocaleTimeString("es-ES");
 
-        form.floor = {
-            id: floor,
-            name: floor,
-            bgColor: floor === "Laboratorio XRLAB" ? "#0099ff" : "#808080",
-            selected: false,
-        };
+        form.floor = floor;
         form.title = title;
         form.description = description;
         form.date = new Date(start);
@@ -365,7 +360,8 @@ export const useCalendarPage = () => {
             const response = await axios.put(
                 route("calendarPage.update", infoSelectedEvent.value.id),
                 {
-                    floor: form.floor.name,
+                    backgroundColor: form.floor.Sala_Color,
+                    floor: form.floor,
                     title: form.title,
                     description: form.description,
                     starting_date: formatDateSelect(
@@ -393,8 +389,9 @@ export const useCalendarPage = () => {
                         if (event.id === Number(infoSelectedEvent.value.id)) {
                             return {
                                 ...event,
+                                backgroundColor: form.floor.Sala_Color,
                                 title: form.title,
-                                floor: form.floor.name,
+                                floor: form.floor,
                                 description: form.description,
                                 start: formatDateSelect(
                                     form.date,
@@ -447,8 +444,19 @@ export const useCalendarPage = () => {
         }
     };
 
+    const convertTo24Hour = (hour) => {
+        if (hour < 12) {
+            return hour + 12;
+        }
+        return hour;
+    };
+
     const formatDateSelect = (date, hours) => {
-        const [hour, minute] = hours.split(":").map(Number);
+        let [hour, minute] = hours.split(":").map(Number);
+
+        if (hour >= 1 && hour <= 5) {
+            hour = convertTo24Hour(hour);
+        }
 
         const updatedDate = setHours(setMinutes(date, minute), hour);
 
@@ -459,7 +467,8 @@ export const useCalendarPage = () => {
 
     const prepareEventData = (form) => {
         return {
-            floor: form.floor.name,
+            backgroundColor: form.floor.Sala_Color,
+            floor: form.floor,
             title: form.title,
             description: form.description,
             starting_date: formatDateSelect(form.date, form.dateHours[0]),
@@ -480,10 +489,9 @@ export const useCalendarPage = () => {
         calendarOptions.value.events = [
             ...calendarOptions.value.events,
             {
-                backgroundColor:
-                    form.floor === "Laboratorio XRLAB" ? "#0099ff" : "#808080",
+                backgroundColor: form.floor.Sala_Color,
                 id: eventData.ID,
-                floor: form.floor.name,
+                floor: form.floor,
                 title: form.title,
                 description: form.description,
                 start: formatDateSelect(form.date, form.dateHours[0]),
@@ -671,7 +679,7 @@ export const useCalendarPage = () => {
             typeService: event.type_services,
             backgroundColor: event.backgroundColor,
             uidUser: event.uid_user,
-            floor: event.sala,
+            floor: event.floor,
             isRepeatPeriod: event.IsSerial,
             rrule:
                 event.IsSerial === "1"
@@ -691,7 +699,11 @@ export const useCalendarPage = () => {
         isLoadingData.value = true;
 
         try {
-            const response = await axios.get(route("calendarPage.index"));
+            const floorSelect = url.split("floor=")[1];
+
+            const response = await axios.get(
+                route("calendarPage.index", { floor: Number(floorSelect) })
+            );
 
             events.value = response.data.data.map((event) => {
                 return getDataEvent(event);

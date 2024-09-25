@@ -73,13 +73,15 @@ Route::middleware([
 
     // Calendar
     Route::prefix('calendarPage')->name('calendarPage.')->group(function () {
-        Route::get('/', [CalendarController::class, 'index'])->name('index');
+        Route::get('/getEvents/{floor}', [CalendarController::class, 'index'])->name('index');
         Route::get('/getReason/{id}', [CalendarController::class, 'getReason'])->name('getReason');
-        Route::get('/getEventsFiltersByFloor', [CalendarController::class, "getFiltersEventsByFloor"])->name('getEventsFiltersByFloor');
         Route::get('/getAllFloors', [CalendarController::class, 'getAllFloors'])->name('getAllFloors');
         Route::post('/create', [CalendarController::class, 'create'])->name('create');
+        Route::post('/createFloor', [CalendarController::class, 'addFloor'])->name('createFloor');
         Route::put('/update/{id}', [CalendarController::class, 'update'])->name('update');
+        Route::put('/update/{id}/floor', [CalendarController::class, 'updateFloor'])->name('updateFloor');
         Route::delete('/delete/{id}/{reason}', [CalendarController::class, 'destroy'])->name('delete');
+        Route::delete('/delete/{id}/floor', [CalendarController::class, 'deleteFloor'])->name('deleteFloor');
     });
 
     //TypeServices
@@ -97,7 +99,6 @@ Route::middleware([
     Route::prefix('Sigedin')->group(function () {
         $routes = [
             'Request/AddRequest' => 'AddRequest',
-            'Request/AssignRequest' => 'AssignRequest',
             'Personnel/Reports' => 'Reports',
             'Profile/ProfileUser' => 'Profile',
             'CalendarPage/CalendarPage' => 'CalendarPage',

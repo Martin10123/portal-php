@@ -1,9 +1,6 @@
 import { onMounted, ref, watch } from "vue";
-import { useNavSidebar } from "./useNavSidebar";
 
 export const useReports = () => {
-    const { openSidebar, toggleOpenSidebar } = useNavSidebar();
-
     const projectsReport = ref([]);
     const projectSelect = ref([]);
     const stageProjectRef = ref([]);
@@ -107,7 +104,7 @@ export const useReports = () => {
             selectedSwbs.value = "";
         } else {
             selectedSwbs.value = "";
-            
+
             updateUniqueValues({
                 data: projectSelect.value.filter(
                     (project) =>
@@ -129,7 +126,6 @@ export const useReports = () => {
     onMounted(fetchReports);
 
     return {
-        openSidebar,
         valueProject,
         projectsReport,
         projectSelect,
@@ -138,7 +134,6 @@ export const useReports = () => {
         selectedSwbs,
         selectedStage,
         filteredProjects,
-        toggleOpenSidebar,
         clearValues,
     };
 };

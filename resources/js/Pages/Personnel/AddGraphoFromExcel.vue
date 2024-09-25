@@ -1,12 +1,6 @@
 <template>
 
-    <Head title="Agregar grafos" />
-
-    <Navbar :toggleOpenSidebar="toggleOpenSidebar" />
-
-    <main class="sm:grid sm:grid-cols-01">
-        <SideBarMain class-name="sm:w-full lg:w-full" :openSidebar="openSidebar"
-            :toggleOpenSidebar="toggleOpenSidebar" />
+    <AppLayout title="Agregar grafos">
 
         <section class="overflow-auto">
             <HeaderTableExcel :data-excel="dataExcel" :handle-file-change="handleFileChange" :file="file"
@@ -48,18 +42,16 @@
                     @changePage="changePage" />
             </article>
         </section>
-    </main>
+    </AppLayout>
 </template>
 
 <script setup>
-import Navbar from "@/Components/SideBar/Navbar.vue";
-import SideBarMain from "@/Components/SideBar/SideBarMain.vue";
 import PaginationPersonnel from "@/Components/Personnel/PaginationPersonnel.vue";
 import HeaderTableExcel from "@/Components/Personnel/HeaderTableExcel.vue";
 import ItemsTableExcel from "@/Components/Personnel/ItemsTableExcel.vue";
 import { useAddExcelFile } from "@/Composables/useAddExcelFile";
 import FormOneSelectExcel from "@/Components/Personnel/FormOneSelectExcel.vue";
-import { Head } from "@inertiajs/vue3";
+import AppLayout from "@/Layouts/AppLayout.vue";
 
 const {
     currentPage,
@@ -67,7 +59,6 @@ const {
     file,
     itemsPerPage,
     loadingFile,
-    openSidebar,
     paginatedData,
     showModalForm,
     projectSelectToEdit,
@@ -77,7 +68,6 @@ const {
     onLoadSaveExcel,
     handleFileChange,
     onUpdateGraphSelect,
-    toggleOpenSidebar,
     onDeleteGraphSelect,
     startEditing,
 } = useAddExcelFile();
