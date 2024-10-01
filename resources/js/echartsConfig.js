@@ -1,20 +1,28 @@
 import { use } from "echarts/core";
-import { CanvasRenderer } from "echarts/renderers";
 import { BarChart } from "echarts/charts";
+import { PieChart } from "echarts/charts";
+import { TreemapChart } from "echarts/charts";
+import { CanvasRenderer } from "echarts/renderers";
 import {
-    TitleComponent,
+    DatasetComponent,
     TooltipComponent,
     LegendComponent,
     GridComponent,
+    DataZoomComponent,
+    TitleComponent,
 } from "echarts/components";
 
-export function initECharts() {
+export const echartsConfig = () => {
     use([
-        CanvasRenderer,
-        BarChart,
-        TitleComponent,
+        DatasetComponent,
         TooltipComponent,
-        LegendComponent,
         GridComponent,
+        LegendComponent,
+        BarChart,
+        CanvasRenderer,
+        DataZoomComponent,
+        PieChart,
+        TitleComponent,
+        TreemapChart,
     ]);
-}
+};

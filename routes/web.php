@@ -6,6 +6,7 @@ use App\Http\Controllers\{
     ManagementController,
     ProjectsController,
     PersonnelController,
+    PrivilegiosController,
     RequirementController,
     TipoServicioController,
     TypeServicesCalendarController,
@@ -33,6 +34,12 @@ Route::middleware([
         Route::get('/getUsuariosGerencia', [UserController::class, 'getUsuariosGerencia'])->name('getUsuariosGerencia');
         Route::get('/consultaUsuariosXGerencia', [UserController::class, 'consultaUsuariosXGerencia'])->name('consultaUsuariosXGerencia');
         Route::get('/consultaDatosSegunPersonaSeleccionada', [UserController::class, 'consultaDatosSegunPersonaSeleccionada'])->name('consultaDatosSegunPersonaSeleccionada');
+        Route::get('/consultaCasoBuque', [UserController::class, 'consultaCaso'])->name('consultaCasoBuque');
+    });
+
+    // privilegios
+    Route::prefix('privilegios')->name('privilegios.')->group(function () {
+        Route::get('/', [PrivilegiosController::class, 'index'])->name('index');
     });
 
     // Servicios

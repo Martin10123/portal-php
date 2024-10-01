@@ -3,7 +3,7 @@
         <label class="font-medium">{{ label }}</label>
         <v-select class="dark:bg-gray-700 rounded-md" multiple :options="options" placeholder="Participantes..."
             append-to-body :calculate-position="calcSpacing" label="correo" :filter="customFilter"
-            :reduce="email => email.correo" v-model="localValue">
+            :reduce="email => email.correo" v-model="localValue" taggable>
             <template v-slot:option="option">
                 <div>
                     {{ option.correo }}

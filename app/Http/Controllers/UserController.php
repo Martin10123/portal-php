@@ -11,6 +11,13 @@ use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
+    protected $usuarioActivo;
+
+    public function __construct()
+    {
+        $this->usuarioActivo = Auth::user();
+    }
+
     public function index()
     {
         $users = DB::table('sigedin.guest.responsable')
@@ -33,10 +40,8 @@ class UserController extends Controller
     public function getUsuariosGerencia()
     {
         try {
-            $usuarioActivo = Auth::user();
 
-            // Hacer una sola consulta para obtener usuarios activos en la división correcta
-            $usuarios = $this->consultaABD($usuarioActivo->oficina);
+            $usuarios = $this->consultaABD([$this->usuarioActivo->oficina]);
 
             return response()->json($usuarios);
         } catch (\Throwable $th) {
@@ -48,13 +53,13 @@ class UserController extends Controller
     public function consultaUsuariosXGerencia(Request $request)
     {
         try {
+            $usuarios = [];
 
-            $usuarios = DB::table('sigedin.guest.responsable')
-                ->join('sigedin.guest.division', 'sigedin.guest.responsable.IdDivision', '=', 'sigedin.guest.division.DivisionID')
-                ->select('sigedin.guest.responsable.IdResponsable', 'sigedin.guest.division.DivisionID', 'sigedin.guest.division.DivisionName', 'sigedin.guest.responsable.Correo', 'sigedin.guest.responsable.Nombre', 'sigedin.guest.responsable.Cargo', 'sigedin.guest.responsable.EsJefe', 'sigedin.guest.responsable.IsAdmin', 'sigedin.guest.responsable.Estado', 'sigedin.guest.responsable.Usuario')
-                ->whereIn('sigedin.guest.division.DivisionName', $request->divisiones)
-                ->where('sigedin.guest.responsable.Estado', 'Activo')
-                ->get();
+            if ($this->usuarioActivo->IsAdmin == "1") {
+                $usuarios = $this->consultaABD($request->divisiones);
+            } else if ($this->usuarioActivo->IsJefe == "1" || $this->usuarioActivo->IdResponsable == "20258") {
+                $usuarios = $this->consultaABD([$this->usuarioActivo->oficina]);
+            }
 
             return response()->json([
                 'usuarios' => $usuarios,
@@ -73,94 +78,81 @@ class UserController extends Controller
 
     public function consultaDatosSegunPersonaSeleccionada(Request $request)
     {
+        DB::beginTransaction();
+
         try {
-            $concurrenciaFase = [];
+            // Inicialización de variables
             $horasAcumuladas = 0;
             $resultado = [];
-            $rangosFechas = [];
-            $concurrenciaAct = [];
 
-            // Recorrer el array de años y meses para generar los rangos de fechas
-            foreach ($request->anios as $anio) {
-                foreach ($request->meses as $mes) {
-                    $inicioMes = Carbon::create($anio, $mes, 1)->startOfMonth(); // Primer día del mes
-                    $finMes = Carbon::create($anio, $mes, 1)->endOfMonth();      // Último día del mes
+            // Generar los rangos de fechas
+            $rangosFechas = $this->obtenerRangoFechas($request->anios, $request->meses);
 
-                    $rangosFechas[] = [$inicioMes, $finMes]; // Guardar los rangos
-                }
-            }
+            // Filtro común para ambas consultas
+            $filtrosComunes = function ($query) use ($request, $rangosFechas) {
+                $query->whereIn('Trabajador', $request->personas)
+                    ->when($request->casos, function ($query) use ($request) {
+                        return $query->whereIn('Caso', $request->casos);
+                    })
+                    ->where(function ($query) use ($rangosFechas) {
+                        foreach ($rangosFechas as $rango) {
+                            $query->orWhereBetween('Fecha', $rango);
+                        }
+                    });
+            };
 
-            // Consulta optimizada: Agrupar por semanas y sumar las horas de cada semana
-            PlanillaReporte::select(
-                DB::raw('YEAR(Fecha) as anio'),  // Obtener el año de la fecha
-                DB::raw('DATEPART(WEEK, Fecha) as semana'),  // Obtener la semana del año
-                DB::raw('SUM(Horas) as horasDeLaSemana')      // Sumar las horas de cada semana
+            // Consulta optimizada: sumar horas por semanas
+            $planillaHoras = PlanillaReporte::select(
+                DB::raw('YEAR(Fecha) as anio'),
+                DB::raw('DATEPART(WEEK, Fecha) as semana'),
+                DB::raw('SUM(Horas) as horasDeLaSemana')
             )
-                ->whereIn('Trabajador', $request->personas)
-                ->where(function ($query) use ($rangosFechas) {
-                    // Usar whereBetween con or para múltiples rangos de fechas
-                    foreach ($rangosFechas as $rango) {
-                        $query->whereBetween('Fecha', $rango, 'or');
-                    }
-                })
-                ->groupBy(DB::raw('YEAR(Fecha)'), DB::raw('DATEPART(WEEK, Fecha)'))  // Agrupar por año y semana
-                ->orderBy(DB::raw('YEAR(Fecha)'), 'asc')  // Ordenar por año
-                ->orderBy(DB::raw('DATEPART(WEEK, Fecha)'), 'asc')  // Ordenar por semana dentro del año
+                ->where($filtrosComunes)
+                ->groupBy(DB::raw('YEAR(Fecha)'), DB::raw('DATEPART(WEEK, Fecha)'))
+                ->orderBy(DB::raw('YEAR(Fecha)'), 'asc')
+                ->orderBy(DB::raw('DATEPART(WEEK, Fecha)'), 'asc')
                 ->chunk(2000, function ($datosHorasUsuarios) use (&$horasAcumuladas, &$resultado) {
                     foreach ($datosHorasUsuarios as $dato) {
-                        $horasAcumuladas += $dato->horasDeLaSemana; // Sumar las horas acumuladas
-
-                        // Concatenar 'w' con el número de la semana y el año
+                        $horasAcumuladas += $dato->horasDeLaSemana;
                         $resultado[] = [
-                            'semana' => 'w' . $dato->semana . '-' . $dato->anio,  // Semana y año
+                            'semana' => 'w' . $dato->semana . '-' . $dato->anio,
                             'horasDeLaSemana' => $dato->horasDeLaSemana,
                             'horasAcumuladas' => $horasAcumuladas
                         ];
                     }
                 });
 
+            // Función para concurrencia de Fase o Actividad
+            $obtenerConcurrencia = function ($campo) use ($filtrosComunes) {
+                return PlanillaReporte::select(
+                    $campo,
+                    DB::raw('COUNT(' . $campo . ') as concurrencia')
+                )
+                    ->where($filtrosComunes)
+                    ->groupBy($campo)
+                    ->get();
+            };
 
-            // Consulta para obtener la concurrencia de fases
+            // Obtener concurrencia de Fase y Actividad
+            $concurrenciaFase = $obtenerConcurrencia('Fase');
+            $concurrenciaAct = $obtenerConcurrencia('Actividad');
 
-            $concurrenciaFase = PlanillaReporte::select(
-                'Fase',
-                DB::raw('COUNT(Fase) as concurrencia')
-            )
-                ->whereIn('Trabajador', $request->personas)
-                ->where(function ($query) use ($rangosFechas) {
-                    // Usar whereBetween con or para múltiples rangos de fechas
-                    foreach ($rangosFechas as $rango) {
-                        $query->whereBetween('Fecha', $rango, 'or');
-                    }
-                })
-                ->groupBy('Fase')
-                ->get();
+            // Obtener datos adicionales
+            $dataSWBSTarea = $this->consultaSWBSTarea($request);
 
-            // Consulta para obtener la concurrencia de act
-
-            $concurrenciaAct = PlanillaReporte::select(
-                'Actividad',
-                DB::raw('COUNT(Actividad) as concurrencia')
-            )
-                ->whereIn('Trabajador', $request->personas)
-                ->where(function ($query) use ($rangosFechas) {
-                    // Usar whereBetween con or para múltiples rangos de fechas
-                    foreach ($rangosFechas as $rango) {
-                        $query->whereBetween('Fecha', $rango, 'or');
-                    }
-                })
-                ->groupBy('Actividad')
-                ->get();
-
+            DB::commit();
 
             return response()->json([
                 'semanasData' => $resultado,
                 'concurrenciaFase' => $concurrenciaFase,
-                'ok' => true,
-                'concurrenciaAct' => $concurrenciaAct
+                'concurrenciaAct' => $concurrenciaAct,
+                'dataSWBSTarea' => $dataSWBSTarea->original["data"],
+                'ok' => true
             ]);
         } catch (\Throwable $th) {
             Log::error('Error al obtener datos: ' . $th->getMessage());
+            DB::rollBack();
+
             return response()->json([
                 'error' => 'Error al obtener datos.',
                 'message' => $th->getMessage(),
@@ -169,14 +161,98 @@ class UserController extends Controller
         }
     }
 
-
-    public function consultaABD($oficina)
+    public function consultaABD($divisiones)
     {
-        return DB::table('sigedin.guest.responsable')
+        return  DB::table('sigedin.guest.responsable')
             ->join('sigedin.guest.division', 'sigedin.guest.responsable.IdDivision', '=', 'sigedin.guest.division.DivisionID')
-            ->select('sigedin.guest.responsable.IdResponsable', 'sigedin.guest.responsable.Correo', 'sigedin.guest.responsable.Nombre', 'sigedin.guest.responsable.Cargo', 'sigedin.guest.responsable.EsJefe', 'sigedin.guest.responsable.IsAdmin', 'sigedin.guest.responsable.Estado', 'sigedin.guest.responsable.Usuario')
-            ->where('sigedin.guest.division.DivisionName', $oficina)
+            ->select('sigedin.guest.responsable.IdResponsable', 'sigedin.guest.division.DivisionID', 'sigedin.guest.division.DivisionName', 'sigedin.guest.responsable.Correo', 'sigedin.guest.responsable.Nombre', 'sigedin.guest.responsable.Cargo', 'sigedin.guest.responsable.EsJefe', 'sigedin.guest.responsable.IsAdmin', 'sigedin.guest.responsable.Estado', 'sigedin.guest.responsable.Usuario')
+            ->whereIn('sigedin.guest.division.DivisionName', $divisiones)
             ->where('sigedin.guest.responsable.Estado', 'Activo')
             ->get();
+    }
+
+    public function obtenerRangoFechas($anios, $meses)
+    {
+        $rangosFechas = collect($anios)->flatMap(function ($anio) use ($meses) {
+            return collect($meses)->map(function ($mes) use ($anio) {
+                return [
+                    Carbon::create($anio, $mes, 1)->startOfMonth(),
+                    Carbon::create($anio, $mes, 1)->endOfMonth()
+                ];
+            });
+        });
+
+        return $rangosFechas;
+    }
+
+    public function consultaCaso(Request $request)
+    {
+        try {
+
+            $request->validate([
+                'divisiones' => 'required|array',
+                'personas' => 'nullable|array',
+                'search' => 'required|string'
+            ]);
+
+            $divionesInt = array_map('intval', $request->divisiones);
+
+            $casos = PlanillaReporte::select('Caso', DB::raw('MIN(Proyecto) as Proyecto'))
+                ->where('Caso', 'like', '%' . $request->search . '%')
+                ->whereIn('IdDivision', $divionesInt)
+                ->when($request->personas, function ($query) use ($request) {
+                    return $query->whereIn('Trabajador', $request->personas);
+                })
+                ->where('Proyecto', '!=', '')
+                ->groupBy('Caso')
+                ->get();
+
+            return response()->json([
+                'message' => '(consultaCaso) Datos obtenidos correctamente.',
+                'data' => $casos,
+                'ok' => true
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('(consultaCaso) Error al obtener datos: ' . $th->getMessage());
+            return response()->json([
+                'error' => 'Error al obtener datos.',
+                'message' => $th->getMessage(),
+                'ok' => false
+            ], 500);
+        }
+    }
+
+    public function consultaSWBSTarea(Request $request)
+    {
+        try {
+            // Crear los rangos de fechas directamente
+            $rangosFechas = $this->obtenerRangoFechas($request->anios, $request->meses);
+
+            // Construir la consulta
+            $tareas = PlanillaReporte::select('SWBSPadre', 'Tarea', DB::raw('COUNT(*) as total'))
+                ->whereIn('Trabajador', $request->personas)
+                ->when($request->casos, function ($query) use ($request) {
+                    return $query->whereIn('Caso', $request->casos);
+                })->where(function ($query) use ($rangosFechas) {
+                    foreach ($rangosFechas as $rango) {
+                        $query->orWhereBetween('Fecha', $rango);
+                    }
+                })->groupBy('Tarea', 'SWBSPadre')->get();
+
+            $SWBSPadres = $tareas->pluck('SWBSPadre')->unique()->values();
+
+            return response()->json([
+                'message' => '(consultaSWBSTarea) Datos obtenidos correctamente.',
+                'data' => [$tareas, $SWBSPadres],
+                'ok' => true
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('(consultaSWBSTarea) Error al obtener datos: ' . $th->getMessage());
+            return response()->json([
+                'error' => 'Error al obtener datos.',
+                'message' => $th->getMessage(),
+                'ok' => false
+            ], 500);
+        }
     }
 }

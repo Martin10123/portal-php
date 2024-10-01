@@ -5,10 +5,14 @@ import {
     getListMouth,
     getXAtributoArray,
     getYearsFrom2000,
-} from "@/helpers/BarChartHelper";
-import { initECharts } from "@/echartsConfig";
+    optionsColumnGraphBar,
+    optionsColumnGraphPie,
+    optionsColumnGraphPieAct,
+    optionsColumnGraphTreeMap,
+} from "@/helpers";
+import { echartsConfig } from "@/echartsConfig";
 
-initECharts();
+echartsConfig();
 
 export const useBarChart = () => {
     const listDivision = ref([]);
@@ -20,14 +24,21 @@ export const useBarChart = () => {
     const isSearchDivision = ref(false);
     const loadingCharts = ref(false);
     const isLoadingNames = ref(false);
+    const isLoadingCasos = ref(false);
+    const isDisabledClean = ref(true);
+
+    const optionsColumnGraphB = ref(optionsColumnGraphBar);
+    const optionsColumnGraphP = ref(optionsColumnGraphPie);
+    const optionsColumnGraphPAct = ref(optionsColumnGraphPieAct);
+    const optionsColumnGraphTree = ref(optionsColumnGraphTreeMap);
 
     const form = useForm({
-        division: "",
-        persona: "",
-        caso: "",
-        buque: "",
-        mes: "",
-        anio: "",
+        division: [],
+        persona: [],
+        caso: [],
+        buque: [],
+        mes: [],
+        anio: [],
     });
 
     const getDivision = async () => {
@@ -35,6 +46,14 @@ export const useBarChart = () => {
             const { data } = await axios.get(route("management.getDivision"));
 
             listDivision.value = data.data;
+
+            if (listDivision.value.length === 1) {
+                form.division = listDivision.value;
+                fetchPersonas();
+            } else {
+                form.division = [];
+                listNombresXGerencia.value = [];
+            }
         } catch (error) {
             console.log(error);
         }
@@ -58,6 +77,31 @@ export const useBarChart = () => {
         } finally {
             isLoadingNames.value = false;
             isSearchDivision.value = false;
+        }
+    };
+
+    const onGetCasoBuque = async (search) => {
+        if (search.value.length < 3 || form.division.length === 0) {
+            listCasoBuque.value = [];
+            return;
+        }
+
+        try {
+            isLoadingCasos.value = true;
+
+            const { data } = await axios.get(
+                route("users.consultaCasoBuque", {
+                    personas: getXAtributoArray(form.persona, "IdResponsable"),
+                    divisiones: getXAtributoArray(form.division, "DivisionID"),
+                    search: search.value,
+                })
+            );
+
+            listCasoBuque.value = data.data;
+        } catch (error) {
+            console.log(error);
+        } finally {
+            isLoadingCasos.value = false;
         }
     };
 
@@ -90,17 +134,50 @@ export const useBarChart = () => {
         try {
             const response = await fetchChartData(form);
 
-            if (!response.data.ok) {
-                showWarning("No hay datos para la persona seleccionada");
+            if (response.data.semanasData.length <= 0) {
+                showWarning("No hay datos para mostrar en los gráficos");
                 return;
             }
 
-            renderCharts(response.data);
+            renderDrawChartBar(response.data.semanasData);
+            renderDrawChartPie(response.data.concurrenciaFase);
+            renderDrawChartPieAct(response.data.concurrenciaAct);
+            renderDrawChartTreeMap(response.data.dataSWBSTarea);
         } catch (error) {
             console.error(error);
         } finally {
             loadingCharts.value = false;
         }
+    };
+
+    const onCleanForm = () => {
+        form.reset();
+        listNombresXGerencia.value = [];
+        listCasoBuque.value = [];
+        optionsColumnGraphB.value.dataset.source = [];
+        optionsColumnGraphP.value.series[0].data = [];
+        optionsColumnGraphPAct.value.series[0].data = [];
+        optionsColumnGraphTree.value.series[0].data = [];
+    };
+
+    const fetchChartData = (form) => {
+        return axios.get(
+            route("users.consultaDatosSegunPersonaSeleccionada", {
+                personas:
+                    form.persona.length > 0
+                        ? getXAtributoArray(form.persona, "IdResponsable")
+                        : getXAtributoArray(
+                              listNombresXGerencia.value,
+                              "IdResponsable"
+                          ),
+                anios: [...form.anio],
+                meses: getXAtributoArray(form.mes, "value"),
+                casos:
+                    form.caso.length > 0
+                        ? getXAtributoArray(form.caso, "Caso")
+                        : [],
+            })
+        );
     };
 
     const isFormValid = (form) => {
@@ -141,26 +218,10 @@ export const useBarChart = () => {
         }
     };
 
-    const fetchChartData = (form) => {
-        return axios.get(
-            route("users.consultaDatosSegunPersonaSeleccionada", {
-                personas:
-                    form.persona.length > 0
-                        ? getXAtributoArray(form.persona, "IdResponsable")
-                        : getXAtributoArray(
-                              listNombresXGerencia.value,
-                              "IdResponsable"
-                          ),
-                anios: [...form.anio],
-                meses: getXAtributoArray(form.mes, "value"),
-            })
-        );
-    };
-
     watch(
         () => form.division,
-        async (newValue) => {
-            if (newValue.length > 0) {
+        (newValue) => {
+            if (newValue.length > 0 && !isSearchDivision.value) {
                 isSearchDivision.value = true;
             } else {
                 isSearchDivision.value = false;
@@ -168,31 +229,114 @@ export const useBarChart = () => {
         }
     );
 
-    const optionsColumnGraph = ref({
-        legend: {},
-        tooltip: {},
-        dataset: {
-            dimensions: ["product", "2015", "2016", "2017"], // Define las dimensiones
-            source: [
-                { product: "Matcha Latte", 2015: 43.3, 2016: 85.8, 2017: 93.7 },
-                { product: "Milk Tea", 2015: 83.1, 2016: 73.4, 2017: 55.1 },
-                { product: "Cheese Cocoa", 2015: 86.4, 2016: 65.2, 2017: 82.5 },
-                {
-                    product: "Walnut Brownie",
-                    2015: 72.4,
-                    2016: 53.9,
-                    2017: 39.1,
-                },
-            ],
-        },
-        xAxis: { type: "category" },
-        yAxis: {},
-        series: [
-            { type: "bar", name: "2015", encode: { x: "product", y: "2015" } },
-            { type: "bar", name: "2016", encode: { x: "product", y: "2016" } },
-            { type: "bar", name: "2017", encode: { x: "product", y: "2017" } },
-        ],
-    });
+    watch(
+        () => form.caso,
+        (newValue) => {
+            if (newValue.length > 0) {
+                form.buque = form.caso;
+            } else {
+                form.buque = [];
+            }
+        }
+    );
+
+    watch(
+        () => form.data(),
+        (newValue) => {
+            isDisabledClean.value = Object.values(newValue).every(
+                (value) => value.length === 0
+            );
+        }
+    );
+
+    const mapDataForBarChart = (semanasData) => {
+        return semanasData.map(
+            ({ semana, horasDeLaSemana, horasAcumuladas }) => ({
+                semana,
+                HHSemana: horasDeLaSemana,
+                HHAcumulada: horasAcumuladas,
+            })
+        );
+    };
+
+    const mapDataForPieChart = (data, nameKey, valueKey) => {
+        return data.map((item) => ({
+            value: Number(item[valueKey]),
+            name: item[nameKey],
+        }));
+    };
+
+    const renderDrawChartBar = (semanasData) => {
+        try {
+            if (!Array.isArray(semanasData))
+                throw new Error("Invalid data format for semanasData");
+
+            optionsColumnGraphB.value.dataset.source =
+                mapDataForBarChart(semanasData);
+        } catch (error) {
+            console.error("Error rendering Bar Chart:", error);
+        }
+    };
+
+    const renderDrawChartPie = (concurrenciaFaseData) => {
+        try {
+            if (!Array.isArray(concurrenciaFaseData))
+                throw new Error("Invalid data format for concurrenciaFaseData");
+
+            optionsColumnGraphP.value.series[0].data = mapDataForPieChart(
+                concurrenciaFaseData,
+                "Fase",
+                "concurrencia"
+            );
+        } catch (error) {
+            console.error("Error rendering concurrenciaFaseData:", error);
+        }
+    };
+
+    const renderDrawChartPieAct = (concurrenciaActData) => {
+        try {
+            if (!Array.isArray(concurrenciaActData))
+                throw new Error("Invalid data format for concurrenciaActData");
+
+            optionsColumnGraphPAct.value.series[0].data = mapDataForPieChart(
+                concurrenciaActData,
+                "Actividad",
+                "concurrencia"
+            );
+        } catch (error) {
+            console.error(
+                "Error rendering Pie Chart for concurrenciaActData:",
+                error
+            );
+        }
+    };
+
+    const renderDrawChartTreeMap = (concurrenciaTaskData) => {
+        try {
+            if (!Array.isArray(concurrenciaTaskData))
+                throw new Error("Invalid data format for concurrenciaTaskData");
+
+            optionsColumnGraphTree.value.series[0].data =
+                concurrenciaTaskData[1].map((swbs) => ({
+                    value: 647772,
+                    name: swbs,
+                    children: concurrenciaTaskData[0].map((task) =>
+                        task.SWBSPadre === swbs
+                            ? {
+                                  value: Number(task.total),
+                                  name: `${task.Tarea}\n${task.total}`,
+                                  path: `${swbs}/${task.Tarea}`,
+                              }
+                            : {}
+                    ),
+                }));
+        } catch (error) {
+            console.error(
+                "Error rendering Tree Map for concurrenciaTaskData:",
+                error
+            );
+        }
+    };
 
     onMounted(() => {
         getDivision();
@@ -211,8 +355,15 @@ export const useBarChart = () => {
         isSearchDivision,
         loadingCharts,
         isLoadingNames,
-        optionsColumnGraph,
+        isLoadingCasos,
+        isDisabledClean,
+        optionsColumnGraphB,
+        optionsColumnGraphP,
+        optionsColumnGraphPAct,
+        optionsColumnGraphTree,
         onGetPersonasXGerencia,
         onViewReport,
+        onGetCasoBuque,
+        onCleanForm,
     };
 };

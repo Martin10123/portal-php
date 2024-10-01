@@ -12,3 +12,4 @@ export * from "./useAddExcelFile";
 export * from "./useBarChart";
 export * from "./useModalFloor";
 export * from "./useAdminFloor";
+export * from "./useGetOptionsSidebar";

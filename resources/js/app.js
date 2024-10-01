@@ -16,7 +16,6 @@ import Aura from "@primevue/themes/aura";
 import FullCalendar from "@fullcalendar/vue3";
 import VueECharts from "vue-echarts";
 
-const appName = import.meta.env.VITE_APP_NAME || "Laravel";
 const pinia = createPinia();
 
 createInertiaApp({

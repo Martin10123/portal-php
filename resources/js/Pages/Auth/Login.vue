@@ -20,6 +20,11 @@ const form = useForm({
 });
 
 const submit = () => {
+
+    if (form.username.includes('@')) {
+        form.username = form.username.split('@')[0];
+    }
+
     form.transform(data => ({
         ...data,
         remember: form.remember ? 'on' : '',
@@ -43,14 +48,14 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="username" value="Username (Sin el @Cotecmar)" />
+                <InputLabel for="username" value="Usuario" />
                 <TextInput id="username" v-model="form.username" type="text" class="mt-1 block w-full" required
                     autofocus placeholder="Username..." />
                 <InputError class="mt-2" :message="form.errors.username" />
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="password" value="Contraseña" />
                 <TextInput id="password" v-model="form.password" type="password" class="mt-1 block w-full" required
                     placeholder="Password..." />
                 <InputError class="mt-2" :message="form.errors.password" />

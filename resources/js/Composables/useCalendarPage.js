@@ -269,7 +269,7 @@ export const useCalendarPage = () => {
         openModal.value = !openModal.value;
 
         if (!openModal.value) {
-            form.reset();
+            formReset();
         }
     };
 
@@ -319,6 +319,7 @@ export const useCalendarPage = () => {
         if (infoSelectedEvent.value.id) {
             onSaveUpdateEvent();
         } else {
+            infoSelectedEvent.value = {};
             onSaveCreateEvent();
         }
     };
@@ -328,6 +329,8 @@ export const useCalendarPage = () => {
             if (!validateFormCalendar({ ...form.data() })) {
                 return;
             }
+
+            console.log(form.data());
 
             const { value: text, isConfirmed } = await Swal.fire({
                 input: "textarea",
@@ -345,7 +348,7 @@ export const useCalendarPage = () => {
                 return;
             }
 
-            if (text.length <= 10) {
+            if (text.length <= 7) {
                 Swal.fire({
                     icon: "warning",
                     title: "Error",
@@ -415,7 +418,7 @@ export const useCalendarPage = () => {
                     }
                 );
 
-                form.reset();
+                formReset();
                 openModal.value = false;
                 openShowInfo.value = false;
                 infoSelectedEvent.value = {};
@@ -501,7 +504,7 @@ export const useCalendarPage = () => {
                 resource: form.resource,
                 division: form.division,
                 isArRequired: form.isArRequired,
-                typeService: form.typeService,
+                typeService: eventData.type_service_ID,
                 isRepeatPeriod: form.repeatPeriodically,
             },
         ];
@@ -521,7 +524,7 @@ export const useCalendarPage = () => {
             if (response.data.ok) {
                 addEventToCalendar(response.data.data, form);
 
-                form.reset();
+                formReset();
                 openModal.value = false;
 
                 Swal.fire({
@@ -550,6 +553,20 @@ export const useCalendarPage = () => {
         } finally {
             isLoadingSaveEvent.value = false;
         }
+    };
+
+    const formReset = () => {
+        form.title = "";
+        form.description = "";
+        form.date = "";
+        form.division = "***";
+        form.isArRequired = false;
+        form.repeatPeriodically = false;
+        form.typeService = "";
+        form.dateHours = [];
+        form.participantsNecesary = [];
+        form.participantsOptional = [];
+        form.resource = [];
     };
 
     const onDeleteEvent = async () => {

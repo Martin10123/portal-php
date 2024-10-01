@@ -26,4 +26,9 @@ class CalendarRespFloor extends Model
     {
         return $this->belongsTo(Responsable::class, 'id_resp', 'idResponsable');
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('estado', '1');
+    }
 }

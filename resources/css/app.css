@@ -82,11 +82,11 @@ html {
 }
 
 .vs__selected {
-    @apply dark:bg-transparent dark:text-white !important;
+    @apply dark:bg-transparent !important;
 }
 
 .vs__deselect {
-    @apply dark:fill-white !important;
+    @apply dark:fill-white break-words !important;
 }
 
 .vs__clear,
@@ -115,4 +115,8 @@ html {
 
 .fc-direction-ltr .fc-timegrid-col-events {
     width: 100%;
+}
+
+.vs__selected {
+    line-break: anywhere;
 }

@@ -54,7 +54,7 @@ const onOpenProfile = () => {
 
 const onCopyEmail = () => {
     navigator.clipboard.writeText(userActive.value.usuario);
-    alert("Correo copiado al portapapeles");
+    alert("Correo copiado en el portapapeles");
 }
 
 const logout = () => {

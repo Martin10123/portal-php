@@ -66,6 +66,7 @@ class CalendarController extends Controller
                 $typeServiceData["type_service_ID"] = $typeService->type_service_ID;
                 $typeServiceData["description"] = $typeService->description;
             }
+
             return $typeServiceData;
         } catch (\Throwable $th) {
             Log::error('Error al verificar el tipo de servicio: ' . $th->getMessage());
@@ -330,77 +331,16 @@ class CalendarController extends Controller
     public function getAllFloors()
     {
         try {
-
             $floors = CalendarFloor::with(['responsables' => function ($query) {
-                $query->select('idResponsable', 'Nombre', 'Correo', 'Cargo');
+                $query->select('idResponsable', 'Nombre', 'Correo', 'Cargo')
+                    ->where('Calendar_Resp_Sala.estado', 1);
             }])
                 ->where('estado', 1)
                 ->get();
 
-            $options = [
-                [
-                    'label' => 'Solicitudes',
-                    'icon' => 'pi pi-folder-plus',
-                    'isOnlyAdmin' => true,
-                    'items' => [
-                        [
-                            'label' => 'Agregar solicitud',
-                            'icon' => 'pi pi-file-plus',
-                            'route' => '/Sigedin/Request/AddRequest',
-                        ],
-                    ],
-                ],
-                [
-                    'label' => "Planillación",
-                    'icon' => "pi pi-file-check",
-                    'isOnlyAdmin' => true,
-                    'items' => [
-                        [
-                            'label' => "Gestion de grafos",
-                            'icon' => "pi pi-list-check",
-                            'route' => "/Sigedin/Personnel/Reports",
-                        ],
-                    ],
-                ],
-                [
-                    'label' => 'Reservar sala',
-                    'icon' => 'pi pi-bell',
-                    'items' => array_merge(
-                        $floors->map(function ($floor) {
-                            return [
-                                'label' => $floor->Sala_Name,
-                                'icon' => 'pi pi-calendar',
-                                'route' => '/Sigedin/CalendarPage/CalendarPage?floor=' . urlencode($floor->ID),
-                            ];
-                        })->toArray(),
-                        [
-                            [
-                                'label' => 'Gestionar salas',
-                                'icon' => 'pi pi-clipboard',
-                                'isOnlyAdmin' => true,
-                                'route' => '/Sigedin/CalendarPage/AdminFloor',
-                            ]
-                        ]
-                    ),
-                ],
-                [
-                    'label' => 'Graficos',
-                    'icon' => 'pi pi-chart-bar',
-                    'isOnlyAdmin' => true,
-                    'items' => [
-                        [
-                            'label' => 'Index',
-                            'icon' => 'pi pi-chart-pie',
-                            'route' => '/Sigedin/Charts/ChartsMain',
-                        ],
-                    ],
-                ],
-            ];
-
             return response()->json([
                 "message" => "Datos obtenidos correctamente de las salas",
                 "data" => $floors,
-                "options" => $options,
                 "ok" => true
             ]);
         } catch (\Throwable $th) {
@@ -419,7 +359,7 @@ class CalendarController extends Controller
             return CalendarFloor::where('Sala_Color', $Sala_Color)->exists();
         } catch (\Throwable $th) {
             Log::error('Error al verificar si el color de la sala existe: ' . $th->getMessage());
-            throw $th; // Es mejor relanzar la excepción para manejarla externamente
+            throw $th;
         }
     }
 

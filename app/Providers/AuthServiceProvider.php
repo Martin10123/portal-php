@@ -34,7 +34,7 @@ class AuthServiceProvider extends ServiceProvider
                 $userSelect = DB::table('sigedin.guest.responsable')
                     ->where('usuario', $usernameCotecmar)
                     ->where('Estado', 'Activo')
-                    ->select('IsAdmin', 'IdResponsable', 'EsJefe')
+                    ->select('IsAdmin', 'IdResponsable', 'EsJefe', 'IdDivision')
                     ->get()
                     ->first();
 
@@ -46,6 +46,7 @@ class AuthServiceProvider extends ServiceProvider
                 $request->session()->put('IsAdmin', $userSelect->IsAdmin);
                 $request->session()->put('IdResponsable', $userSelect->IdResponsable);
                 $request->session()->put('IsJefe', $userSelect->EsJefe);
+                $request->session()->put('IdDivision', $userSelect->IdDivision);
 
                 return $userDA;
             }
