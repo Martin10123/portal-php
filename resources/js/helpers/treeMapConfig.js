@@ -40,6 +40,12 @@ export const optionsColumnGraphTreeMap = {
         text: "Tareas",
         left: "center",
     },
+    toolbox: {
+        feature: {
+            dataView: { show: true, readOnly: false },
+            saveAsImage: { show: true },
+        },
+    },
     tooltip: {
         formatter: function (info) {
             var value = info.value;

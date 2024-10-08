@@ -5,7 +5,7 @@
         <section class="overflow-auto">
             <HeaderTableExcel :data-excel="dataExcel" :handle-file-change="handleFileChange" :file="file"
                 :loading-file="loadingFile" :on-load-save-excel="onLoadSaveExcel"
-                :somebody-excel-edit="somebodyExcelEdit" :loading-excel="loadingExcel" />
+                :somebody-excel-edit="somebodyExcelEdit" />
 
             <article class="p-4 relative overflow-x-auto shadow-md sm:rounded-lg">
                 <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -39,19 +39,22 @@
                     :show-modal-form="showModalForm" v-on:update-graph-select="onUpdateGraphSelect" />
 
                 <PaginationPersonnel :project-select="dataExcel.dataExcelSelect" :pagination="currentPage"
-                    @changePage="changePage" />
+                    @changePage="changePage" :total-pages="totalPages" />
+
+                <Paginator :rows="rowsPerPage" :totalRecords="listaDataDeliverables.length"
+                    :first="currentPage * rowsPerPage" :rowsPerPageOptions="[10, 20, 30]" @page="onPageChange" />
             </article>
         </section>
     </AppLayout>
 </template>
 
 <script setup>
-import PaginationPersonnel from "@/Components/Personnel/PaginationPersonnel.vue";
 import HeaderTableExcel from "@/Components/Personnel/HeaderTableExcel.vue";
 import ItemsTableExcel from "@/Components/Personnel/ItemsTableExcel.vue";
 import { useAddExcelFile } from "@/Composables/useAddExcelFile";
 import FormOneSelectExcel from "@/Components/Personnel/FormOneSelectExcel.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
+import Paginator from "primevue/paginator";
 
 const {
     currentPage,
@@ -62,8 +65,8 @@ const {
     paginatedData,
     showModalForm,
     projectSelectToEdit,
-    loadingExcel,
     somebodyExcelEdit,
+    totalPages,
     changePage,
     onLoadSaveExcel,
     handleFileChange,

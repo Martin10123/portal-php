@@ -7,6 +7,7 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import axios from 'axios';
 
 defineProps({
     canResetPassword: Boolean,
@@ -19,16 +20,20 @@ const form = useForm({
     remember: false,
 });
 
-const submit = () => {
+const submit = async () => {
 
-    if (form.username.includes('@')) {
-        form.username = form.username.split('@')[0];
+    try {
+        if (form.username.includes('@')) {
+            form.username = form.username.split('@')[0];
+        }
+
+        form.transform(data => ({
+            ...data,
+            remember: form.remember ? 'on' : '',
+        })).post(route('login'));
+    } catch (error) {
+        console.log(error);
     }
-
-    form.transform(data => ({
-        ...data,
-        remember: form.remember ? 'on' : '',
-    })).post(route('login'));
 
 };
 </script>

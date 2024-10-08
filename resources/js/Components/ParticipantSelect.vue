@@ -1,9 +1,8 @@
 <template>
     <div class="grid gap-2">
         <label class="font-medium">{{ label }}</label>
-        <v-select class="dark:bg-gray-700 rounded-md" multiple :options="options" placeholder="Participantes..."
-            append-to-body :calculate-position="calcSpacing" label="correo" :filter="customFilter"
-            :reduce="email => email.correo" v-model="localValue" taggable>
+        <v-select class="dark:bg-gray-700 rounded-md" :options="paginated" :placeholder="placeholder" @search="onSearch"
+            multiple append-to-body :calculate-position="calcSpacing" label="correo" v-model="localValue">
             <template v-slot:option="option">
                 <div>
                     {{ option.correo }}
@@ -11,42 +10,73 @@
                     <cite class="text-sm">{{ option.nombre }}</cite>
                 </div>
             </template>
+            <template #list-footer>
+                <li class="flex justify-between items-center p-2 flex-grow">
+                    <button class="bg-stone-300 text-stone-800 hover:bg-stone-400 hover:text-stone-900 rounded-md px-2 py-1
+                    " :disabled="!hasPrevPage" @click="prevPage">Prev</button>
+                    <button class="bg-stone-300 text-stone-800 hover:bg-stone-400 hover:text-stone-900 rounded-md px-2 py-1
+                    " :disabled="!hasNextPage" @click="nextPage">Next</button>
+                </li>
+            </template>
         </v-select>
     </div>
 </template>
 
 <script setup>
-import Fuse from 'fuse.js';
-import { ref, watch } from 'vue';
-import { defineEmits } from 'vue';
+import { usePaginatedSelect } from '@/Composables/usePaginatedVueSelect';
+import { createPopper } from '@popperjs/core';
+import { ref, watch, defineEmits } from 'vue';
 
 const props = defineProps({
-    modelValue: Array,
+    modelValue: Array | String,
     label: String,
     options: Array,
-    calcSpacing: Function,
+    placeholder: String,
 });
+
+const { paginated, hasPrevPage, hasNextPage, prevPage, nextPage, onSearch } =
+    usePaginatedSelect(props.options, 10);
 
 const emit = defineEmits();
 
-// Crear una referencia local para v-model
 const localValue = ref(props.modelValue);
+const emailsBefore = [...props.modelValue];
 
-// Emitir el valor actualizado cuando localValue cambie
 watch(localValue, (newValue) => {
-    emit('update:modelValue', newValue);
+
+    const selectedEmails = newValue.map((email) => email.correo);
+
+    const newEmails = [...emailsBefore, ...selectedEmails].filter((email) => email)
+
+    emit('update:modelValue', newEmails);
 });
 
-function customFilter(options, search) {
-    const fuse = new Fuse(options, {
-        keys: ['nombre', 'correo'],
-        shouldSort: true,
-        threshold: 0.2,
-        distance: 200,
+const calcSpacing = (dropdownList, component, { width }) => {
+    dropdownList.style.width = width;
+
+    const popper = createPopper(component.$refs.toggle, dropdownList, {
+        modifiers: [
+            {
+                name: "offset",
+                options: {
+                    offset: [0, -1],
+                },
+            },
+            {
+                name: "toggleClass",
+                enabled: true,
+                phase: "write",
+                fn({ state }) {
+                    component.$el.classList.toggle(
+                        "drop-up",
+                        state.placement === "top"
+                    );
+                },
+            },
+        ],
     });
 
-    return search.length
-        ? fuse.search(search).map(({ item }) => item)
-        : options;
-}
+    return () => popper.destroy();
+};
+
 </script>

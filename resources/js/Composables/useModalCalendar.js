@@ -1,46 +1,21 @@
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import axios from "axios";
-import { createPopper } from "@popperjs/core";
 import { useDataCalendarStore } from "@/pinia/useDataCalendarStore";
 import { usePage } from "@inertiajs/vue3";
+import { useGetEmailsStore } from "@/pinia/useGetEmailsStore";
 
 export const useModalCalendar = (form) => {
     const storeCalendar = useDataCalendarStore();
-    const usersEmails = ref([]);
+    const storeGetEmails = useGetEmailsStore();
     const listaTipoServicios = ref([]);
     const listManagement = ref([]);
-    const listFloors = ref([]);
+
     const { url } = usePage();
+    const listFloors = computed(() =>
+        storeCalendar.getFloorSelected(url.split("floor=")[1])
+    );
+    const usersEmails = computed(() => storeGetEmails.usersEmails);
 
-    const calcSpacing = (dropdownList, component, { width }) => {
-        dropdownList.style.width = width;
-
-        const popper = createPopper(component.$refs.toggle, dropdownList, {
-            modifiers: [
-                {
-                    name: "offset",
-                    options: {
-                        offset: [0, -1],
-                    },
-                },
-                {
-                    name: "toggleClass",
-                    enabled: true,
-                    phase: "write",
-                    fn({ state }) {
-                        component.$el.classList.toggle(
-                            "drop-up",
-                            state.placement === "top"
-                        );
-                    },
-                },
-            ],
-        });
-
-        return () => popper.destroy();
-    };
-
-    // Handle API requests
     const fetchData = async (url, setData) => {
         try {
             const { data } = await axios.get(url);
@@ -54,11 +29,6 @@ export const useModalCalendar = (form) => {
         console.error("API error: ", error);
     };
 
-    const getEmailsUsers = () =>
-        fetchData(route("users.index"), (data) => {
-            usersEmails.value = data;
-        });
-
     const getTypeServices = () =>
         fetchData(route("typeServices.index"), (data) => {
             listaTipoServicios.value = data.data;
@@ -71,21 +41,11 @@ export const useModalCalendar = (form) => {
 
     onMounted(async () => {
         try {
-            await Promise.all([
-                getEmailsUsers(),
-                getTypeServices(),
-                getManagement(),
-            ]);
-
             await storeCalendar.getFloors();
 
-            const floorSelect = url.split("floor=")[1];
-
-            listFloors.value = storeCalendar.allFloorsCalendar.data.filter(
-                (floor) => floor.ID === Number(floorSelect)
-            );
-
             form.floor = listFloors.value[0];
+
+            await Promise.all([getTypeServices(), getManagement()]);
         } catch (error) {
             handleError(error);
         }
@@ -96,6 +56,5 @@ export const useModalCalendar = (form) => {
         listaTipoServicios,
         listManagement,
         listFloors,
-        calcSpacing,
     };
 };

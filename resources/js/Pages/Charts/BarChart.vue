@@ -32,7 +32,8 @@
 
             <GraphicsCharts :options-column-graph-b="optionsColumnGraphB" :options-column-graph-p="optionsColumnGraphP"
                 :options-column-graph-p-act="optionsColumnGraphPAct" :options-column-graph-tree="optionsColumnGraphTree"
-                :loading-charts="loadingCharts" />
+                :loading-charts="loadingCharts" :options-column-graph-l-b="optionsColumnGraphLB"
+                :lista-data-deliverables="listaDataDeliverables" :total-data-deliverables="totalDataDeliverables" />
         </section>
     </AppLayout>
 </template>
@@ -51,6 +52,8 @@ const {
     isDisabledClean,
     listCasoBuque,
     listNombresXGerencia,
+    listaDataDeliverables,
+    totalDataDeliverables,
     loadingCharts,
     onViewReport,
     onGetPersonasXGerencia,
@@ -58,6 +61,7 @@ const {
     optionsColumnGraphP,
     optionsColumnGraphPAct,
     optionsColumnGraphTree,
+    optionsColumnGraphLB,
     onGetCasoBuque,
     onCleanForm
 } = useBarChart();

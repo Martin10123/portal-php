@@ -63,9 +63,8 @@
                             <label class="font-medium">Gerencia</label>
                             <select class="w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700"
                                 v-model="form.division">
-                                <option v-for="management in listManagement" :key="management.Nombre"
-                                    :value="management.Nombre">{{
-                                        management.Nombre }}
+                                <option v-for="{ Nombre } in listManagement" :key="Nombre" :value="Nombre">
+                                    {{ Nombre }}
                                 </option>
                             </select>
                         </div>
@@ -92,10 +91,10 @@
                     </div>
 
                     <ParticipantSelect label="Participantes necesarios" :options="usersEmails"
-                        :calcSpacing="calcSpacing" v-model="form.participantsNecesary" />
+                        v-model="form.participantsNecesary" placeholder="Participantes necesarios..." />
 
                     <ParticipantSelect label="Participantes opcionales" :options="usersEmails"
-                        :calcSpacing="calcSpacing" v-model="form.participantsOptional" />
+                        v-model="form.participantsOptional" placeholder="Participantes opcionales..." />
 
                     <div class="grid gap-2">
                         <div class="flex justify-between">
@@ -122,8 +121,9 @@
                     </div>
 
                     <button
-                        class=" w-full py-2 mt-4 bg-primary-cotecmar text-white rounded-md shadow-md cursor-pointer hover:bg-tertiary-cotecmar duration-300"
-                        type="submit">{{ isLoadingSaveEvent ? 'Guardando evento...' : 'Guardar' }}</button>
+                        class="w-full py-2 mt-4 bg-primary-cotecmar text-white rounded-md shadow-md cursor-pointer hover:bg-tertiary-cotecmar duration-300"
+                        type="submit">{{ isLoadingSaveEvent ? 'Guardando evento...' : 'Guardar' }}
+                    </button>
                 </form>
             </article>
         </section>
@@ -154,7 +154,7 @@ const props = defineProps({
     infoSelectedEvent: Object,
 });
 
-const { calcSpacing, listaTipoServicios, usersEmails, listManagement, listFloors } = useModalCalendar(props.form)
+const { listaTipoServicios, usersEmails, listManagement, listFloors } = useModalCalendar(props.form)
 
 </script>
 

@@ -38,15 +38,12 @@
             </tbody>
         </table>
 
-        <PaginationPersonnel :project-select="projectSelect" :pagination="pagination" @change-page="onChangePage" />
-
         <FormSelects :show-modal-form="showModalForm" :handle-modal-form="handleModalForm"
             :selected-project="selectedProject" :on-update-project-selected="onUpdateProjectSelected" />
     </div>
 </template>
 
 <script setup>
-import PaginationPersonnel from './PaginationPersonnel.vue';
 import HeaderTable from './HeaderTable.vue';
 import FormSelects from './FormSelects.vue';
 import { useTablePersonnel } from '@/Composables';

@@ -25,7 +25,7 @@
                     <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
                         <span class="font-semibold">Click para cargar archivo</span>
                     </p>
-                    <p class="text-base text-gray-600 dark:text-gray-400 px-4" v-if="!loadingExcel">
+                    <p class="text-base text-gray-600 dark:text-gray-400 px-4" v-if="!loadingFile.loadingExcel">
                         {{
                             file
                                 ? file.name
@@ -48,9 +48,9 @@
 
         <button
             class="w-full px-4 py-2 mt-4 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            :class="{ 'cursor-not-allowed': loadingFile }" @click="onLoadSaveExcel" :disabled="loadingFile"
-            :aria-disabled="loadingFile" v-if="dataExcel.rowsCount > 0">
-            {{ loadingFile
+            :class="{ 'cursor-not-allowed': loadingFile.loadingSave }" @click="onLoadSaveExcel"
+            :disabled="loadingFile.loadingSave" :aria-disabled="loadingFile.loadingSave" v-if="dataExcel.rowsCount > 0">
+            {{ loadingFile.loadingSave
                 ? "Cargando..."
                 : somebodyExcelEdit ? 'Guardar archivos modificados' : 'Cargar archivo excel sin modificaciones'
             }}
@@ -65,8 +65,7 @@ import { Link } from '@inertiajs/vue3';
 const props = defineProps({
     somebodyExcelEdit: Boolean,
     dataExcel: Object,
-    loadingExcel: Boolean,
-    loadingFile: Boolean,
+    loadingFile: Object,
     file: Object,
     onLoadSaveExcel: Function,
     handleFileChange: Function,

@@ -9,6 +9,7 @@ import {
     optionsColumnGraphPie,
     optionsColumnGraphPieAct,
     optionsColumnGraphTreeMap,
+    optionsColumnGraphLineBar,
 } from "@/helpers";
 import { echartsConfig } from "@/echartsConfig";
 
@@ -20,6 +21,8 @@ export const useBarChart = () => {
     const listMouth = ref([]);
     const listNombresXGerencia = ref([]);
     const listCasoBuque = ref([]);
+    const listaDataDeliverables = ref([]);
+    const totalDataDeliverables = ref(0);
 
     const isSearchDivision = ref(false);
     const loadingCharts = ref(false);
@@ -31,6 +34,7 @@ export const useBarChart = () => {
     const optionsColumnGraphP = ref(optionsColumnGraphPie);
     const optionsColumnGraphPAct = ref(optionsColumnGraphPieAct);
     const optionsColumnGraphTree = ref(optionsColumnGraphTreeMap);
+    const optionsColumnGraphLB = ref(optionsColumnGraphLineBar);
 
     const form = useForm({
         division: [],
@@ -143,6 +147,10 @@ export const useBarChart = () => {
             renderDrawChartPie(response.data.concurrenciaFase);
             renderDrawChartPieAct(response.data.concurrenciaAct);
             renderDrawChartTreeMap(response.data.dataSWBSTarea);
+            renderDrawChartLineBar(response.data.dataSWBSTarea);
+
+            listaDataDeliverables.value = response.data.dataEntregables[0];
+            totalDataDeliverables.value = response.data.dataEntregables[1];
         } catch (error) {
             console.error(error);
         } finally {
@@ -158,6 +166,7 @@ export const useBarChart = () => {
         optionsColumnGraphP.value.series[0].data = [];
         optionsColumnGraphPAct.value.series[0].data = [];
         optionsColumnGraphTree.value.series[0].data = [];
+        optionsColumnGraphLB.value.dataset.source = [];
     };
 
     const fetchChartData = (form) => {
@@ -338,6 +347,22 @@ export const useBarChart = () => {
         }
     };
 
+    const renderDrawChartLineBar = (data) => {
+        try {
+            optionsColumnGraphLB.value.dataset[0].source = data[0].map(
+                (item) => ({
+                    tarea: item.Tarea,
+                    total: Number(item.total),
+                })
+            );
+        } catch (error) {
+            console.log(
+                "Error rendering Line Bar for renderDrawChartLineBar:",
+                error
+            );
+        }
+    };
+
     onMounted(() => {
         getDivision();
 
@@ -352,6 +377,8 @@ export const useBarChart = () => {
         listMouth,
         listNombresXGerencia,
         listCasoBuque,
+        listaDataDeliverables,
+        totalDataDeliverables,
         isSearchDivision,
         loadingCharts,
         isLoadingNames,
@@ -361,6 +388,7 @@ export const useBarChart = () => {
         optionsColumnGraphP,
         optionsColumnGraphPAct,
         optionsColumnGraphTree,
+        optionsColumnGraphLB,
         onGetPersonasXGerencia,
         onViewReport,
         onGetCasoBuque,

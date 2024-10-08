@@ -7,6 +7,12 @@ export const optionsColumnGraphPie = {
         trigger: "item",
         formatter: "{b}: {c} ({d}%)",
     },
+    toolbox: {
+        feature: {
+            dataView: { show: true, readOnly: false },
+            saveAsImage: { show: true },
+        },
+    },
     series: [
         {
             name: "Fase",
@@ -32,6 +38,12 @@ export const optionsColumnGraphPieAct = {
     tooltip: {
         trigger: "item",
         formatter: "{b}: {c} ({d}%)",
+    },
+    toolbox: {
+        feature: {
+            dataView: { show: true, readOnly: false },
+            saveAsImage: { show: true },
+        },
     },
     series: [
         {

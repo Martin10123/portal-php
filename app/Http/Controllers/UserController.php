@@ -6,7 +6,9 @@ use App\Models\PlanillaReporte;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
@@ -20,21 +22,22 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = DB::table('sigedin.guest.responsable')
-            ->select('Correo', 'Nombre', 'Usuario', 'IdResponsable')
-            ->where('Estado', 'Activo')
-            ->get();
+        $url = config('services.ldapUsers.url');
+        $token = config('services.ldapUsers.token');
 
-        $usersSet = $users->map(function ($user) {
-            return [
-                'idResponsable' => $user->IdResponsable,
-                'correo' => $user->Correo,
-                'nombre' => $user->Nombre,
-                'usuario' => $user->Usuario ? (strpos($user->Usuario, '\\') !== false ? explode('\\', $user->Usuario)[1] : $user->Usuario) : ""
-            ];
+        $users1 = Cache::remember('users_list', now()->addWeeks(2), function () use ($url, $token) {
+            $response = Http::withToken($token)->get($url)->json();
+
+            return collect($response)->map(function ($user) {
+                return [
+                    'nombre' => $user['displayName'] ?? null,
+                    'correo' => $user['userPrincipalName'] ?? null,
+                    'usuario' => $user['sAMAccountName'] ?? null
+                ];
+            });
         });
 
-        return response()->json($usersSet);
+        return response()->json($users1);
     }
 
     public function getUsuariosGerencia()
@@ -55,9 +58,9 @@ class UserController extends Controller
         try {
             $usuarios = [];
 
-            if ($this->usuarioActivo->IsAdmin == "1") {
+            if ($this->usuarioActivo->IsAdmin == "1" || $this->usuarioActivo->IdResponsable == "20258") {
                 $usuarios = $this->consultaABD($request->divisiones);
-            } else if ($this->usuarioActivo->IsJefe == "1" || $this->usuarioActivo->IdResponsable == "20258") {
+            } else if ($this->usuarioActivo->IsJefe == "1") {
                 $usuarios = $this->consultaABD([$this->usuarioActivo->oficina]);
             }
 
@@ -81,7 +84,6 @@ class UserController extends Controller
         DB::beginTransaction();
 
         try {
-            // Inicialización de variables
             $horasAcumuladas = 0;
             $resultado = [];
 
@@ -139,6 +141,7 @@ class UserController extends Controller
 
             // Obtener datos adicionales
             $dataSWBSTarea = $this->consultaSWBSTarea($request);
+            $dataEntregables = $this->consultaEntregableSumHoras($request);
 
             DB::commit();
 
@@ -147,6 +150,7 @@ class UserController extends Controller
                 'concurrenciaFase' => $concurrenciaFase,
                 'concurrenciaAct' => $concurrenciaAct,
                 'dataSWBSTarea' => $dataSWBSTarea->original["data"],
+                'dataEntregables' => $dataEntregables->original["data"],
                 'ok' => true
             ]);
         } catch (\Throwable $th) {
@@ -225,10 +229,8 @@ class UserController extends Controller
     public function consultaSWBSTarea(Request $request)
     {
         try {
-            // Crear los rangos de fechas directamente
             $rangosFechas = $this->obtenerRangoFechas($request->anios, $request->meses);
 
-            // Construir la consulta
             $tareas = PlanillaReporte::select('SWBSPadre', 'Tarea', DB::raw('COUNT(*) as total'))
                 ->whereIn('Trabajador', $request->personas)
                 ->when($request->casos, function ($query) use ($request) {
@@ -248,6 +250,43 @@ class UserController extends Controller
             ]);
         } catch (\Throwable $th) {
             Log::error('(consultaSWBSTarea) Error al obtener datos: ' . $th->getMessage());
+            return response()->json([
+                'error' => 'Error al obtener datos.',
+                'message' => $th->getMessage(),
+                'ok' => false
+            ], 500);
+        }
+    }
+
+    public function consultaEntregableSumHoras(Request $request)
+    {
+        try {
+
+            $rangosFechas = $this->obtenerRangoFechas($request->anios, $request->meses);
+
+            $entregables = PlanillaReporte::select('Entregable', DB::raw('SUM(Horas) as total'))
+                ->whereIn('Trabajador', $request->personas)
+                ->when($request->casos, function ($query) use ($request) {
+                    return $query->whereIn('Caso', $request->casos);
+                })->where(function ($query) use ($rangosFechas) {
+                    foreach ($rangosFechas as $rango) {
+                        $query->orWhereBetween('Fecha', $rango);
+                    }
+                })
+                ->where('Entregable', '!=', '')
+                ->groupBy('Entregable')
+                ->orderBy('total', 'desc')
+                ->get();
+
+            $totalHoras = $entregables->sum('total');
+
+            return response()->json([
+                'message' => '(consultaEntregableSumHoras) Datos obtenidos correctamente.',
+                'data' => [$entregables, $totalHoras],
+                'ok' => true
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('(consultaEntregableSumHoras) Error al obtener datos: ' . $th->getMessage());
             return response()->json([
                 'error' => 'Error al obtener datos.',
                 'message' => $th->getMessage(),

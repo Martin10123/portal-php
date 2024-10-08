@@ -32,6 +32,7 @@
 
 <script setup>
 import { useDataCalendarStore } from "@/pinia/useDataCalendarStore";
+import { useSidebarStore } from "@/pinia/useSidebarStore";
 import { Link } from "@inertiajs/vue3";
 import PanelMenu from "primevue/panelmenu";
 import { computed } from "vue";
@@ -45,10 +46,7 @@ defineProps({
 });
 
 const storeCalendar = useDataCalendarStore();
-const listFloors = ref([]);
-const listOptions = ref([]);
-const listUsersPrivileges = ref([]);
-
+const sidebarStore = useSidebarStore();
 const hiddenSidebar = ref(false);
 
 const SIDEBAR_OPEN =
@@ -70,106 +68,12 @@ const toggleOpenSidebarCom = () => {
     hiddenSidebar.value = !hiddenSidebar.value;
 };
 
-const generateFloorOptions = (floors) => {
-    return floors.map((floor) => ({
-        label:
-            floor.Sala_Name === "Laboratorio de Realidad Extendida"
-                ? "Laboratorio XRLAB"
-                : floor.Sala_Name,
-        icon: "pi pi-list",
-        route: `/Sigedin/CalendarPage/CalendarPage?floor=${floor.ID}`,
-    }));
-};
+const listOptions = computed(() => sidebarStore.listOptions);
 
-const fetchUsersPrivileges = async () => {
-    try {
-        const response = await axios.get(route("privilegios.index"));
-
-        listUsersPrivileges.value = response.data.data;
-    } catch (error) {
-        console.error(error);
-    }
-};
-
-const fetchSidebarOptions = async () => {
-    await storeCalendar.getFloors();
-
-    listFloors.value = generateFloorOptions(
-        storeCalendar.allFloorsCalendar.data
-    );
-
-    const options = [
-        {
-            id: 0,
-            label: "Solicitudes",
-            icon: "pi pi-folder-plus",
-            items: [
-                {
-                    label: "Agregar solicitud",
-                    icon: "pi pi-file-plus",
-                    route: "/Sigedin/Request/AddRequest",
-                },
-            ],
-        },
-        {
-            id: 1,
-            label: "Planillación",
-            icon: "pi pi-file-check",
-            items: [
-                {
-                    label: "Gestion de grafos",
-                    icon: "pi pi-list-check",
-                    route: "/Sigedin/Personnel/Reports",
-                },
-            ],
-        },
-        {
-            id: 2,
-            label: "Reservar sala",
-            icon: "pi pi-bell",
-            items: [
-                ...listFloors.value,
-                {
-                    label: "Gestionar salas",
-                    icon: "pi pi-clipboard",
-                    route: "/Sigedin/CalendarPage/AdminFloor",
-                },
-            ],
-        },
-        {
-            id: 3,
-            label: "Graficos",
-            icon: "pi pi-chart-bar",
-            items: [
-                {
-                    label: "Index",
-                    icon: "pi pi-chart-pie",
-                    route: "/Sigedin/Charts/ChartsMain",
-                },
-            ],
-        },
-    ];
-
-    listOptions.value = options.filter((option) => {
-
-        if (listUsersPrivileges.value.length === 0) {
-            if (option.id === 2) {
-                return option.items.pop();
-            }
-            return
-        }
-
-        return listUsersPrivileges.value.some((privilege) => {
-            if (privilege.Is_Visible === "1" && Number(privilege.Menu_Items_ID) === option.id) {
-                return option;
-            }
-        });
-    });
-};
-
-onMounted(() => {
-    fetchUsersPrivileges();
-    fetchSidebarOptions();
+onMounted(async () => {
+    await sidebarStore.fetchUsersPrivileges();
+    await sidebarStore.fetchFloors(storeCalendar);
+    sidebarStore.generateOptions();
 });
 
 </script>

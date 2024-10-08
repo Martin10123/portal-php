@@ -1,8 +1,10 @@
-import { onMounted, watch, ref } from "vue";
+import { onMounted, watch, computed } from "vue";
 import { useForm } from "@inertiajs/vue3";
+import { useGetEmailsStore } from "@/pinia/useGetEmailsStore";
 
 export const useModalFloor = ({ emit, props }) => {
-    const listResponsables = ref([]);
+    const storeGetEmails = useGetEmailsStore();
+    const listResponsables = computed(() => storeGetEmails.usersEmails);
     const listColors = [
         { name: "Rojo", valueC: "#FF0000" },
         { name: "Azul", valueC: "#0000FF" },
@@ -66,18 +68,8 @@ export const useModalFloor = ({ emit, props }) => {
         }
     };
 
-    const getAllResponsables = async () => {
-        try {
-            const response = await axios.get(route("users.index"));
-
-            listResponsables.value = response.data;
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
     onMounted(() => {
-        getAllResponsables();
+        storeGetEmails.fetchUsersEmails();
     });
 
     return {

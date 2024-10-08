@@ -1,17 +1,18 @@
+import { useGetEmailsStore } from "@/pinia/useGetEmailsStore";
 import { usePage } from "@inertiajs/vue3";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 
 export const useProjectCase = ({ form }) => {
+    const storeGetEmails = useGetEmailsStore();
     const { props } = usePage();
-
     const projects = ref([]);
-    const usersEmails = ref([]);
     const tipoServicios = ref([]);
     const servicioSolicitado = ref([]);
     const listPlanta = ref([]);
     const userActive = ref(props.auth.user);
+    const usersEmails = computed(() => storeGetEmails.usersEmails);
 
     const getProjects = async () => {
         try {
@@ -23,15 +24,6 @@ export const useProjectCase = ({ form }) => {
             );
         } catch (error) {
             console.log("Error en getProjects: ", error);
-        }
-    };
-
-    const getEmailsUsers = async () => {
-        try {
-            const { data } = await axios.get(route("users.index"));
-            usersEmails.value = data;
-        } catch (error) {
-            console.log("Error en getEmailsUsers: ", error);
         }
     };
 
@@ -131,10 +123,18 @@ export const useProjectCase = ({ form }) => {
         }
     );
 
+    const getEmailsByQuery = async () => {
+        try {
+            await storeGetEmails.fetchUsersEmails();
+        } catch (error) {
+            handleError(error);
+        }
+    };
+
     onMounted(() => {
         getProjects();
-        getEmailsUsers();
         getTipoServicios();
+        getEmailsByQuery();
 
         if (form.tipoServicio && form.tipoServicio !== "") {
             onSelectTipoServicio(form.tipoServicio.id);

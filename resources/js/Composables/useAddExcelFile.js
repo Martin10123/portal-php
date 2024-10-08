@@ -1,17 +1,15 @@
-import { ref, computed, onMounted } from "vue";
+import { ref } from "vue";
 import Swal from "sweetalert2";
 import readXlsxFile from "read-excel-file";
 import { useDataGrafosStore } from "@/pinia/useDataStore";
+import { usePagination } from "./usePagination";
 
 export const useAddExcelFile = () => {
     const dataGrafos = useDataGrafosStore();
-
     const file = ref(null);
     const projectSelectToEdit = ref(null);
     const showModalForm = ref(false);
     const somebodyExcelEdit = ref(false);
-    const currentPage = ref(1);
-    const itemsPerPage = 10;
     const loadingFile = ref({
         loadingExcel: false,
         loadingSave: false,
@@ -22,9 +20,9 @@ export const useAddExcelFile = () => {
     });
 
     const handleFileChange = (e) => {
-        file.value = e.target.files[0];
-
         loadingFile.value.loadingExcel = true;
+
+        file.value = e.target.files[0];
 
         try {
             readXlsxFile(file.value)
@@ -43,7 +41,6 @@ export const useAddExcelFile = () => {
 
     const convertExcelToJson = (data) => {
         const [header, ...rows] = data;
-
         dataExcel.value.rowsCount = rows.length;
 
         dataExcel.value.dataExcelSelect = rows.map((row) => {
@@ -87,17 +84,8 @@ export const useAddExcelFile = () => {
         });
     };
 
-    const paginatedData = computed(() => {
-        const startIndex = (currentPage.value - 1) * itemsPerPage;
-        return dataExcel.value.dataExcelSelect.slice(
-            startIndex,
-            startIndex + itemsPerPage
-        );
-    });
-
-    const changePage = (page) => {
-        currentPage.value = page;
-    };
+    const { currentPage, totalPages, paginatedData, changePage } =
+        usePagination(dataExcel.value.dataExcelSelect, 10);
 
     const startEditing = (dataGrafo) => {
         if (!dataGrafo) {
@@ -153,7 +141,6 @@ export const useAddExcelFile = () => {
 
         try {
             loadingFile.value.loadingSave = true;
-
             const formData = new FormData();
             formData.append("file", file.value);
             const response = await axios.post(
@@ -292,27 +279,22 @@ export const useAddExcelFile = () => {
         }
     };
 
-    onMounted(() => {
-        getAllInfoPersonnelStore();
-    });
-
     return {
         file,
-        loadingFile: loadingFile.value.loadingSave,
-        loadingExcel: loadingFile.value.loadingExcel,
+        handleFileChange,
         dataExcel,
-        currentPage,
-        itemsPerPage,
-        paginatedData,
-        dataGrafos,
+        somebodyExcelEdit,
+        loadingFile,
         showModalForm,
         projectSelectToEdit,
-        somebodyExcelEdit,
-        handleFileChange,
-        changePage,
-        onLoadSaveExcel,
         startEditing,
+        onLoadSaveExcel,
+        changePage,
+        currentPage,
+        totalPages,
+        paginatedData,
         onUpdateGraphSelect,
         onDeleteGraphSelect,
+        getAllInfoPersonnelStore,
     };
 };

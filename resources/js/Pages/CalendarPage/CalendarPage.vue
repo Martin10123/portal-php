@@ -2,7 +2,7 @@
 
     <AppLayout title="Reservas XRLAB">
 
-        <div v-if="isLoadingData">
+        <div v-if="isLoadingData || isLoadingEmails">
             <div class="flex justify-center items-center h-[calc(100vh-4.1rem)]">
                 <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary-cotecmar"></div>
             </div>
@@ -50,6 +50,7 @@ const {
     openModalHours,
     events,
     isLoadingData,
+    isLoadingEmails,
     isLoadingSaveEvent,
     openFilterByPlaces,
     onCreateEvent,

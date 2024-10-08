@@ -30,7 +30,7 @@ class ManagementController extends Controller
             $divisiones = DB::table('sigedin.guest.division')
                 ->select('DivisionID', 'DivisionName');
 
-            if ($usuarioActivo->IsJefe == "1" || $usuarioActivo->IdResponsable == "20258") {
+            if ($usuarioActivo->IsJefe == "1") {
                 $divisiones->where('DivisionID', $usuarioActivo->IdDivision);
             }
 

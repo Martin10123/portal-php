@@ -1,6 +1,13 @@
 export const optionsColumnGraphBar = {
     legend: {},
     tooltip: {},
+    toolbox: {
+        feature: {
+            dataView: { show: true, readOnly: false },
+            magicType: { show: true, type: ["line", "bar"] },
+            saveAsImage: { show: true },
+        },
+    },
     dataset: {
         dimensions: ["semana", "HHSemana", "HHAcumulada"],
         source: [],

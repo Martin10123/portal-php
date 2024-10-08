@@ -17,5 +17,10 @@ export const useDataCalendarStore = defineStore("dataCalendar", {
                 console.log(error);
             }
         },
+        getFloorSelected(floorSelect) {
+            return this.allFloorsCalendar.data.filter(
+                (floor) => floor.ID === Number(floorSelect)
+            );
+        },
     },
 });

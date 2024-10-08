@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'ldapUsers' => [
+        'url' => env('LDAP_URL_API'),
+        'token' => env('LDAP_URL_USERS_TOKEN'),
+    ]
+
 ];

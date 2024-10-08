@@ -1,5 +1,5 @@
 import { useForm, usePage } from "@inertiajs/vue3";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -11,19 +11,27 @@ import Swal from "sweetalert2";
 import { validateFormCalendar } from "@/Validations/validCalendarModal";
 import { getAllHolidays } from "@/Data/getHolidays";
 import { add, format, setHours, setMinutes } from "date-fns";
+import { useDataCalendarStore } from "@/pinia/useDataCalendarStore";
+import { useGetEmailsStore } from "@/pinia/useGetEmailsStore";
 
 export const useCalendarPage = () => {
+    const storeCalendar = useDataCalendarStore();
+    const storeGetEmails = useGetEmailsStore();
     const openModal = ref(false);
     const openShowInfo = ref(false);
     const openModalHours = ref(false);
     const openFilterByPlaces = ref(false);
     const infoSelectedEvent = ref({});
 
+    const isLoadingEmails = computed(() => storeGetEmails.isLoading);
     const isLoadingData = ref(false);
     const isLoadingSaveEvent = ref(false);
     const events = ref([]);
 
     const { props, url } = usePage();
+    const floorSelectedByDefault = computed(() =>
+        storeCalendar.getFloorSelected(url.split("floor=")[1])
+    );
 
     const form = useForm({
         title: "",
@@ -160,8 +168,9 @@ export const useCalendarPage = () => {
         };
     }
 
-    // Función para manejar la selección de un evento
     function handleSelectEvent(info) {
+        form.floor = floorSelectedByDefault.value[0];
+
         if (
             !isValidTimeRange(info.startStr, info.endStr) &&
             info.view.type !== "dayGridMonth"
@@ -329,8 +338,6 @@ export const useCalendarPage = () => {
             if (!validateFormCalendar({ ...form.data() })) {
                 return;
             }
-
-            console.log(form.data());
 
             const { value: text, isConfirmed } = await Swal.fire({
                 input: "textarea",
@@ -732,7 +739,16 @@ export const useCalendarPage = () => {
         }
     };
 
+    const getEmailsByQuery = async () => {
+        try {
+            await storeGetEmails.fetchUsersEmails();
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     onMounted(() => {
+        getEmailsByQuery();
         getAllEventsCalendar();
     });
 
@@ -745,6 +761,7 @@ export const useCalendarPage = () => {
         openModalHours,
         events,
         isLoadingData,
+        isLoadingEmails,
         isLoadingSaveEvent,
         openFilterByPlaces,
         onCreateEvent,
