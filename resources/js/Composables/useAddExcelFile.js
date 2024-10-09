@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import Swal from "sweetalert2";
 import readXlsxFile from "read-excel-file";
 import { useDataGrafosStore } from "@/pinia/useDataStore";
@@ -84,8 +84,10 @@ export const useAddExcelFile = () => {
         });
     };
 
-    const { currentPage, totalPages, paginatedData, changePage } =
-        usePagination(dataExcel.value.dataExcelSelect, 10);
+    const listDataExcel = computed(() => dataExcel.value.dataExcelSelect);
+
+    const { currentPage, onPageChange, paginatedData, rowsPerPage } =
+        usePagination(listDataExcel);
 
     const startEditing = (dataGrafo) => {
         if (!dataGrafo) {
@@ -281,20 +283,20 @@ export const useAddExcelFile = () => {
 
     return {
         file,
-        handleFileChange,
         dataExcel,
         somebodyExcelEdit,
         loadingFile,
         showModalForm,
         projectSelectToEdit,
+        currentPage,
+        paginatedData,
+        rowsPerPage,
+        handleFileChange,
         startEditing,
         onLoadSaveExcel,
-        changePage,
-        currentPage,
-        totalPages,
-        paginatedData,
         onUpdateGraphSelect,
         onDeleteGraphSelect,
         getAllInfoPersonnelStore,
+        onPageChange,
     };
 };

@@ -34,7 +34,26 @@
             <article class="overflow-x-auto">
                 <h2>Grafico organizacional</h2>
 
-                <div id="chart_div"></div>
+                <div class="card overflow-x-auto">
+                    <div v-for="(chartData, index) in data" :key="index">
+                        <OrganizationChart :value="chartData || []" collapsible>
+                            <template #person="slotProps">
+                                <div class="flex flex-col">
+                                    <div class="flex flex-col items-center">
+                                        <img :alt="slotProps.node.data.name" :src="slotProps.node.data.image"
+                                            class="mb-4 w-12 h-12" />
+                                        <span class="font-bold mb-2">{{ slotProps.node.data.name }}</span>
+                                        <span>{{ slotProps.node.data.title }}</span>
+                                    </div>
+                                </div>
+                            </template>
+                            <template #default="slotProps">
+                                <span>{{ slotProps.node.label }}</span>
+                            </template>
+                        </OrganizationChart>
+                    </div>
+
+                </div>
             </article>
         </section>
     </AppLayout>
@@ -43,54 +62,57 @@
 <script setup>
 import ModalListCharts from '@/Components/Charts/ModalListCharts.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import OrganizationChart from 'primevue/organizationchart';
 import { onMounted, ref } from 'vue';
 
 const getUsuariosGerencia = ref([]);
 const showListCharts = ref(false);
+const data = ref({});
 
 const getGerenciaUsuarioActivo = async () => {
     try {
         const response = await axios.get(route("users.getUsuariosGerencia"));
         getUsuariosGerencia.value = response.data;
-        drawChart();  // Call drawChart after data is fetched
+
+        const getBoss = getUsuariosGerencia.value.filter(user => user.EsJefe === "1");
+
+        data.value =
+            getBoss.map((boss) => {
+                return {
+                    type: boss.DivisionName,
+                    label: boss.Nombre,
+                    data: boss.Nombre.substring(0, 2),
+                    children: getUsuariosGerencia.value
+                        .filter(user => user.IsAdmin === "1")
+                        .map(user => {
+                            return {
+                                key: `${boss.idResponsable}_${user.idResponsable}`,
+                                type: 'División',
+                                label: user.Nombre,
+                                data: user.Nombre.substring(0, 2),
+                                children: getUsuariosGerencia.value
+                                    .filter(subUser => subUser.IsAdmin === "0" && subUser.EsJefe === "0")
+                                    .map(subUser => {
+                                        return {
+                                            key: `${boss.idResponsable}_${user.idResponsable}_${user.idResponsable}`,
+                                            type: 'División',
+                                            label: subUser.Nombre,
+                                            data: subUser.Nombre.substring(0, 2)
+                                        };
+                                    })
+                            };
+                        })
+                };
+            })
+
+
     } catch (error) {
         console.log(error);
     }
 };
 
-function drawChart() {
-    var data = new google.visualization.DataTable();
-    data.addColumn('string', 'Name');
-    data.addColumn('string', 'Manager');
-    data.addColumn('string', 'ToolTip');
-
-    // Check if getUsuariosGerencia.value has data
-    if (getUsuariosGerencia.value.length > 0) {
-        // Transform API data into Google Charts data format
-        const rows = getUsuariosGerencia.value.map(user => {
-
-            const nombreJefe = getUsuariosGerencia.value.find(jefe => jefe.EsJefe)?.Nombre;
-
-            return [
-                {
-                    v: user.Nombre,
-                    f: `${user.Nombre}<div style="color:red; font-style:italic">${user.Cargo}</div>`
-                }
-                , nombreJefe, user.Nombre
-            ];
-        });
-
-        data.addRows(rows);
-    }
-
-    var chart = new google.visualization.OrgChart(document.getElementById('chart_div'));
-    chart.draw(data, { 'allowHtml': true });
-}
-
 onMounted(() => {
     getGerenciaUsuarioActivo();
-    google.charts.load('current', { 'packages': ['orgchart'] });
-    google.charts.setOnLoadCallback(drawChart);
 });
 
 </script>

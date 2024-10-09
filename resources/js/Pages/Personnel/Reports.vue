@@ -35,17 +35,21 @@
             </header>
 
             <div class="p-4">
-                <TablePersonnel :project-select="filteredProjects" :selected-stage="selectedStage"
+                <TablePersonnel :project-select="paginatedData" :selected-stage="selectedStage"
                     :selected-swbs="selectedSwbs" :value-project="valueProject" :clear-values="clearValues" />
             </div>
+
+            <Paginator :rows="rowsPerPage" :totalRecords="filteredProjects.length" :first="currentPage * rowsPerPage"
+                @page="onPageChange" />
         </section>
     </AppLayout>
 </template>
 
 <script setup>
 import TablePersonnel from '@/Components/Personnel/TablePersonnel.vue';
-import { useReports } from '@/Composables';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import Paginator from 'primevue/paginator';
+import { usePagination, useReports } from '@/Composables';
 
 const {
     SWBSPersonnel,
@@ -57,5 +61,8 @@ const {
     valueProject,
     clearValues
 } = useReports()
+
+const { currentPage, onPageChange, paginatedData, rowsPerPage } =
+    usePagination(filteredProjects);
 
 </script>

@@ -165,13 +165,24 @@ class UserController extends Controller
         }
     }
 
-    public function consultaABD($divisiones)
+    public function consultaABD(array $divisiones)
     {
-        return  DB::table('sigedin.guest.responsable')
-            ->join('sigedin.guest.division', 'sigedin.guest.responsable.IdDivision', '=', 'sigedin.guest.division.DivisionID')
-            ->select('sigedin.guest.responsable.IdResponsable', 'sigedin.guest.division.DivisionID', 'sigedin.guest.division.DivisionName', 'sigedin.guest.responsable.Correo', 'sigedin.guest.responsable.Nombre', 'sigedin.guest.responsable.Cargo', 'sigedin.guest.responsable.EsJefe', 'sigedin.guest.responsable.IsAdmin', 'sigedin.guest.responsable.Estado', 'sigedin.guest.responsable.Usuario')
-            ->whereIn('sigedin.guest.division.DivisionName', $divisiones)
-            ->where('sigedin.guest.responsable.Estado', 'Activo')
+        return DB::table('sigedin.guest.responsable as r')
+            ->join('sigedin.guest.division as d', 'r.IdDivision', '=', 'd.DivisionID')
+            ->select(
+                'r.IdResponsable',
+                'd.DivisionID',
+                'd.DivisionName',
+                'r.Correo',
+                'r.Nombre',
+                'r.Cargo',
+                'r.EsJefe',
+                'r.IsAdmin',
+                'r.Estado',
+                'r.Usuario'
+            )
+            ->whereIn('d.DivisionName', $divisiones)
+            ->where('r.Estado', 'Activo')
             ->get();
     }
 

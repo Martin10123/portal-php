@@ -38,10 +38,7 @@
                 <FormOneSelectExcel :project-select-to-edit="projectSelectToEdit" :start-editing="startEditing"
                     :show-modal-form="showModalForm" v-on:update-graph-select="onUpdateGraphSelect" />
 
-                <PaginationPersonnel :project-select="dataExcel.dataExcelSelect" :pagination="currentPage"
-                    @changePage="changePage" :total-pages="totalPages" />
-
-                <Paginator :rows="rowsPerPage" :totalRecords="listaDataDeliverables.length"
+                <Paginator :rows="rowsPerPage" :totalRecords="dataExcel.dataExcelSelect.length"
                     :first="currentPage * rowsPerPage" :rowsPerPageOptions="[10, 20, 30]" @page="onPageChange" />
             </article>
         </section>
@@ -57,22 +54,22 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import Paginator from "primevue/paginator";
 
 const {
-    currentPage,
     dataExcel,
     file,
     itemsPerPage,
     loadingFile,
-    paginatedData,
     showModalForm,
     projectSelectToEdit,
     somebodyExcelEdit,
-    totalPages,
-    changePage,
+    currentPage,
+    paginatedData,
+    rowsPerPage,
     onLoadSaveExcel,
     handleFileChange,
     onUpdateGraphSelect,
     onDeleteGraphSelect,
     startEditing,
+    onPageChange
 } = useAddExcelFile();
 
 </script>

@@ -28,7 +28,7 @@
                     </th>
                 </tr>
             </thead>
-            <tbody v-if="paginatedDeliverables.length">
+            <tbody v-if="listaDataDeliverables.length">
                 <tr class="border-b border-gray-200 dark:border-gray-700">
                     <th scope="row"
                         class="px-6 py-4 font-medium text-gray-900 bg-gray-50 dark:text-white dark:bg-gray-800 break-words whitespace-normal max-w-[900px]">
@@ -36,7 +36,7 @@
                     </th>
                     <td class="px-6 py-4">{{ redondear(totalDataDeliverables) }}</td>
                 </tr>
-                <tr class="border-b border-gray-200 dark:border-gray-700" v-for="deliverible in paginatedDeliverables"
+                <tr class="border-b border-gray-200 dark:border-gray-700" v-for="deliverible in paginatedData"
                     :key="deliverible.Entregable">
                     <th scope="row"
                         class="px-6 py-4 font-medium text-gray-900 bg-gray-50 dark:text-white dark:bg-gray-800 break-words whitespace-normal max-w-[900px]">
@@ -64,7 +64,7 @@ const props = defineProps({
 
 const listDeliverablesComputed = computed(() => props.listaDataDeliverables)
 
-const { currentPage, onPageChange, paginatedDeliverables, rowsPerPage } = usePagination(listDeliverablesComputed)
+const { currentPage, onPageChange, paginatedData, rowsPerPage } = usePagination(listDeliverablesComputed)
 
 const redondear = (num) => {
     return Math.round(num * 100) / 100;
