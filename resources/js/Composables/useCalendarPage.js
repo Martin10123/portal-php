@@ -512,7 +512,7 @@ export const useCalendarPage = () => {
                 division: form.division,
                 isArRequired: form.isArRequired,
                 typeService: eventData.type_service_ID,
-                isRepeatPeriod: form.repeatPeriodically,
+                isRepeatPeriod: form.repeatPeriodically ? "1" : "0",
             },
         ];
     };

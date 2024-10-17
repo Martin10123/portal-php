@@ -4,6 +4,7 @@ use App\Http\Controllers\{
     CalendarController,
     ConsecutiveController,
     ManagementController,
+    MatrixDSMController,
     ProjectsController,
     PersonnelController,
     PrivilegiosController,
@@ -102,6 +103,11 @@ Route::middleware([
         Route::get('/getDivision', [ManagementController::class, 'getDivision'])->name('getDivision');
     });
 
+    //Matrixdsm
+    Route::prefix('matrixdsm')->name('matrixdsm.')->group(function () {
+        Route::post('/exportDataMatrix', [MatrixDSMController::class, 'exportDataMatrix'])->name('exportDataMatrix');
+    });
+
     // Vistas
     Route::prefix('Sigedin')->group(function () {
         $routes = [
@@ -113,6 +119,7 @@ Route::middleware([
             'Personnel/AddGraphoFromExcel' => 'AddGraphoFromExcel',
             'Charts/ChartsMain' => 'ChartsMain',
             'Charts/BarChart' => 'BarChart',
+            'MatrixDSM/MatrixDSM' => 'MatrixDSM',
         ];
 
         foreach ($routes as $url => $name) {

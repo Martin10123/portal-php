@@ -87,6 +87,18 @@ export const useSidebarStore = defineStore("sidebar", {
                         },
                     ],
                 },
+                {
+                    id: 4,
+                    label: "Matriz DMS",
+                    icon: "pi pi-calculator",
+                    items: [
+                        {
+                            label: "Index",
+                            icon: "pi pi-bullseye",
+                            route: "/Sigedin/MatrixDSM/MatrixDSM",
+                        },
+                    ],
+                },
             ];
 
             this.listOptions = options.filter((option) => {

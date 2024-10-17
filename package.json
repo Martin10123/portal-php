@@ -38,6 +38,7 @@
         "echarts": "^5.5.1",
         "fuse.js": "^7.0.0",
         "ics": "^3.7.6",
+        "lodash": "^4.17.21",
         "pinia": "^2.2.2",
         "primeicons": "^7.0.0",
         "primevue": "^4.0.0",
