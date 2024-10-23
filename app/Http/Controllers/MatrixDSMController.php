@@ -18,40 +18,68 @@ class MatrixDSMController extends Controller
 
             if ($request->hasFile('file') && $request->file('file')->isValid()) {
                 $file = $request->file('file');
-                $fileName = $file->getClientOriginalName(); // Obtener el nombre original del archivo
+                $fileName = $file->getClientOriginalName();
 
-                // Generar una clave única para el caché utilizando el nombre del archivo
                 $cacheKey = 'excel_' . md5($fileName);
 
-                // Verificar si los datos ya están en caché
                 if (Cache::has($cacheKey)) {
-                    // Si los datos ya están en caché, se devuelven directamente
                     $cachedData = Cache::get($cacheKey);
+                    $headerMatrix = $cachedData['headerMatrix'];
+                    $bodyMatrix = $cachedData['bodyMatrix'];
+                    $footerMatrix = $cachedData['footerMatrix'];
+
+                    $this->calcIncidentsAndIncidentsNor($bodyMatrix);
 
                     return response()->json([
-                        'data' => $cachedData,
+                        'data' => $cachedData['data'],
+                        'headerMatrix' => $headerMatrix,
+                        'bodyMatrix' => $bodyMatrix,
+                        'footerMatrix' => $footerMatrix,
                         'message' => 'Archivo cargado desde la caché correctamente',
                         'ok' => true
                     ], 200);
                 }
 
-                // Si los datos no están en caché, procesar el archivo
                 $spreadsheet = IOFactory::load($file->getPathname());
                 $sheets = $spreadsheet->getAllSheets();
                 $filteredData = [];
 
                 foreach ($sheets as $sheet) {
                     $sheetName = $sheet->getTitle();
-                    if (str_contains(strtoupper($sheetName), 'MOD')) {
-                        $filteredData[$sheetName] = $sheet->toArray();
+                    $filteredData[$sheetName] = $sheet->toArray();
+                }
+
+                $headerMatrix = isset($filteredData['G100 mod']) ? array_slice($filteredData['G100 mod'], 0, 3) : [];
+
+                $bodyMatrix = [];
+                $footerMatrix = [];
+
+                foreach ($filteredData['G100 mod'] as $row) {
+                    if (!empty($row[0])) {
+                        $bodyMatrix[] = $row;
                     }
                 }
 
-                // Guardar los datos en la caché por 24 horas (1440 minutos)
-                Cache::put($cacheKey, $filteredData, 1440);
+                foreach (array_slice($filteredData['G100 mod'], 3) as $index => $row) {
+                    if (empty($row[0])) {
+                        $footerMatrix[] = $row;
+                    }
+                }
+
+                Cache::put($cacheKey, [
+                    'data' => $filteredData,
+                    'headerMatrix' => $headerMatrix,
+                    'bodyMatrix' => $bodyMatrix,
+                    'footerMatrix' => $footerMatrix
+                ], 1440);
+
+                $this->calcIncidentsAndIncidentsNor($bodyMatrix);
 
                 return response()->json([
                     'data' => $filteredData,
+                    'headerMatrix' => $headerMatrix,
+                    'bodyMatrix' => $bodyMatrix,
+                    'footerMatrix' => $footerMatrix,
                     'message' => 'Archivo cargado correctamente',
                     'ok' => true
                 ], 200);
@@ -70,6 +98,48 @@ class MatrixDSMController extends Controller
                 'message' => 'Error al cargar el archivo',
                 'ok' => false
             ], 500);
+        }
+    }
+
+    public function calcIncidentsAndIncidentsNor($bodyMatrix)
+    {
+        try {
+
+            $numColumns = count($bodyMatrix);
+            $sumIncident = array_fill(0, $numColumns, 0);
+            $restIncidentNorm = array_fill(0, $numColumns, 0);
+
+            for ($i = 0; $i < $numColumns; $i++) {
+                for ($j = 6; $j < $numColumns; $j++) {
+                    if (!isset($bodyMatrix[$i][$j])) {
+                        continue;
+                    }
+
+                    $sumIncident[$j - 6] += (int) ($bodyMatrix[$i][$j]);
+                }
+            }
+
+            $totalIncidents = 0;
+
+            for ($i = 0; $i < $numColumns; $i++) {
+                $totalIncidents += $sumIncident[$i];
+            }
+
+            for ($i = 0; $i < $numColumns; $i++) {
+
+                if ($sumIncident[$i] === 0) {
+                    continue;
+                }
+
+                $restIncidentNorm[$i] = $sumIncident[$i] / $totalIncidents;
+            }
+
+            return [
+                'incNorm' => $restIncidentNorm,
+                'sumIncident' => $sumIncident,
+            ];
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
         }
     }
 }
