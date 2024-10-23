@@ -1,5 +1,5 @@
 <script setup>
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 import AuthenticationCard from '@/Components/AuthenticationCard.vue';
 import AuthenticationCardLogo from '@/Components/AuthenticationCardLogo.vue';
 import Checkbox from '@/Components/Checkbox.vue';
@@ -7,6 +7,7 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import axios from 'axios';
 
 defineProps({
     canResetPassword: Boolean,
@@ -19,18 +20,27 @@ const form = useForm({
     remember: false,
 });
 
-const submit = () => {
-    form.transform(data => ({
-        ...data,
-        remember: form.remember ? 'on' : '',
-    })).post(route('login'));
+const submit = async () => {
+
+    try {
+        if (form.username.includes('@')) {
+            form.username = form.username.split('@')[0];
+        }
+
+        form.transform(data => ({
+            ...data,
+            remember: form.remember ? 'on' : '',
+        })).post(route('login'));
+    } catch (error) {
+        console.log(error);
+    }
 
 };
 </script>
 
 <template>
 
-    <Head title="Log in" />
+    <Head title="Iniciar sesión" />
 
     <AuthenticationCard>
         <template #logo>
@@ -43,14 +53,14 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="username" value="Username" />
+                <InputLabel for="username" value="Usuario" />
                 <TextInput id="username" v-model="form.username" type="text" class="mt-1 block w-full" required
                     autofocus placeholder="Username..." />
                 <InputError class="mt-2" :message="form.errors.username" />
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="password" value="Contraseña" />
                 <TextInput id="password" v-model="form.password" type="password" class="mt-1 block w-full" required
                     placeholder="Password..." />
                 <InputError class="mt-2" :message="form.errors.password" />

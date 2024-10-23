@@ -1,15 +1,18 @@
 <?php
 
-use App\Http\Controllers\CalendarController;
-use App\Http\Controllers\ConsecutiveController;
-use App\Http\Controllers\ManagementController;
-use App\Http\Controllers\ProjectsController;
-use App\Http\Controllers\ReportsController;
-use App\Http\Controllers\RequirementController;
-use App\Http\Controllers\TipoServicioController;
-use App\Http\Controllers\TypeServicesCalendarController;
-use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\{
+    CalendarController,
+    ConsecutiveController,
+    ManagementController,
+    MatrixDSMController,
+    ProjectsController,
+    PersonnelController,
+    PrivilegiosController,
+    RequirementController,
+    TipoServicioController,
+    TypeServicesCalendarController,
+    UserController
+};
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -29,6 +32,15 @@ Route::middleware([
     // Usuarios
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/getUsuariosGerencia', [UserController::class, 'getUsuariosGerencia'])->name('getUsuariosGerencia');
+        Route::get('/consultaUsuariosXGerencia', [UserController::class, 'consultaUsuariosXGerencia'])->name('consultaUsuariosXGerencia');
+        Route::get('/consultaDatosSegunPersonaSeleccionada', [UserController::class, 'consultaDatosSegunPersonaSeleccionada'])->name('consultaDatosSegunPersonaSeleccionada');
+        Route::get('/consultaCasoBuque', [UserController::class, 'consultaCaso'])->name('consultaCasoBuque');
+    });
+
+    // privilegios
+    Route::prefix('privilegios')->name('privilegios.')->group(function () {
+        Route::get('/', [PrivilegiosController::class, 'index'])->name('index');
     });
 
     // Servicios
@@ -55,23 +67,30 @@ Route::middleware([
 
     // Reportes
     Route::prefix('reports')->name('reports.')->group(function () {
-        Route::get('/', [ReportsController::class, 'index'])->name('index');
-        Route::post('/searchReport', [ReportsController::class, 'searchReport'])->name('searchReport');
-        Route::get('/stagePersonnel', [ReportsController::class, 'getStagePersonnel'])->name('stagePersonnel');
-        Route::get('/swbsPersonnel', [ReportsController::class, 'getSWBSPersonnel'])->name('swbsPersonnel');
-        Route::get('/operationsPersonnel', [ReportsController::class, 'getOperationPersonnel'])->name('operationsPersonnel');
-        Route::post('/updateGraph', [ReportsController::class, 'updateGraph'])->name('updateGraph');
-        Route::post('/updateMassaGraphs', [ReportsController::class, 'updateMassaGraphs'])->name('updateMassaGraphs');
+        Route::get('/', [PersonnelController::class, 'index'])->name('index');
+        Route::post('/searchReport', [PersonnelController::class, 'searchReport'])->name('searchReport');
+        Route::get('/stagePersonnel', [PersonnelController::class, 'getStagePersonnel'])->name('stagePersonnel');
+        Route::get('/swbsPersonnel', [PersonnelController::class, 'getSWBSPersonnel'])->name('swbsPersonnel');
+        Route::get('/operationsPersonnel', [PersonnelController::class, 'getOperationPersonnel'])->name('operationsPersonnel');
+        Route::post('/updateGraph', [PersonnelController::class, 'updateGraph'])->name('updateGraph');
+        Route::post('/updateMassaGraphs', [PersonnelController::class, 'updateMassaGraphs'])->name('updateMassaGraphs');
+        Route::post('/importExcel', [PersonnelController::class, 'loadExcelFile'])->name('importExcel');
+        Route::post('/addGraph', [PersonnelController::class, 'addGraph'])->name('addGraph');
+        Route::get('/getActivities', [PersonnelController::class, 'getActivities'])->name('getActivities');
     });
 
     // Calendar
     Route::prefix('calendarPage')->name('calendarPage.')->group(function () {
-        Route::get('/', [CalendarController::class, 'index'])->name('index');
+        Route::get('/getEvents/{floor}', [CalendarController::class, 'index'])->name('index');
+        Route::get('/getReason/{id}', [CalendarController::class, 'getReason'])->name('getReason');
+        Route::get('/getAllFloors', [CalendarController::class, 'getAllFloors'])->name('getAllFloors');
         Route::post('/create', [CalendarController::class, 'create'])->name('create');
+        Route::post('/createFloor', [CalendarController::class, 'addFloor'])->name('createFloor');
         Route::put('/update/{id}', [CalendarController::class, 'update'])->name('update');
-        Route::delete('/delete/{id}', [CalendarController::class, 'destroy'])->name('delete');
+        Route::put('/update/{id}/floor', [CalendarController::class, 'updateFloor'])->name('updateFloor');
+        Route::delete('/delete/{id}/{reason}', [CalendarController::class, 'destroy'])->name('delete');
+        Route::delete('/delete/{id}/floor', [CalendarController::class, 'deleteFloor'])->name('deleteFloor');
     });
-    Route::get('/sendEmailEvent', [CalendarController::class, 'sendEmailEvent'])->name('sendEmail');
 
     //TypeServices
     Route::prefix('typeServices')->name('typeServices.')->group(function () {
@@ -81,28 +100,30 @@ Route::middleware([
     //Management
     Route::prefix('management')->name('management.')->group(function () {
         Route::get('/', [ManagementController::class, 'index'])->name('index');
+        Route::get('/getDivision', [ManagementController::class, 'getDivision'])->name('getDivision');
+    });
+
+    //Matrixdsm
+    Route::prefix('matrixdsm')->name('matrixdsm.')->group(function () {
+        Route::post('/exportDataMatrix', [MatrixDSMController::class, 'exportDataMatrix'])->name('exportDataMatrix');
     });
 
     // Vistas
     Route::prefix('Sigedin')->group(function () {
-        Route::get('Request/AddRequest', function () {
-            return Inertia::render('Request/AddRequest');
-        })->name('AddRequest');
+        $routes = [
+            'Request/AddRequest' => 'AddRequest',
+            'Personnel/Reports' => 'Reports',
+            'Profile/ProfileUser' => 'Profile',
+            'CalendarPage/CalendarPage' => 'CalendarPage',
+            'CalendarPage/AdminFloor' => 'AdminFloor',
+            'Personnel/AddGraphoFromExcel' => 'AddGraphoFromExcel',
+            'Charts/ChartsMain' => 'ChartsMain',
+            'Charts/BarChart' => 'BarChart',
+            'MatrixDSM/MatrixDSM' => 'MatrixDSM',
+        ];
 
-        Route::get('Request/AssignRequest', function () {
-            return Inertia::render('Request/AssignRequest');
-        })->name('AssignRequest');
-
-        Route::get('Personnel/Reports', function () {
-            return Inertia::render('Personnel/Reports');
-        })->name('Reports');
-
-        Route::get('Profile/ProfileUser', function () {
-            return Inertia::render('Profile/ProfileUser');
-        })->name('Profile');
-
-        Route::get('CalendarPage/CalendarPage', function () {
-            return Inertia::render('CalendarPage/CalendarPage');
-        })->name('CalendarPage');
+        foreach ($routes as $url => $name) {
+            Route::get($url, fn() => Inertia::render($url))->name($name);
+        }
     });
 });

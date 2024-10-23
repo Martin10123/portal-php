@@ -19,18 +19,19 @@ class CalendarRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'backgroundColor' => 'required|string',
             'title' => 'required|string',
             'description' => 'required|string',
             'starting_date' => 'required|date',
             'ending_date' => 'required|date',
             'participants_necesary' => 'required|string',
-            'backgroundColor' => 'required|string',
             'division' => 'required|string',
             'isVRRequired' => 'required|boolean',
             'type_service_ID' => 'required|array',
-            'uid_user' => 'required|string',
             'calendar_status' => 'required|boolean',
-            'floor' => 'required|string',
+            'floor' => 'required|array',
+            'userCreated' => 'required|array',
+            'isRepeatPeriod' => 'required|boolean',
         ];
     }
 }

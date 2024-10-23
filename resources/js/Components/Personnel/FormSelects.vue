@@ -19,16 +19,21 @@
                 </div>
 
                 <div class="w-full grid gap-2">
-                    <label class="block text-base font-medium text-gray-700 dark:text-gray-400">Operación proceso</label>
-                    <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer dark:bg-gray-700 dark:text-white" v-model="form.operation">
+                    <label class="block text-base font-medium text-gray-700 dark:text-gray-400">Operación
+                        proceso</label>
+                    <select
+                        class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer dark:bg-gray-700 dark:text-white"
+                        v-model="form.operation">
                         <option value="">Seleccione</option>
-                        <option v-for="operation in allOperation" :key="operation.detalle"
-                            :value="operation.detalle">{{ operation.detalle }}</option>
+                        <option v-for="operation in allOperation" :key="operation.detalle" :value="operation.detalle">{{
+                            operation.detalle }}</option>
                     </select>
                 </div>
                 <div class="w-full grid gap-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">Fase</label>
-                    <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer dark:bg-gray-700 dark:text-white" v-model="form.stage">
+                    <select
+                        class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer dark:bg-gray-700 dark:text-white"
+                        v-model="form.stage">
                         <option value="">Seleccione</option>
                         <option v-for="stage in allStage" :key="stage.fase" :value="stage.fase">{{ stage.fase }}
                         </option>
@@ -37,7 +42,9 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="w-full grid gap-2">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">SWBS</label>
-                        <select class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer dark:bg-gray-700 dark:text-white" v-model="form.swbs">
+                        <select
+                            class="w-full border-gray-300 rounded-md shadow-sm cursor-pointer dark:bg-gray-700 dark:text-white"
+                            v-model="form.swbs">
                             <option value="">Seleccione</option>
                             <option v-for="swbs in allSWBS" :key="swbs.swbs" :value="swbs.swbs">{{ swbs.swbs }}</option>
                         </select>
@@ -53,7 +60,9 @@
                     </div>
 
                     <div class="w-full grid gap-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">Estado - {{ form.state ? 'Activo' :
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">Estado - {{ form.state
+                            ?
+                            'Activo' :
                             'Inactivo'
                             }}</label>
                         <label class="w-fit inline-flex items-center cursor-pointer">
@@ -81,16 +90,16 @@
 import Modal from '@/Components/Modal.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useFormSelects } from '@/Composables';
+import { useDataGrafosStore } from '@/pinia/useDataStore';
 
 const props = defineProps({
     showModalForm: Boolean,
     handleModalForm: Function,
     selectedProject: Array,
-    allOperation: Array,
-    allStage: Array,
-    allSWBS: Array,
     onUpdateProjectSelected: Function,
 });
+
+const { allOperation, allSWBS, allStage } = useDataGrafosStore()
 
 const { form, loadingSave, onSaveGrafoEdit } = useFormSelects({ props })
 

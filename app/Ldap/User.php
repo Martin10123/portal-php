@@ -2,6 +2,7 @@
 
 namespace App\Ldap;
 
+use Illuminate\Support\Facades\Log;
 use LdapRecord\Models\Model;
 
 class User extends Model
@@ -9,9 +10,9 @@ class User extends Model
     /**
      * The object classes of the LDAP model.
      */
-    public static array $objectClasses = [];
+    public static array $objectClasses = ['top', 'person', 'organizationalPerson', 'user'];
 
-    protected $guidKey = 'uuid';
+    protected string $guidKey = 'uuid';
 
     public function guardName()
     {
@@ -21,9 +22,6 @@ class User extends Model
     public function photo()
     {
         $value = $this->thumbnailphoto ?? null;
-        // Due to LDAP's multi-valued nature, all values will be
-        // contained inside of an array. We will attempt to
-        // retrieve the first one, or supply a default.
         if (!isset($value)) {
             return 'https://ui-avatars.com/api/?background=2E3092&color=fff&size=64&name=' . explode(' ', $this->name[0])[0] . '+' . explode(' ', $this->sn[0])[0];
         }
@@ -51,6 +49,16 @@ class User extends Model
     public function getIdResponsable()
     {
         return $this->idresponsable[0] ?? null;
+    }
+
+    public function getIsJefe()
+    {
+        return $this->isJefe[0] ?? null;
+    }
+
+    public function getIdDivision()
+    {
+        return $this->iddivision[0] ?? null;
     }
 
     public function getCedula()

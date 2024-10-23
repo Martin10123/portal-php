@@ -82,14 +82,15 @@ html {
 }
 
 .vs__selected {
-    @apply dark:bg-transparent dark:text-white !important;
+    @apply dark:bg-transparent !important;
 }
 
 .vs__deselect {
-    @apply dark:fill-white !important;
+    @apply dark:fill-white break-words !important;
 }
 
-.vs__clear, .vs__open-indicator {
+.vs__clear,
+.vs__open-indicator {
     @apply dark:bg-transparent dark:fill-white !important;
 }
 
@@ -99,4 +100,23 @@ html {
 
 .dp__input {
     @apply dark:bg-gray-700 dark:border-gray-700 dark:text-white !important;
+}
+
+.fc-direction-ltr .fc-list-day-text,
+.fc-direction-rtl .fc-list-day-side-text,
+.fc-direction-ltr .fc-list-day-side-text,
+.fc-direction-rtl .fc-list-day-text {
+    color: #000;
+}
+
+.google-visualization-orgchart-node-medium {
+    @apply dark:bg-gray-700 dark:border-gray-700 dark:text-black !important;
+}
+
+.fc-direction-ltr .fc-timegrid-col-events {
+    width: 100%;
+}
+
+.vs__selected {
+    line-break: anywhere;
 }

@@ -90,7 +90,7 @@ const getManualHolidays = (year) => {
         new Date(year, 6, 4), // 2016-07-04 -> Festivo
         new Date(year, 6, 20), // 2016-07-20 -> Día de la Independencia
         new Date(year, 7, 19), // 2016-08-15 -> Festivo
-        new Date(year, 9, 17), // 2016-10-17 -> Festivo
+        new Date(year, 9, 14), // 2016-10-17 -> Festivo
         new Date(year, 10, 7), // 2016-11-07 -> Festivo
         new Date(year, 10, 14), // 2016-11-14 -> Festivo
         new Date(year, 11, 8), // 2016-12-08 -> Inmaculada Concepción

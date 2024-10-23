@@ -1,4 +1,5 @@
 import { useForm } from "@inertiajs/vue3";
+import Swal from "sweetalert2";
 import { ref } from "vue";
 
 export const useFormSelects = ({ props }) => {
@@ -23,8 +24,16 @@ export const useFormSelects = ({ props }) => {
             form.codeSap.trim() === "" &&
             form.block.trim() === "" &&
             form.project.trim() === "" &&
-            form.case.trim() === ""
+            form.case.trim() === "" &&
+            form.state === true
         ) {
+
+            Swal.fire({
+                icon: "error",
+                title: "Advertencia",
+                text: "Todos los campos son iguales a los originales"
+            })
+
             return;
         }
 
@@ -51,6 +60,12 @@ export const useFormSelects = ({ props }) => {
                 for (const data of response.data) {
                     props.onUpdateProjectSelected(data);
                 }
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Se guardo correctamente",
+                    text: "Los datos se guardaron correctamente"
+                })
             }
         } catch (error) {
             console.log(error);

@@ -31,7 +31,8 @@ class Calendar extends Model
         'type_service_ID',
         'uid_user',
         'calendar_status',
-        'sala'
+        'sala',
+        'IsSerial'
     ];
 
     public function typeServices()
@@ -39,4 +40,8 @@ class Calendar extends Model
         return $this->belongsTo(TypeServices::class, 'type_service_ID');
     }
 
+    public function floor()
+    {
+        return $this->belongsTo(CalendarFloor::class, 'sala');
+    }
 }

@@ -13,7 +13,9 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <AddIcon classE="w-5 h-5 cursor-pointer" @click="handleModalExcelDB" />
+                <Link href="/Sigedin/Personnel/AddGraphoFromExcel">
+                    <AddIcon classE="w-5 h-5 cursor-pointer" />
+                </Link>
                 <EditIcon classE="w-5 h-5 cursor-pointer" @click="startEditing" />
             </div>
         </div>
@@ -23,6 +25,7 @@
 <script setup>
 import AddIcon from '@/Assets/AddIcon.vue';
 import EditIcon from '@/Assets/EditIcon.vue';
+import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({
     projectSelect: Array,
@@ -31,7 +34,6 @@ const props = defineProps({
     selectedSwbs: String,
     valueProject: Object,
     clearValues: Function,
-    handleModalExcelDB: Function,
 })
 
 </script>

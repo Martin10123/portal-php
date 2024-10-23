@@ -18,17 +18,16 @@
                 <form class="grid gap-4 pt-3" @submit.prevent="onSaveEvent">
                     <div class="grid gap-2">
                         <label class="font-medium">Lugar del evento</label>
-                        <select class="w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700" v-model="form.floor">
-                                <option value="">Seleccionar</option>
-                                <option value="Laboratorio XRLAB">Laboratorio XRLAB</option>
-                                <option value="Sala de juntas">Sala de juntas</option>
-                                <option value="Sala de capacitación">Sala de capacitación</option>
-                                <option value="Sala de conferencias">Sala de conferencias</option>
-                                <option value="Sala de reuniones">Sala de reuniones</option>
-                                <option value="Sala de videoconferencias">Sala de videoconferencias</option>
-                                <option value="Sala de espera">Sala de espera</option>
-                                <option value="Sala de descanso">Sala de descanso</option>
-                            </select>
+                        <Select :options="listFloors" optionLabel="Sala_Name" placeholder="Selecciona un lugar"
+                            class="w-full" v-model="form.floor" disabled>
+                            <template #option="slotProps">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded" :style="{ background: slotProps.option.Sala_Color }">
+                                    </div>
+                                    <div>{{ slotProps.option.Sala_Name }}</div>
+                                </div>
+                            </template>
+                        </Select>
                     </div>
                     <div class="grid gap-2">
                         <label class="font-medium">Título</label>
@@ -36,8 +35,8 @@
                     </div>
                     <div class="grid gap-2">
                         <label class="font-medium">Tipo de servicio</label>
-                        <v-select class="dark:bg-gray-700 rounded-md" :options="listaTipoServicios" label="description" placeholder="Tipo de servicios..."
-                            v-model="form.typeService" taggable />
+                        <v-select class="dark:bg-gray-700 rounded-md" :options="listaTipoServicios" label="description"
+                            placeholder="Tipo de servicios..." v-model="form.typeService" taggable />
                     </div>
                     <div class="grid gap-2">
                         <label class="font-medium">Descripción</label>
@@ -52,7 +51,8 @@
                                     <RealityIcon />
                                 </label>
                                 <label class="w-max inline-flex items-center cursor-pointer">
-                                    <input id="realityIcon" type="checkbox" value="" class="sr-only peer" v-model="form.isArRequired">
+                                    <input id="realityIcon" type="checkbox" value="" class="sr-only peer"
+                                        v-model="form.isArRequired">
                                     <div
                                         class="relative w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
                                     </div>
@@ -61,9 +61,10 @@
                         </div>
                         <div class="grid gap-2 col-span-4">
                             <label class="font-medium">Gerencia</label>
-                            <select class="w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700" v-model="form.division">
-                                <option v-for="management in listManagement" :key="management.Nombre"
-                                    :value="management.Nombre">{{ management.Nombre }}
+                            <select class="w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700"
+                                v-model="form.division">
+                                <option v-for="{ Nombre } in listManagement" :key="Nombre" :value="Nombre">
+                                    {{ Nombre }}
                                 </option>
                             </select>
                         </div>
@@ -89,50 +90,47 @@
                         </div>
                     </div>
 
-                    <div class="grid gap-2">
-                        <label class="font-medium">Participantes necesarios</label>
-                        <v-select class="dark:bg-gray-700 rounded-md" multiple :options="usersEmails" placeholder="Participantes..." append-to-body
-                            :calculate-position="calcSpacing" v-model="form.participantsNecesary" label="correo"
-                            :reduce="email => email.correo" :filter="customFilter">
-                            <template v-slot:option="option">
-                                <div>
-                                    {{ option.correo }}
-                                    <br>
-                                    <cite class="text-sm">{{ option.nombre }}</cite>
-                                </div>
-                            </template>
-                        </v-select>
-                    </div>
-                    <div class="grid gap-2">
-                        <label class="font-medium">Participantes opcionales</label>
-                        <v-select class="dark:bg-gray-700 rounded-md" multiple :options="usersEmails" placeholder="Participantes..." label="correo"
-                            append-to-body :calculate-position="calcSpacing" v-model="form.participantsOptional"
-                            :reduce="email => email.correo" :filter="customFilter">
-                            <template v-slot:option="option">
-                                <div>
-                                    {{ option.correo }}
-                                    <br>
-                                    <cite class="text-sm">{{ option.nombre }}</cite>
-                                </div>
-                            </template>
-                        </v-select>
-                    </div>
+                    <ParticipantSelect label="Participantes necesarios" :options="usersEmails"
+                        v-model="form.participantsNecesary" placeholder="Participantes necesarios..." />
+
+                    <ParticipantSelect label="Participantes opcionales" :options="usersEmails"
+                        v-model="form.participantsOptional" placeholder="Participantes opcionales..." />
 
                     <div class="grid gap-2">
-                        <label class="font-medium">recursos</label>
-                        <v-select class="dark:bg-gray-700 rounded-md" multiple placeholder="Recursos..." :options="[]" v-model="form.resource" taggable />
+                        <div class="flex justify-between">
+                            <label class="font-medium">recursos</label>
+
+                            <div class="group flex relative">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-6 cursor-pointer">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                                </svg>
+
+                                <span
+                                    class="group-hover:opacity-100 transition-opacity bg-gray-800 px-1 text-sm text-gray-100 rounded-md opacity-0 m-4 mx-auto p-2 w-40 absolute right-0 bottom-4 -z-10 group-hover:z-30">
+                                    Los recursos son enlaces a documentos, videos, descargas, entre otros que son
+                                    necesarios para llevar a
+                                    cabo la reunión.
+                                </span>
+                            </div>
+
+                        </div>
+                        <v-select class="dark:bg-gray-700 rounded-md" multiple placeholder="Recursos..." :options="[]"
+                            v-model="form.resource" taggable />
                     </div>
 
                     <button
-                        class=" w-full py-2 mt-4 bg-primary-cotecmar text-white rounded-md shadow-md cursor-pointer hover:bg-tertiary-cotecmar duration-300"
-                        type="submit">{{ isLoadingSaveEvent ? 'Guardando evento...' : 'Guardar' }}</button>
+                        class="w-full py-2 mt-4 bg-primary-cotecmar text-white rounded-md shadow-md cursor-pointer hover:bg-tertiary-cotecmar duration-300"
+                        type="submit">{{ isLoadingSaveEvent ? 'Guardando evento...' : 'Guardar' }}
+                    </button>
                 </form>
             </article>
         </section>
     </transition>
 
     <ModalHoursEvent v-if="form.date" :events="events" :open-modal-hours="openModalHours"
-        :handle-open-modal-hours="handleOpenModalHours" :form="form" />
+        :handle-open-modal-hours="handleOpenModalHours" :form="form" :info-selected-event="infoSelectedEvent" />
 </template>
 
 <script setup>
@@ -141,7 +139,8 @@ import ModalHoursEvent from './ModalHoursEvent.vue';
 import { getAllHolidays } from '@/Data/getHolidays';
 import { useModalCalendar } from '@/Composables';
 import RealityIcon from '@/Assets/RealityIcon.vue';
-import Fuse from 'fuse.js';
+import Select from 'primevue/select';
+import ParticipantSelect from '../ParticipantSelect.vue';
 
 const props = defineProps({
     openModal: Boolean,
@@ -152,22 +151,10 @@ const props = defineProps({
     handleOpenModalHours: Function,
     events: Array,
     isLoadingSaveEvent: Boolean,
+    infoSelectedEvent: Object,
 });
 
-const { calcSpacing, listaTipoServicios, usersEmails, listManagement } = useModalCalendar(props.form)
-
-function customFilter(options, search) {
-  const fuse = new Fuse(options, {
-    keys: ['nombre', 'correo'],
-    shouldSort: true,
-    threshold: 0,
-    distance: 100,
-  });
-
-  return search.length
-    ? fuse.search(search).map(({ item }) => item)
-    : options;
-}
+const { listaTipoServicios, usersEmails, listManagement, listFloors } = useModalCalendar(props.form)
 
 </script>
 
